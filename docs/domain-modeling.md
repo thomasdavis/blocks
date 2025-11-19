@@ -71,7 +71,7 @@ Blocks can reference measures via `measure.<name>`:
 
 ```yaml
 blocks:
-  my_facet:
+  my_block:
     outputs:
       - name: civic_score
         type: measure.score_0_1
@@ -83,7 +83,7 @@ Blocks can have **domain-specific validation rules**:
 
 ```yaml
 blocks:
-  facet.civic_mindedness:
+  civic_mindedness:
     domain_rules:
       - id: must_use_values
         description: "Civic score must reference candidate values or volunteerism."

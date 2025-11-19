@@ -45,14 +45,14 @@ Each signal has:
 
 Signals guide AI validators and document domain intent.
 
-### In Facet Blocks
+### In Blocks
 
-Facets are blocks that extract signals:
+Blocks can extract or calculate signals:
 
 ```yaml
 blocks:
-  facet.civic_mindedness:
-    type: facet
+  civic_mindedness:
+    type: utility
     description: "Extract civic-mindedness signal from candidate data"
     inputs:
       - name: candidate
@@ -62,7 +62,7 @@ blocks:
         measures: [score_0_1]
 ```
 
-The block name `facet.civic_mindedness` maps to the `civic_mindedness` signal.
+The block name `civic_mindedness` corresponds to the `civic_mindedness` signal in your domain definition.
 
 ### In Domain Rules
 
@@ -70,7 +70,7 @@ Reference signals in domain rules:
 
 ```yaml
 blocks:
-  facet.civic_mindedness:
+  civic_mindedness:
     domain_rules:
       - id: use_volunteer_data
         description: "Civic signal must analyze volunteer work and community involvement"
@@ -131,7 +131,7 @@ The domain validator checks:
 
 ### Example Validation
 
-```typescript title="blocks/facet/civic_mindedness/block.ts"
+```typescript title="blocks/civic_mindedness/block.ts"
 // ❌ Bad: Doesn't actually extract civic-mindedness
 export function civicMindedness(candidate: Candidate) {
   return { score: Math.random() };  // Random! Not civic at all
@@ -145,7 +145,7 @@ Validator output:
 → Found: Random number generation
 ```
 
-```typescript title="blocks/facet/civic_mindedness/block.ts"
+```typescript title="blocks/civic_mindedness/block.ts"
 // ✅ Good: Actually extracts the signal
 export function civicMindedness(candidate: Candidate) {
   const volunteerScore = candidate.volunteer_roles?.length || 0;
@@ -177,8 +177,8 @@ domain:
       extraction_hint: "Consider: learning history, adaptability, curiosity indicators"
 
 blocks:
-  facet.technical_strength:
-    type: facet
+  technical_strength:
+    type: utility
     inputs:
       - name: candidate
         type: entity.candidate
@@ -186,8 +186,8 @@ blocks:
       - name: strength_score
         measures: [score_0_1]
 
-  facet.culture_fit:
-    type: facet
+  culture_fit:
+    type: utility
     inputs:
       - name: candidate
         type: entity.candidate
@@ -233,7 +233,7 @@ blocks:
   />
   <Card
     title="Blocks"
-    description="Create facets that extract signals"
+    description="Create blocks that extract signals"
     href="/docs/core-concepts/blocks"
   />
   <Card

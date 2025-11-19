@@ -35,7 +35,7 @@ Reference entities in block inputs using `entity.<name>`:
 ```yaml title="blocks.yml"
 blocks:
   calculate_engagement:
-    type: facet
+    type: utility
     inputs:
       - name: user
         type: entity.user  # References the user entity
@@ -74,7 +74,7 @@ Blocks can accept multiple entities as inputs:
 ```yaml
 blocks:
   match_candidate_to_job:
-    type: facet
+    type: utility
     inputs:
       - name: candidate
         type: entity.candidate

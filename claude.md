@@ -241,7 +241,7 @@ blocks run get_weather_and_translate
 
 ## Multi-Block Projects
 
-When working on projects with many blocks (e.g., 100+ facets, 100+ templates):
+When working on projects with many blocks (e.g., 100+ utility blocks, 100+ templates):
 
 ### Strategy 1: Generate in Batches
 
@@ -264,7 +264,7 @@ Define domain rules to catch common mistakes:
 
 ```yaml
 blocks:
-  facet.civic_mindedness:
+  civic_mindedness:
     domain_rules:
       - id: must_use_values
         description: "Civic score must reference candidate values or volunteerism."

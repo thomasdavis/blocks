@@ -61,7 +61,7 @@ export const DomainRuleSchema = z.object({
 });
 
 export const BlockDefinitionSchema = z.object({
-  type: z.enum(["utility", "facet", "template", "validator", "custom"]),
+  type: z.enum(["utility", "template", "validator", "custom"]),
   description: z.string(),
   path: z.string().optional(), // Custom path to block implementation
   inputs: z.array(BlockInputSchema).optional(),

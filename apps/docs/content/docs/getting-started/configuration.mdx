@@ -152,7 +152,7 @@ Define individual blocks.
 ```yaml
 blocks:
   user_engagement_score:
-    type: facet
+    type: utility
     description: "Calculate user engagement score"
     path: "lib/engagement"  # Optional custom path
     inputs:
@@ -179,14 +179,13 @@ blocks:
 ### Block Types
 
 - **utility** - Pure function, deterministic transformation
-- **facet** - Extracts/calculates a specific signal
 - **template** - Renders output (HTML, JSON, etc.)
 - **validator** - Custom validation logic
 - **custom** - User-defined type
 
 ### Block Fields
 
-- **type** (required) - Block type (utility, facet, template, validator, custom)
+- **type** (required) - Block type (utility, template, validator, custom)
 - **description** (required) - What this block does
 - **path** (optional) - Custom location (default: `{discover.root}/{block_name}`)
 - **inputs** (optional) - Array of input definitions

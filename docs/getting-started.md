@@ -72,8 +72,8 @@ Add block definitions to `blocks.yml`:
 
 ```yaml
 blocks:
-  facet.culture_fit:
-    type: facet
+  culture_fit:
+    type: utility
     description: "Calculate culture fit score"
     inputs:
       - name: candidate
@@ -93,10 +93,10 @@ blocks:
 Create the block directory and files:
 
 ```bash
-mkdir -p blocks/facet.culture_fit
+mkdir -p blocks/culture_fit
 ```
 
-`blocks/facet.culture_fit/block.ts`:
+`blocks/culture_fit/block.ts`:
 
 ```typescript
 interface Candidate {
@@ -121,7 +121,7 @@ export async function cultureFit(candidate: Candidate, job: Job) {
 }
 ```
 
-`blocks/facet.culture_fit/index.ts`:
+`blocks/culture_fit/index.ts`:
 
 ```typescript
 export { cultureFit } from "./block.js";
@@ -132,7 +132,7 @@ export { cultureFit } from "./block.js";
 Validate your block:
 
 ```bash
-blocks run facet.culture_fit
+blocks run culture_fit
 ```
 
 Output:
@@ -140,13 +140,13 @@ Output:
 ```
 🧱 Blocks Validator
 
-📦 Validating: facet.culture_fit
+📦 Validating: culture_fit
   ✓ schema ok
   ✓ shape ok
   Running domain validation...
   ✓ domain ok
 
-  ✅ Block "facet.culture_fit" passed all validations
+  ✅ Block "culture_fit" passed all validations
 ```
 
 ### 6. Fix Issues (if any)
@@ -154,14 +154,14 @@ Output:
 If validation fails:
 
 ```
-📦 Validating: facet.culture_fit
+📦 Validating: culture_fit
   ✓ schema ok
   ✓ shape ok
 
   ⚠ [domain] Score calculation doesn't reference job.culture
   → Suggestion: Use job.culture in score calculation
 
-  ❌ Block "facet.culture_fit" has warnings
+  ❌ Block "culture_fit" has warnings
 ```
 
 Update your code based on the feedback and re-run.

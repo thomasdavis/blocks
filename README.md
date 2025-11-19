@@ -59,7 +59,7 @@ domain:
 
 blocks:
   user_engagement_score:
-    type: facet
+    type: utility
     description: "Calculate user engagement score"
     inputs:
       - name: user
@@ -298,7 +298,7 @@ templates:
 
 blocks:
   [name]:
-    type: "utility" | "facet" | "template" | "validator" | "custom"
+    type: "utility" | "template" | "validator" | "custom"
     description: string
     inputs?: Array<{ name, type, optional? }>
     outputs?: Array<{ name, type, measures?, constraints? }>

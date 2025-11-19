@@ -122,15 +122,37 @@ Define your domain semantics in `blocks.yml`:
 
 ### 🔍 Multi-Layer Validation
 
-Seven validator types:
+**Blocks is a development-time validator** that analyzes source code, not runtime behavior.
 
-1. **Schema** - validate I/O signatures
-2. **Shape** - validate file structure
-3. **Lint** - code quality (coming soon)
-4. **Domain** - AI-powered semantic validation
-5. **Chain** - multi-step pipelines (coming soon)
-6. **Shadow** - advisory validators (coming soon)
-7. **Scoring** - quality metrics (coming soon)
+Four validator types:
+
+1. **Schema** - Fast, structural validation of I/O signatures
+2. **Shape** - Fast, file-based validation of structure
+3. **Domain** - AI-powered semantic validation of ALL source files
+4. **Output** - User-defined validators that render and check output (future)
+
+**How Domain Validation Works:**
+
+1. Reads **all files** in block directory (block.ts, template.hbs, etc.)
+2. Passes complete source code to AI with Blocks philosophy context
+3. AI analyzes source for semantic compliance (not runtime behavior)
+4. For templates: checks template source for semantic HTML, ARIA labels, media queries
+5. Returns specific, actionable feedback
+
+**Example:**
+```
+📦 Validating: theme.modern_professional
+- Reading all files from: themes/modern-professional/
+  Found: block.ts, template.hbs, index.ts
+
+✓ domain ok - Template uses semantic HTML tags
+✓ domain ok - ARIA labels present in template source
+✓ domain ok - CSS media queries found @media (max-width: 768px)
+```
+
+**Key Principle:** Validate source code at development time, trust validated code at runtime.
+
+See [Validators Architecture](./docs/validators-architecture.md) for complete details.
 
 ### 🤖 Agentic Integration
 

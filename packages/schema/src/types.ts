@@ -69,6 +69,8 @@ export const BlockDefinitionSchema = z.object({
   domain_rules: z.array(DomainRuleSchema).optional(),
   template_engine: z.string().optional(),
   sections: z.array(z.string()).optional(),
+  test_data: z.string().optional(), // Path to test data file for validation
+  test_samples: z.array(z.any()).optional(), // Inline test data samples
 });
 
 // ——————————————————————————————————————————

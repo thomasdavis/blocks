@@ -96,6 +96,7 @@ blocks:
     description: "Clean, modern resume theme with professional styling"
     path: "themes/modern-professional"  # Custom path to theme implementation
     template_engine: hbs
+    test_data: "test-data/sample-resume.json"  # Test data for validation
     inputs:
       - name: resume
         type: entity.resume

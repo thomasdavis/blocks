@@ -60,11 +60,12 @@ export class AIProvider {
   async validateDomainSemantics(params: {
     blockName: string;
     blockDefinition: string;
-    code: string;
+    files: Record<string, string>;
     domainRules?: string[];
+    philosophy?: string[];
   }): Promise<{
     isValid: boolean;
-    issues: Array<{ message: string; severity: "error" | "warning" }>;
+    issues: Array<{ message: string; severity: "error" | "warning"; file?: string }>;
   }> {
     const schema = z.object({
       isValid: z.boolean(),
@@ -72,36 +73,65 @@ export class AIProvider {
         z.object({
           message: z.string(),
           severity: z.enum(["error", "warning"]),
+          file: z.string().optional(),
         })
       ),
     });
 
     const domainRulesText = params.domainRules?.length
-      ? `\n\nDomain Rules:\n${params.domainRules.map((r) => `- ${r}`).join("\n")}`
+      ? `\n\nDOMAIN RULES:\n${params.domainRules.map((r) => `- ${r}`).join("\n")}`
       : "";
+
+    const philosophyText = params.philosophy?.length
+      ? `\n\nBLOCKS PHILOSOPHY:\n${params.philosophy.map((p) => `- ${p}`).join("\n")}`
+      : "";
+
+    const filesText = Object.entries(params.files)
+      .map(
+        ([path, content]) => `
+--- ${path} ---
+\`\`\`
+${content}
+\`\`\`
+`
+      )
+      .join("\n");
 
     const result = await this.generateStructured({
       schema,
-      system: `You are a domain-driven design expert validating code against semantic intent.
-Your job is to check if the implementation aligns with the domain specification.`,
+      system: `You are validating a block in the Blocks framework - a domain-driven validation system for agentic coding.
+
+Blocks is a development-time framework that guides AI agents to produce code that aligns with domain semantics. Your role is to analyze block source code (not runtime behavior) for domain compliance.
+
+DOMAIN CONCEPTS:
+- Entities: Core data types (e.g., resume, user, product)
+- Signals: Domain concepts to extract (e.g., readability, professionalism)
+- Measures: Constraints on outputs (e.g., valid_html, responsive_layout)
+
+Your validation should focus on SOURCE CODE analysis:
+- For templates: Check template source for semantic HTML, ARIA labels, CSS media queries, etc.
+- For code: Check if logic expresses domain intent clearly
+- Do NOT focus on runtime behavior or test execution
+- Check if domain rules are reflected in the implementation`,
       prompt: `Block Name: ${params.blockName}
+${philosophyText}
 
 Block Definition:
 ${params.blockDefinition}
 ${domainRulesText}
 
-Implementation Code:
-\`\`\`typescript
-${params.code}
-\`\`\`
+BLOCK FILES:
+${filesText}
 
-Analyze if the code:
-1. Expresses the domain intent clearly
-2. Uses the specified inputs/outputs correctly
-3. Adheres to domain rules (if any)
-4. Introduces any undocumented concepts
+VALIDATION TASK:
+Analyze ALL files together to determine if this block:
+1. Expresses domain intent clearly in source code
+2. Uses specified inputs/outputs correctly
+3. Adheres to all domain rules
+4. For templates: Check if template SOURCE contains semantic HTML, ARIA labels, media queries, heading hierarchy
+5. Does NOT introduce undocumented concepts
 
-Return validation result with issues found.`,
+Return validation issues with specific file references where possible.`,
     });
 
     return result;

@@ -169,7 +169,7 @@ validators:
                   AI-Powered Insights
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400">
-                  Leverage GPT-4 for semantic analysis that goes beyond syntax. Understand intent, not just structure.
+                  Leverage AI for semantic analysis that goes beyond syntax. Understand intent, not just structure.
                 </p>
               </div>
 

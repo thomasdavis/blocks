@@ -15,7 +15,7 @@ export class AIProvider {
   private model: string;
 
   constructor(config: AIProviderConfig = {}) {
-    this.model = config.model ?? "gpt-4o-mini";
+    this.model = config.model ?? "gpt-5.1-mini";
 
     // Configure OpenAI API key from config or environment
     if (config.apiKey) {

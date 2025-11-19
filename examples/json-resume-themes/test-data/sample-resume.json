@@ -1,0 +1,130 @@
+{
+  "basics": {
+    "name": "Sarah Chen",
+    "label": "Senior Software Engineer",
+    "image": "",
+    "email": "sarah.chen@example.com",
+    "phone": "(555) 123-4567",
+    "url": "https://sarahchen.dev",
+    "summary": "Experienced software engineer with 8+ years building scalable web applications. Passionate about clean code, mentorship, and solving complex problems with elegant solutions.",
+    "location": {
+      "city": "San Francisco",
+      "countryCode": "US",
+      "region": "California"
+    },
+    "profiles": [
+      {
+        "network": "GitHub",
+        "username": "schen",
+        "url": "https://github.com/schen"
+      },
+      {
+        "network": "LinkedIn",
+        "username": "sarahchen",
+        "url": "https://linkedin.com/in/sarahchen"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "TechCorp Inc.",
+      "position": "Senior Software Engineer",
+      "url": "https://techcorp.com",
+      "startDate": "2020-03-01",
+      "endDate": "",
+      "summary": "Lead engineer for customer-facing web applications serving 2M+ users.",
+      "highlights": [
+        "Architected and built microservices platform reducing deployment time by 60%",
+        "Led team of 5 engineers, established code review practices and mentorship program",
+        "Improved application performance by 40% through optimization and caching strategies",
+        "Implemented comprehensive test coverage increasing from 45% to 92%"
+      ]
+    },
+    {
+      "name": "StartupXYZ",
+      "position": "Full Stack Engineer",
+      "url": "https://startupxyz.com",
+      "startDate": "2017-06-01",
+      "endDate": "2020-02-28",
+      "summary": "Early engineer building product from MVP to Series A.",
+      "highlights": [
+        "Built core platform features using React, Node.js, and PostgreSQL",
+        "Implemented real-time collaboration features using WebSockets",
+        "Established CI/CD pipeline and deployment automation",
+        "Contributed to technical hiring and onboarding processes"
+      ]
+    },
+    {
+      "name": "WebAgency Co.",
+      "position": "Junior Developer",
+      "url": "https://webagency.com",
+      "startDate": "2015-08-01",
+      "endDate": "2017-05-31",
+      "summary": "Developed client websites and web applications.",
+      "highlights": [
+        "Built 20+ responsive websites for clients across various industries",
+        "Learned modern JavaScript frameworks and best practices",
+        "Collaborated with designers to implement pixel-perfect UIs"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "University of California, Berkeley",
+      "url": "https://berkeley.edu",
+      "area": "Computer Science",
+      "studyType": "Bachelor of Science",
+      "startDate": "2011-09-01",
+      "endDate": "2015-05-31",
+      "score": "3.8",
+      "courses": [
+        "Data Structures and Algorithms",
+        "Database Systems",
+        "Software Engineering",
+        "Artificial Intelligence"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "name": "Frontend",
+      "level": "Expert",
+      "keywords": ["React", "TypeScript", "Next.js", "Tailwind CSS", "Vue.js"]
+    },
+    {
+      "name": "Backend",
+      "level": "Expert",
+      "keywords": ["Node.js", "Python", "PostgreSQL", "Redis", "GraphQL"]
+    },
+    {
+      "name": "DevOps",
+      "level": "Intermediate",
+      "keywords": ["Docker", "Kubernetes", "AWS", "CI/CD", "Terraform"]
+    },
+    {
+      "name": "Tools",
+      "level": "Expert",
+      "keywords": ["Git", "VS Code", "Figma", "Jira", "Postman"]
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "fluency": "Native speaker"
+    },
+    {
+      "language": "Mandarin",
+      "fluency": "Professional working proficiency"
+    }
+  ],
+  "interests": [
+    {
+      "name": "Open Source",
+      "keywords": ["Contributing to OSS projects", "Maintaining npm packages"]
+    },
+    {
+      "name": "Teaching",
+      "keywords": ["Mentoring junior developers", "Technical writing", "Conference speaking"]
+    }
+  ]
+}

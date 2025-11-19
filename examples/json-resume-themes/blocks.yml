@@ -1,0 +1,178 @@
+project:
+  name: "JSON Resume Themes"
+  domain: "jsonresume.themes"
+
+philosophy:
+  - "Resume themes must prioritize readability and professionalism."
+  - "All themes must be responsive and accessible."
+  - "Semantic HTML and proper structure are required."
+  - "Themes should express the candidate's story clearly."
+
+# ——————————————————————————————————————————
+# DOMAIN SEMANTICS
+# ——————————————————————————————————————————
+
+domain:
+  entities:
+    resume:
+      fields:
+        - basics
+        - work
+        - volunteer
+        - education
+        - awards
+        - publications
+        - skills
+        - languages
+        - interests
+        - references
+
+    basics:
+      fields: [name, label, image, email, phone, url, summary, location, profiles]
+
+    work_experience:
+      fields: [name, position, startDate, endDate, summary, highlights, url]
+
+    theme_config:
+      fields: [colors, fonts, layout, spacing]
+
+  signals:
+    readability:
+      description: "How easy is the resume to read and scan?"
+      extraction_hint: "Look for proper typography, spacing, visual hierarchy"
+
+    professional_tone:
+      description: "Does the design convey professionalism?"
+      extraction_hint: "Assess color choices, fonts, layout formality"
+
+    information_density:
+      description: "Balance between whitespace and content density"
+      extraction_hint: "Check if layout uses space efficiently without crowding"
+
+    accessibility:
+      description: "WCAG compliance and screen reader friendliness"
+      extraction_hint: "Verify semantic HTML, ARIA labels, color contrast"
+
+  measures:
+    valid_html:
+      constraints:
+        - "Must output valid HTML5"
+        - "Must pass W3C validation"
+
+    responsive_layout:
+      constraints:
+        - "Must work on mobile (320px+)"
+        - "Must work on tablet (768px+)"
+        - "Must work on desktop (1024px+)"
+
+    accessibility_score:
+      constraints:
+        - "Must use semantic HTML5 tags"
+        - "Must include ARIA labels where appropriate"
+        - "Color contrast must meet WCAG AA standards"
+
+templates:
+  required_sections:
+    - basics
+    - work
+    - education
+    - skills
+
+  optional_sections:
+    - volunteer
+    - awards
+    - publications
+    - languages
+    - interests
+    - references
+
+# ——————————————————————————————————————————
+# BLOCK DEFINITIONS
+# ——————————————————————————————————————————
+
+blocks:
+  theme.modern_professional:
+    type: template
+    description: "Clean, modern resume theme with professional styling"
+    path: "themes/modern-professional"  # Custom path to theme implementation
+    template_engine: hbs
+    inputs:
+      - name: resume
+        type: entity.resume
+      - name: config
+        type: entity.theme_config
+        optional: true
+    outputs:
+      - name: html
+        type: string
+        measures: [valid_html, responsive_layout, accessibility_score]
+        constraints:
+          - "Must include all required sections"
+          - "Must be mobile responsive"
+          - "Must use semantic HTML5"
+          - "Must have proper heading hierarchy (h1, h2, h3)"
+    sections:
+      - basics
+      - work
+      - education
+      - skills
+    domain_rules:
+      - id: semantic_html
+        description: "Must use semantic HTML tags (header, main, section, article)"
+      - id: accessibility
+        description: "Must include proper ARIA labels and semantic structure"
+      - id: responsive_design
+        description: "Must use CSS media queries for responsive layout"
+      - id: visual_hierarchy
+        description: "Must establish clear visual hierarchy with typography"
+
+# ——————————————————————————————————————————
+# VALIDATORS
+# ——————————————————————————————————————————
+
+validators:
+  schema:
+    - id: io_schema
+      run: "schema.io.v1"
+
+  shape:
+    - id: export_shape
+      run: "shape.exports.v1"
+
+  domain:
+    - id: domain_alignment
+      run: "domain.validation.v1"
+
+# ——————————————————————————————————————————
+# PIPELINE
+# ——————————————————————————————————————————
+
+pipeline:
+  name: "resume_theme_validation"
+  steps:
+    - id: schema
+      run: "schema.io.v1"
+    - id: shape
+      run: "shape.exports.v1"
+    - id: domain
+      run: "domain.validation.v1"
+
+# ——————————————————————————————————————————
+# AGENT CONFIGURATION
+# ——————————————————————————————————————————
+
+agent:
+  mode: "theme_builder"
+  rules:
+    - "Always read blocks.yml before creating or modifying themes."
+    - "Always run blocks CLI after theme changes."
+    - "Ensure all required sections are rendered."
+    - "Test with sample resume data."
+  cli:
+    single: "blocks run {name}"
+    all: "blocks run --all"
+
+targets:
+  kind: "block"
+  discover:
+    root: "themes"

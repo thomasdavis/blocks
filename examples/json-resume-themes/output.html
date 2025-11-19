@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarah Chen - Senior Software Engineer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --text-color: #333;
+            --light-gray: #ecf0f1;
+            --border-color: #bdc3c7;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        header {
+            background: var(--primary-color);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .label {
+            font-size: 1.25rem;
+            color: var(--light-gray);
+            margin-bottom: 1rem;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .contact-info a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .contact-info a:hover {
+            opacity: 0.8;
+        }
+
+        main {
+            padding: 2rem;
+        }
+
+        section {
+            margin-bottom: 2.5rem;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .summary {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .job, .education-item {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .job:last-child, .education-item:last-child {
+            border-bottom: none;
+        }
+
+        .job-header, .edu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+
+        .position, .degree {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .company, .institution {
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        .date {
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        .job-summary, .edu-courses {
+            margin: 0.75rem 0;
+            color: #555;
+        }
+
+        .highlights {
+            list-style: none;
+            margin-top: 0.75rem;
+        }
+
+        .highlights li {
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .highlights li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--secondary-color);
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .skill-category {
+            background: var(--light-gray);
+            padding: 1.25rem;
+            border-radius: 8px;
+        }
+
+        .skill-category h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .skill-tag {
+            background: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .contact-info {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            main {
+                padding: 1.5rem;
+            }
+
+            .job-header, .edu-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+
+            section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header role="banner">
+            <h1>Sarah Chen</h1>
+            <div class="label">Senior Software Engineer</div>
+            <nav class="contact-info" aria-label="Contact information">
+                <span><a href="mailto:sarah.chen@example.com">sarah.chen@example.com</a></span>
+                <span>(555) 123-4567</span>
+                <span><a href="https://sarahchen.dev" target="_blank" rel="noopener">https://sarahchen.dev</a></span>
+                <span>San Francisco, California</span>
+            </nav>
+        </header>
+
+        <main role="main">
+            <section aria-labelledby="summary-heading">
+                <h2 id="summary-heading">Summary</h2>
+                <p class="summary">Experienced software engineer with 8+ years building scalable web applications. Passionate about clean code, mentorship, and solving complex problems with elegant solutions.</p>
+            </section>
+
+            <section aria-labelledby="experience-heading">
+                <h2 id="experience-heading">Work Experience</h2>
+                <article class="job">
+                    <div class="job-header">
+                        <div>
+                            <h3 class="position">Senior Software Engineer</h3>
+                            <div class="company">TechCorp Inc.</div>
+                        </div>
+                        <time class="date">
+                            2020-03-01 - Present
+                        </time>
+                    </div>
+                    <p class="job-summary">Lead engineer for customer-facing web applications serving 2M+ users.</p>
+                    <ul class="highlights">
+                        <li>Architected and built microservices platform reducing deployment time by 60%</li>
+                        <li>Led team of 5 engineers, established code review practices and mentorship program</li>
+                        <li>Improved application performance by 40% through optimization and caching strategies</li>
+                        <li>Implemented comprehensive test coverage increasing from 45% to 92%</li>
+                    </ul>
+                </article>
+                <article class="job">
+                    <div class="job-header">
+                        <div>
+                            <h3 class="position">Full Stack Engineer</h3>
+                            <div class="company">StartupXYZ</div>
+                        </div>
+                        <time class="date">
+                            2017-06-01 - 2020-02-28
+                        </time>
+                    </div>
+                    <p class="job-summary">Early engineer building product from MVP to Series A.</p>
+                    <ul class="highlights">
+                        <li>Built core platform features using React, Node.js, and PostgreSQL</li>
+                        <li>Implemented real-time collaboration features using WebSockets</li>
+                        <li>Established CI/CD pipeline and deployment automation</li>
+                        <li>Contributed to technical hiring and onboarding processes</li>
+                    </ul>
+                </article>
+                <article class="job">
+                    <div class="job-header">
+                        <div>
+                            <h3 class="position">Junior Developer</h3>
+                            <div class="company">WebAgency Co.</div>
+                        </div>
+                        <time class="date">
+                            2015-08-01 - 2017-05-31
+                        </time>
+                    </div>
+                    <p class="job-summary">Developed client websites and web applications.</p>
+                    <ul class="highlights">
+                        <li>Built 20+ responsive websites for clients across various industries</li>
+                        <li>Learned modern JavaScript frameworks and best practices</li>
+                        <li>Collaborated with designers to implement pixel-perfect UIs</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section aria-labelledby="education-heading">
+                <h2 id="education-heading">Education</h2>
+                <article class="education-item">
+                    <div class="edu-header">
+                        <div>
+                            <h3 class="degree">Bachelor of Science in Computer Science</h3>
+                            <div class="institution">University of California, Berkeley</div>
+                        </div>
+                        <time class="date">2011-09-01 - 2015-05-31</time>
+                    </div>
+                    <p class="edu-courses">GPA: 3.8</p>
+                </article>
+            </section>
+
+            <section aria-labelledby="skills-heading">
+                <h2 id="skills-heading">Skills</h2>
+                <div class="skills-grid">
+                    <div class="skill-category">
+                        <h3>Frontend</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">React</span>
+                            <span class="skill-tag">TypeScript</span>
+                            <span class="skill-tag">Next.js</span>
+                            <span class="skill-tag">Tailwind CSS</span>
+                            <span class="skill-tag">Vue.js</span>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <h3>Backend</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Node.js</span>
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">PostgreSQL</span>
+                            <span class="skill-tag">Redis</span>
+                            <span class="skill-tag">GraphQL</span>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <h3>DevOps</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Docker</span>
+                            <span class="skill-tag">Kubernetes</span>
+                            <span class="skill-tag">AWS</span>
+                            <span class="skill-tag">CI/CD</span>
+                            <span class="skill-tag">Terraform</span>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <h3>Tools</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Git</span>
+                            <span class="skill-tag">VS Code</span>
+                            <span class="skill-tag">Figma</span>
+                            <span class="skill-tag">Jira</span>
+                            <span class="skill-tag">Postman</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

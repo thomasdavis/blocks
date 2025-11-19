@@ -58,7 +58,18 @@ export const runCommand = new Command("run")
         continue;
       }
 
-      const blockPath = join(process.cwd(), "blocks", name);
+      // Get block path - prioritize block.path, then targets.discover.root, then default to "blocks"
+      const blockDef = config.blocks[name];
+      let blockPath: string;
+
+      if (blockDef.path) {
+        // Use custom path from block definition
+        blockPath = join(process.cwd(), blockDef.path);
+      } else {
+        // Fall back to discover root + block name
+        const discoverRoot = config.targets?.discover?.root || "blocks";
+        blockPath = join(process.cwd(), discoverRoot, name);
+      }
 
       const context = {
         blockName: name,

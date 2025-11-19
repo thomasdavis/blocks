@@ -1,0 +1,21 @@
+{
+  "name": "json-resume-themes-example",
+  "version": "1.0.0",
+  "description": "Example JSON Resume themes using Blocks validation",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "validate": "blocks run theme.modern_professional",
+    "validate:all": "blocks run --all",
+    "render": "node dist/render.js"
+  },
+  "dependencies": {
+    "handlebars": "^4.7.8"
+  },
+  "devDependencies": {
+    "@blocksai/cli": "^0.1.0",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

@@ -2,6 +2,22 @@
 
 This document explains how Claude Code (and other AI coding assistants) should work with Blocks.
 
+## Development Philosophy
+
+**CRITICAL:** Always use the latest versions of all dependencies. When updating packages, use:
+
+```bash
+pnpm up -L  # Update all to latest versions
+```
+
+We prioritize staying current with latest releases over version stability. This means:
+- ✅ Always use `pnpm up -L` when updating dependencies
+- ✅ Use latest versions of Next.js, React, Fumadocs, Tailwind, etc.
+- ✅ Embrace breaking changes and adapt code to new APIs
+- ✅ Remove deprecated patterns immediately
+- ❌ Don't pin to specific versions unless absolutely necessary
+- ❌ Don't use `^` or `~` with conservative intent - we want latest
+
 ## Overview
 
 Blocks is designed to guide agentic coding workflows by providing:

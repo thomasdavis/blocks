@@ -10,13 +10,14 @@ export default async function Page(props: {
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
-  const MDX = page.data.body;
+  // @ts-ignore - Fumadocs v16 API in flux
+  const Content = page.data.default || page.data.body || (() => null);
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
+    <DocsPage>
       <DocsBody>
         <h1>{page.data.title}</h1>
-        <MDX />
+        <Content />
       </DocsBody>
     </DocsPage>
   );

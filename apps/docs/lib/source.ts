@@ -5,10 +5,7 @@ import { createElement } from 'react';
 
 export const source = loader({
   baseUrl: '/docs',
-  source: {
-    files: docs,
-    pageTree: meta,
-  },
+  source: docs,
   icon(icon) {
     if (icon && icon in icons)
       return createElement(icons[icon as keyof typeof icons]);

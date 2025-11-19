@@ -1,0 +1,69 @@
+project:
+  name: "My Blocks Project"
+  domain: "myproject.general"
+
+philosophy:
+  - "Blocks must be small, composable, deterministic."
+  - "Blocks must express domain intent clearly in code."
+  - "All blocks must validate through multi-layer checks."
+
+domain:
+  entities:
+    user:
+      fields: [id, name, email]
+
+  signals:
+    user_engagement:
+      description: "How engaged is the user?"
+      extraction_hint: "Look for login frequency, feature usage."
+
+  measures:
+    score_0_1:
+      constraints:
+        - "Value must be between 0 and 1."
+
+blocks:
+  example_block:
+    type: utility
+    description: "An example block"
+    inputs:
+      - name: user
+        type: entity.user
+    outputs:
+      - name: score
+        type: measure.score_0_1
+
+validators:
+  schema:
+    - id: io_schema
+      run: "schema.io.v1"
+
+  shape:
+    - id: export_shape
+      run: "shape.exports.v1"
+
+  domain:
+    - id: domain_alignment
+      run: "domain.validation.v1"
+
+pipeline:
+  name: "default"
+  steps:
+    - id: schema
+      run: "schema.io.v1"
+    - id: shape
+      run: "shape.exports.v1"
+    - id: domain
+      run: "domain.validation.v1"
+
+agent:
+  mode: "block_builder"
+  rules:
+    - "Always read blocks.yml before creating or modifying code."
+    - "Always run blocks CLI after changes."
+    - "Always interpret validator output as instructions."
+
+targets:
+  kind: "block"
+  discover:
+    root: "."

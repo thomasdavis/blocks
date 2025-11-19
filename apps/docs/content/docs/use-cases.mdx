@@ -1,0 +1,399 @@
+---
+title: Use Cases
+description: Where Blocks excels - real-world scenarios with many similar functions
+---
+
+# Use Cases
+
+Blocks is designed for one specific scenario: **when you have many functions with the same input/output signature but different implementations**.
+
+## The Pattern
+
+You're building a system where you need 10, 50, or 100+ functions that:
+- Take the same inputs
+- Return the same outputs
+- But implement different logic
+
+Without Blocks, AI agents generate inconsistent code. With Blocks, `blocks.yml` defines the pattern once, and AI agents generate compliant implementations automatically.
+
+## Real-World Examples
+
+### 1. E-Commerce Product Page Generators
+
+**The Scenario:**
+You have 50+ product types (electronics, clothing, furniture). Each needs a page generator with identical structure but different rendering logic.
+
+```yaml
+blocks:
+  product_electronics:
+    description: "Generate product page for electronics"
+    inputs:
+      - name: product
+        type: entity.product
+    outputs:
+      - name: html
+        type: string
+        measures: [seo_quality, accessibility]
+    domain_rules:
+      - id: comparison_widget
+        description: "Must include product comparison functionality"
+      - id: technical_specs_table
+        description: "Must display specs in structured table format"
+```
+
+**Why AI Agents Mess It Up:**
+- Some templates have structured data, others don't
+- Inconsistent accessibility features (ARIA labels)
+- Different SEO meta tag strategies
+- Some responsive, others not
+
+**How Blocks Helps:**
+Domain validator checks EVERY template for comparison widget and specs table. Measure constraints verify structured data exists. One `blocks.yml`, 50+ consistent implementations.
+
+---
+
+### 2. Data Pipeline Transformers
+
+**The Scenario:**
+You have 100+ ETL transformation steps. Each transformer takes raw data and outputs normalized data with the same interface.
+
+```yaml
+blocks:
+  transformer_user_login:
+    description: "Transform user login events"
+    inputs:
+      - name: raw_event
+        type: entity.raw_event
+    outputs:
+      - name: normalized_event
+        type: entity.normalized_event
+        measures: [completeness_score]
+    domain_rules:
+      - id: idempotency
+        description: "Same input must always produce same output"
+      - id: error_handling
+        description: "Must handle malformed data gracefully without throwing"
+```
+
+**Why AI Agents Mess It Up:**
+- Different error handling (throw vs return null vs log-and-continue)
+- Timestamp formats vary (Unix vs ISO vs local time)
+- Inconsistent null handling
+- Some transformers mutate input, others don't
+
+**How Blocks Helps:**
+Schema validator ensures all 100+ transformers have identical signatures. Domain rules about idempotency and error handling are checked by AI. One spec, consistent pipelines.
+
+---
+
+### 3. API Endpoint Handlers
+
+**The Scenario:**
+200+ REST API endpoints across microservices. Each validates input, calls business logic, returns standardized responses.
+
+```yaml
+blocks:
+  endpoint_create_user:
+    description: "Create new user account"
+    inputs:
+      - name: request
+        type: entity.api_request
+    outputs:
+      - name: response
+        type: entity.api_response
+        measures: [response_format]
+    domain_rules:
+      - id: input_validation
+        description: "Must validate all inputs before processing"
+      - id: auth_check
+        description: "Must verify authentication and authorization"
+      - id: rate_limiting
+        description: "Must check rate limits before processing"
+```
+
+**Why AI Agents Mess It Up:**
+- Inconsistent error response formats
+- Auth checks happen in different orders
+- Different HTTP status codes for same scenarios
+- Some validate with Zod, others with custom logic
+
+**How Blocks Helps:**
+Domain rules ensure auth checks and validation happen consistently. Measure constraints verify error response structure. API becomes predictable.
+
+---
+
+### 4. Email Template Generators
+
+**The Scenario:**
+80+ email templates (welcome, password reset, receipts, notifications) all needing consistent branding and deliverability.
+
+```yaml
+blocks:
+  email_password_reset:
+    description: "Generate password reset email"
+    inputs:
+      - name: email_data
+        type: entity.email_data
+    outputs:
+      - name: rendered_email
+        type: entity.rendered_email
+        measures: [email_quality]
+    domain_rules:
+      - id: plain_text_version
+        description: "Must include plain text version alongside HTML"
+      - id: branding
+        description: "Must use company colors and logo from brand assets"
+      - id: unsubscribe_link
+        description: "Must include unsubscribe link in footer"
+```
+
+**Why AI Agents Mess It Up:**
+- Some emails HTML-only, others have plain text
+- Inconsistent branding (different logos, colors)
+- UTM parameters formatted differently
+- Unsubscribe links in different locations or missing
+
+**How Blocks Helps:**
+Domain validator analyzes template source for required elements. Measure constraints verify plain text exists. Brand consistency enforced.
+
+---
+
+### 5. Dashboard Widget Components
+
+**The Scenario:**
+60+ dashboard widget types (metrics, charts, tables). All need consistent loading states, error handling, and responsive design.
+
+```yaml
+blocks:
+  widget_sales_metric:
+    description: "Display sales performance metric"
+    inputs:
+      - name: widget_data
+        type: entity.widget_data
+      - name: widget_config
+        type: entity.widget_config
+    outputs:
+      - name: component
+        type: react_component
+        measures: [widget_quality]
+    domain_rules:
+      - id: loading_state
+        description: "Must show skeleton loader during fetch"
+      - id: error_boundary
+        description: "Must catch errors and show retry UI"
+      - id: last_updated
+        description: "Must display last updated timestamp"
+```
+
+**Why AI Agents Mess It Up:**
+- Inconsistent loading indicators (spinners vs skeletons)
+- Some show errors, others fail silently
+- Different data refresh approaches
+- Accessibility features missing
+
+**How Blocks Helps:**
+Domain validator checks for loading states and error handling in source. All widgets follow same UX patterns.
+
+---
+
+### 6. Form Validation Rules
+
+**The Scenario:**
+200+ form fields with specific validation rules (email, phone, credit card, SSN). Each needs consistent error messages and security.
+
+```yaml
+blocks:
+  validator_email:
+    description: "Validate email address format"
+    inputs:
+      - name: field_input
+        type: entity.field_input
+    outputs:
+      - name: validation_result
+        type: entity.validation_result
+        measures: [validation_quality]
+    domain_rules:
+      - id: format_check
+        description: "Must validate RFC 5322 email format"
+      - id: error_messages
+        description: "Must provide actionable error message"
+      - id: sanitization
+        description: "Must sanitize input to prevent XSS"
+```
+
+**Why AI Agents Mess It Up:**
+- Some return boolean, others return strings, others throw
+- Generic error messages ("Invalid email")
+- Different regex patterns for same field type
+- Inconsistent sanitization
+
+**How Blocks Helps:**
+Schema validator ensures all return same structure. Domain rules verify error messages are actionable. Security through consistency.
+
+---
+
+### 7. Authorization Policy Evaluators
+
+**The Scenario:**
+150+ authorization policies for different resources. All evaluate permissions with the same interface but different logic.
+
+```yaml
+blocks:
+  policy_document_read:
+    description: "Evaluate read permission for document"
+    inputs:
+      - name: auth_context
+        type: entity.auth_context
+    outputs:
+      - name: policy_decision
+        type: entity.policy_decision
+        measures: [policy_quality]
+    domain_rules:
+      - id: explicit_deny
+        description: "Deny by default, allow only when rules match"
+      - id: reason_required
+        description: "Must explain why access was granted or denied"
+      - id: audit_logging
+        description: "Must log all policy evaluations"
+```
+
+**Why AI Agents Mess It Up:**
+- Inconsistent default behavior (allow vs deny)
+- Some policies log, others don't
+- Different return types (boolean vs object)
+- Performance varies wildly
+
+**How Blocks Helps:**
+Domain rules enforce explicit deny and logging. Consistent security behavior across all policies.
+
+---
+
+### 8. Notification Channel Handlers
+
+**The Scenario:**
+25+ notification channels (email, SMS, push, Slack, Discord). All send notifications with same data model but different delivery.
+
+```yaml
+blocks:
+  channel_slack:
+    description: "Send notification via Slack"
+    inputs:
+      - name: notification
+        type: entity.notification
+    outputs:
+      - name: delivery_result
+        type: entity.delivery_result
+        measures: [delivery_quality]
+    domain_rules:
+      - id: retry_logic
+        description: "Must retry 3 times with exponential backoff"
+      - id: rate_limiting
+        description: "Must respect channel rate limits"
+      - id: message_id
+        description: "Must return message_id for tracking"
+```
+
+**Why AI Agents Mess It Up:**
+- Inconsistent retry strategies
+- Different error handling
+- Some batch, others don't
+- Rate limiting handled differently
+
+**How Blocks Helps:**
+Domain rules ensure retry logic is consistent. Reliable notification delivery.
+
+---
+
+### 9. Content Format Converters
+
+**The Scenario:**
+40+ format converters (Markdown→HTML, HTML→PDF, JSON→CSV). All need consistent error handling and output validation.
+
+```yaml
+blocks:
+  converter_markdown_to_html:
+    description: "Convert Markdown to HTML"
+    inputs:
+      - name: source_content
+        type: entity.source_content
+    outputs:
+      - name: converted_content
+        type: entity.converted_content
+        measures: [conversion_quality]
+    domain_rules:
+      - id: semantic_preservation
+        description: "Must maintain heading hierarchy and structure"
+      - id: sanitization
+        description: "Must sanitize output to prevent XSS"
+```
+
+**Why AI Agents Mess It Up:**
+- Different parsers used (marked vs remark)
+- Inconsistent edge case handling
+- Some sanitize, others don't
+- Security vulnerabilities
+
+**How Blocks Helps:**
+Domain rules enforce sanitization and semantic preservation. Secure, predictable conversions.
+
+---
+
+### 10. Report Generators
+
+**The Scenario:**
+50+ business report types (financial, analytics, compliance). All require consistent formatting and branding.
+
+```yaml
+blocks:
+  report_financial_summary:
+    description: "Generate financial summary report"
+    inputs:
+      - name: report_data
+        type: entity.report_data
+      - name: config
+        type: entity.report_config
+    outputs:
+      - name: pdf
+        type: binary
+        measures: [report_quality]
+    domain_rules:
+      - id: executive_summary
+        description: "Must include 1-page executive summary at start"
+      - id: page_numbers
+        description: "Must have page numbers on all pages except cover"
+      - id: data_freshness
+        description: "Must display data timestamp and source"
+```
+
+**Why AI Agents Mess It Up:**
+- Inconsistent formatting (fonts, colors, spacing)
+- Some have executive summaries, others don't
+- Different date formats
+- Poor pagination for printing
+
+**How Blocks Helps:**
+Domain validator checks for executive summary in template. Consistent professional quality.
+
+---
+
+## Key Characteristics
+
+All examples share:
+
+1. **Scale**: 10-200+ implementations of the same pattern
+2. **Consistency Need**: Small variations cause major problems
+3. **AI Challenge**: Easy to get 80% right, hard to get 100% consistent
+4. **Domain Rules**: Clear semantic requirements beyond just types
+5. **Evolution**: New implementations added regularly
+
+## When NOT to Use Blocks
+
+Don't use Blocks when:
+- You have only 1-5 similar functions
+- The functions are truly different (not just variations)
+- Consistency doesn't matter
+- You're building a one-off, not a system
+
+## Summary
+
+Blocks excels when you have **many similar functions** that need to be **consistently implemented** across your codebase. The `blocks.yml` file becomes the **single source of truth** that guides AI agents to generate code that follows your domain rules automatically.

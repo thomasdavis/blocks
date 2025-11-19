@@ -1,222 +1,384 @@
 ---
 title: Quick Start
-description: Create your first block in 5 minutes
+description: Build a validated resume theme in 5 minutes
 ---
 
 # Quick Start
 
-Learn how to create and validate your first block.
+Learn how Blocks prevents common AI coding mistakes through a real example: building resume themes with proper accessibility and design.
 
-## Step 1: Define Your Domain
+## The Problem: AI Agents Suck at Visual Design
 
-Edit your `blocks.yml` file to define domain concepts:
+When AI coding agents (Claude Code, Cursor, ChatGPT) generate HTML/CSS, they commonly produce:
+
+- ❌ **Text colors matching backgrounds** (completely unreadable)
+- ❌ **Poor color contrast** (fails WCAG accessibility standards)
+- ❌ **Broken responsive layouts** (mobile unusable)
+- ❌ **Non-semantic HTML** (terrible for screen readers)
+- ❌ **Missing ARIA labels** (accessibility nightmare)
+
+**Blocks solves this** by validating code against explicit domain rules and catching these issues before they reach production.
+
+## Real Example: JSON Resume Themes
+
+This example is from [`examples/json-resume-themes`](https://github.com/yourusername/blocks/tree/main/examples/json-resume-themes) in the repo.
+
+We'll build a resume theme that AI agents commonly mess up, then show how Blocks catches the mistakes.
+
+### Step 1: Define Your Domain (NOT in a blocks/ folder!)
+
+Create `blocks.yml` **in your project root** — you don't need a special `blocks/` directory:
 
 ```yaml title="blocks.yml"
 project:
-  name: "my-project"
-  domain: "myproject.general"
+  name: "JSON Resume Themes"
+  domain: "jsonresume.themes"
 
 philosophy:
-  - "Blocks must be small, composable, deterministic."
+  - "Resume themes must prioritize readability and professionalism."
+  - "All themes must be responsive and accessible."
+  - "Semantic HTML and proper structure are required."
 
 domain:
   entities:
-    user:
-      fields: [id, name, email, created_at]
+    resume:
+      fields: [basics, work, education, skills]
 
   signals:
-    engagement:
-      description: "How engaged is the user?"
-      extraction_hint: "Based on activity frequency and recency"
+    readability:
+      description: "How easy is the resume to read and scan?"
+      extraction_hint: "Look for typography, spacing, visual hierarchy"
+
+    accessibility:
+      description: "WCAG compliance and screen reader friendliness"
+      extraction_hint: "Verify semantic HTML, ARIA labels, color contrast"
 
   measures:
-    score_0_1:
+    valid_html:
       constraints:
-        - "Value must be between 0 and 1."
-        - "Higher values indicate stronger signal."
+        - "Must output valid HTML5"
+
+    accessibility_score:
+      constraints:
+        - "Must use semantic HTML5 tags"
+        - "Color contrast must meet WCAG AA standards"
 
 blocks:
-  user_engagement_score:
-    type: facet
-    description: "Calculate user engagement score from activity patterns"
+  theme.modern_professional:
+    type: template
+    description: "Clean, modern resume theme"
+    path: "themes/modern-professional"  # ← Your code lives here
+    template_engine: hbs
+    test_data: "test-data/sample-resume.json"
     inputs:
-      - name: user
-        type: entity.user
-      - name: activity_days
-        type: number
-        optional: false
+      - name: resume
+        type: entity.resume
     outputs:
-      - name: score
-        type: number
-        measures: [score_0_1]
-      - name: level
+      - name: html
         type: string
-```
-
-## Step 2: Create Block Directory
-
-Create a directory for your block:
-
-```bash
-mkdir -p blocks/user_engagement_score
+        measures: [valid_html, accessibility_score]
+    domain_rules:
+      - id: semantic_html
+        description: "Must use semantic HTML tags (header, main, section, article)"
+      - id: accessibility
+        description: "Must include proper ARIA labels and semantic structure"
+      - id: responsive_design
+        description: "Must use CSS media queries for responsive layout"
+      - id: visual_hierarchy
+        description: "Must establish clear visual hierarchy with typography"
 ```
 
 <Callout type="info">
-  You can organize blocks anywhere in your project using the `path` field in `blocks.yml`. The default location is `blocks/<block-name>/`.
+**Flexible Project Structure**: Notice the `path: "themes/modern-professional"` field. You can organize your code however you want! Blocks doesn't force you into a `blocks/` folder. Just point to where your code lives.
 </Callout>
 
-## Step 3: Implement the Block
+### Step 2: Create Your Theme Implementation
 
-Create `blocks/user_engagement_score/block.ts`:
+Your code can live anywhere. We'll put it in `themes/modern-professional/`:
 
-```typescript title="blocks/user_engagement_score/block.ts"
-export async function userEngagementScore(params: {
-  user: { id: string; name: string; email: string; created_at: string };
-  activity_days: number;
-}) {
-  const { user, activity_days } = params;
+```typescript title="themes/modern-professional/block.ts"
+import Handlebars from "handlebars";
+import * as fs from "fs";
+import * as path from "path";
 
-  // Calculate engagement score (0-1)
-  // More recent activity = higher score
-  const accountAgeDays = Math.floor(
-    (Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24)
+/**
+ * Domain compliance enforced at development time by Blocks validator.
+ * Validator analyzes template.hbs source for semantic HTML, ARIA, responsiveness.
+ */
+export function modernProfessionalTheme(
+  resume: Resume,
+  config?: ThemeConfig
+) {
+  // Input validation only
+  if (!resume.basics?.name || !resume.basics?.label) {
+    throw new Error("Resume must include basics.name and basics.label");
+  }
+
+  // Render template (template is validated by Blocks, so we trust it)
+  const templateSource = fs.readFileSync(
+    path.join(__dirname, "template.hbs"),
+    "utf-8"
   );
-
-  const rawScore = activity_days / Math.max(accountAgeDays, 1);
-  const score = Math.min(rawScore, 1.0);
-
-  // Categorize engagement level
-  let level: string;
-  if (score >= 0.7) level = "high";
-  else if (score >= 0.3) level = "medium";
-  else level = "low";
+  const template = Handlebars.compile(templateSource);
 
   return {
-    score,
-    level,
+    html: template(resume),
+  };
+}
+
+interface Resume {
+  basics: {
+    name: string;
+    label: string;
+    email?: string;
+    phone?: string;
+    summary?: string;
+  };
+  work?: Array<any>;
+  education?: Array<any>;
+  skills?: Array<any>;
+}
+
+interface ThemeConfig {
+  colors?: {
+    primary?: string;
+    background?: string;
   };
 }
 ```
 
-Create `blocks/user_engagement_score/index.ts`:
+```handlebars title="themes/modern-professional/template.hbs"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{basics.name}} - Resume</title>
+  <style>
+    /* Responsive layout */
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+    }
 
-```typescript title="blocks/user_engagement_score/index.ts"
-export { userEngagementScore } from "./block.js";
+    /* WCAG AA compliant colors */
+    body {
+      color: #1a1a1a;
+      background: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <header role="banner">
+    <h1>{{basics.name}}</h1>
+    <p aria-label="Professional title">{{basics.label}}</p>
+  </header>
+
+  <main role="main">
+    {{#if basics.summary}}
+    <section aria-labelledby="summary-heading">
+      <h2 id="summary-heading">Summary</h2>
+      <p>{{basics.summary}}</p>
+    </section>
+    {{/if}}
+
+    {{#if work}}
+    <section aria-labelledby="experience-heading">
+      <h2 id="experience-heading">Experience</h2>
+      {{#each work}}
+      <article>
+        <h3>{{position}} at {{name}}</h3>
+        <p>{{summary}}</p>
+      </article>
+      {{/each}}
+    </section>
+    {{/if}}
+  </main>
+</body>
+</html>
 ```
 
-## Step 4: Validate Your Block
+```typescript title="themes/modern-professional/index.ts"
+export { modernProfessionalTheme } from "./block.js";
+```
+
+### Step 3: Validate Your Theme
 
 Run the Blocks validator:
 
 ```bash
-pnpm blocks run user_engagement_score
+blocks run theme.modern_professional
 ```
 
-You should see output like this:
+**✅ When everything is correct:**
 
 ```
 🧱 Blocks Validator
 
-📦 Validating: user_engagement_score
+📦 Validating: theme.modern_professional
+
+  ✓ schema ok (inputs/outputs match spec)
+  ✓ shape ok (files exist, exports present)
+  ✓ domain ok (semantic HTML, ARIA labels, responsive)
+
+  ✅ Block "theme.modern_professional" passed all validations
+```
+
+**❌ When AI generates bad code:**
+
+Let's say an AI agent generates this broken template:
+
+```handlebars
+<!-- BAD: No semantic HTML, no ARIA, poor contrast -->
+<div>
+  <div style="color: #ccc; background: #ddd">{{basics.name}}</div>
+  <div>{{basics.label}}</div>
+</div>
+```
+
+Running `blocks run theme.modern_professional`:
+
+```
+🧱 Blocks Validator
+
+📦 Validating: theme.modern_professional
 
   ✓ schema ok
   ✓ shape ok
-  ✓ domain ok
 
-  ✅ Block "user_engagement_score" passed all validations
+  ⚠ [domain] Missing semantic HTML structure
+  → Found: Generic <div> tags
+  → Expected: <header>, <main>, <section>, <article>
+  → Rule: semantic_html
+
+  ⚠ [domain] Missing ARIA labels
+  → No aria-label or aria-labelledby attributes found
+  → Required for screen reader accessibility
+  → Rule: accessibility
+
+  ⚠ [domain] Poor color contrast detected
+  → Text color #ccc on background #ddd
+  → Contrast ratio: 1.8:1 (WCAG AA requires 4.5:1)
+  → Rule: accessibility
+
+  ❌ Block "theme.modern_professional" has 3 warnings
 ```
 
-## Understanding the Validation
+## How Claude Code Would Use This
 
-Let's break down what each validator checked:
+When you're coding with **Claude Code** (or Cursor, Copilot, etc.), here's the workflow:
 
-### Schema Validator
+### 1. AI Writes Code
 
-- ✅ Inputs match the definition in `blocks.yml`
-- ✅ Outputs match the definition
-- ✅ Types are correct
+You: "Create a modern resume theme with professional styling"
 
-### Shape Validator
+Claude Code generates the theme files.
 
-- ✅ `block.ts` file exists
-- ✅ `index.ts` file exists
-- ✅ Required exports are present
+### 2. AI Validates Immediately
 
-### Domain Validator
-
-- ✅ Code expresses domain intent clearly
-- ✅ Uses specified entities (`entity.user`)
-- ✅ Outputs respect measures (`score_0_1` constraint)
-- ✅ No undocumented concepts introduced
-
-## What If Validation Fails?
-
-If you introduce an error, Blocks will tell you exactly what's wrong:
-
-```typescript title="blocks/user_engagement_score/block.ts"
-export async function userEngagementScore(params: any) {
-  return {
-    score: 2.5,  // ❌ Violates score_0_1 measure!
-    level: "high",
-  };
-}
-```
-
-Running validation:
+**Claude Code reads `blocks.yml` first** (as instructed in CLAUDE.md), then after writing code, it runs:
 
 ```bash
-pnpm blocks run user_engagement_score
+blocks run theme.modern_professional
 ```
 
-Output:
+### 3. AI Sees Validation Errors
 
 ```
-🧱 Blocks Validator
-
-📦 Validating: user_engagement_score
-
-  ✓ schema ok
-  ✓ shape ok
-
-  ⚠ [domain] Output score violates measure score_0_1
-  → Constraint: "Value must be between 0 and 1."
-  → Found: 2.5
-  → Fix: Ensure score is clamped to [0, 1] range
-
-  ❌ Block "user_engagement_score" has warnings
+⚠ [domain] Poor color contrast detected
+→ Text color #e0e0e0 on background #ffffff
+→ Contrast ratio: 1.4:1 (WCAG AA requires 4.5:1)
 ```
 
-Fix the issue and re-run validation until it passes.
+### 4. AI Auto-Corrects
 
-## Using Test Data
+Claude Code reads the error, understands the domain rule, and fixes it:
 
-You can add test data to your `blocks.yml` for more comprehensive validation:
+```diff
+- color: #e0e0e0;
++ color: #1a1a1a; /* WCAG AA compliant */
+```
 
-```yaml title="blocks.yml"
+### 5. AI Re-Validates
+
+```bash
+blocks run theme.modern_professional
+```
+
+```
+✅ Block "theme.modern_professional" passed all validations
+```
+
+**This feedback loop happens automatically** while the AI is coding, catching mistakes before you even see them.
+
+## Output Validators: Future Vision
+
+In the current version, Blocks validates **source code**. Future versions will add **output validators** that render and analyze the actual HTML output.
+
+### Example: Computer Vision for Color Contrast
+
+```yaml
+validators:
+  output:
+    - id: color_contrast_cv
+      run: "output.vision.contrast.v1"
+      config:
+        model: "gpt-4o-vision"  # or Claude with vision
+        test_data: "test-data/sample-resume.json"
+```
+
+This validator would:
+1. Render `output.html` from your theme
+2. Screenshot the page
+3. Use a vision model to analyze:
+   - Color contrast ratios
+   - Text readability
+   - Visual hierarchy
+   - Responsive breakpoints
+
+**Why this is powerful:**
+- Catches issues that are hard to detect in source (like computed CSS styles)
+- Validates the *actual user experience*
+- Works even with complex CSS frameworks
+
+## Understanding the Validators
+
+### Schema Validator (Fast, Deterministic)
+- ✅ Input types match `blocks.yml`
+- ✅ Output types match specification
+- ✅ Required fields present
+
+### Shape Validator (Fast, Deterministic)
+- ✅ File structure correct (`block.ts`, `index.ts`, `template.hbs`)
+- ✅ Exports present and named correctly
+
+### Domain Validator (Slow, AI-Powered)
+- ✅ **Reads ALL files in your block** (not just block.ts)
+- ✅ Analyzes template source for semantic HTML
+- ✅ Checks domain rules compliance
+- ✅ Validates against philosophy statements
+- ✅ Detects undocumented concepts (drift detection)
+
+**Key insight:** The domain validator reads **template.hbs source**, not rendered output. It analyzes the code with AI to ensure semantic correctness.
+
+## What If I Don't Use a blocks/ Folder?
+
+**You don't have to!** Blocks respects your project structure:
+
+```yaml
 blocks:
-  user_engagement_score:
-    type: facet
-    description: "Calculate user engagement score from activity patterns"
-    # ... inputs/outputs ...
-    test_samples:
-      - user: { id: "1", name: "Alice", email: "alice@example.com", created_at: "2024-01-01" }
-        activity_days: 30
-      - user: { id: "2", name: "Bob", email: "bob@example.com", created_at: "2023-01-01" }
-        activity_days: 5
+  theme.modern_professional:
+    path: "themes/modern-professional"  # ← Custom path
+
+  theme.creative:
+    path: "src/themes/creative"  # ← Anywhere you want
+
+  utils.format_date:
+    path: "lib/utilities/date-formatter"  # ← Whatever structure
 ```
 
-Or reference an external file:
-
-```yaml title="blocks.yml"
-blocks:
-  user_engagement_score:
-    # ... other config ...
-    test_data: "test-data/user-engagement-samples.json"
-```
+If you don't specify `path`, Blocks defaults to `blocks/<block-name>/` (or whatever you set in `targets.discover.root`).
 
 ## Next Steps
-
-Congratulations! You've created and validated your first block.
 
 <Cards>
   <Card
@@ -225,18 +387,18 @@ Congratulations! You've created and validated your first block.
     href="/docs/core-concepts"
   />
   <Card
+    title="Claude Code Integration"
+    description="Set up AI coding agents to use Blocks"
+    href="/docs/ai-integration/claude-code"
+  />
+  <Card
     title="Validation Architecture"
-    description="Learn how multi-layer validation works"
+    description="How multi-layer validation works"
     href="/docs/validation/architecture"
   />
   <Card
-    title="CLI Reference"
-    description="Explore all CLI commands"
-    href="/docs/cli"
-  />
-  <Card
-    title="Examples"
-    description="See more complex real-world examples"
-    href="/docs/examples"
+    title="Full Example"
+    description="Explore the complete JSON Resume example"
+    href="https://github.com/yourusername/blocks/tree/main/examples/json-resume-themes"
   />
 </Cards>

@@ -387,4 +387,521 @@ pipeline:
 
 ---
 
+## Development Philosophy: How to Build Blocks
+
+This section documents critical architectural decisions and development patterns learned while building Blocks.
+
+### Core Principle: Development-Time vs Runtime Validation
+
+**CRITICAL:** Blocks is fundamentally a **development-time validator**, not a runtime validator.
+
+#### What This Means
+
+**Development-Time (Where Blocks Lives):**
+- Validate SOURCE CODE during development
+- AI analyzes template files, implementation files, all block files
+- Provide semantic feedback to guide iterative improvement
+- Goal: Ensure code is correct BEFORE deployment
+
+**Runtime (Application Layer):**
+- Validate INPUT DATA only (required fields, valid formats)
+- NO validation of template compliance
+- NO parsing of output to check domain rules
+- Trust that validated source code produces correct output
+
+#### Why This Matters
+
+Templates are **deterministic**:
+```
+Same input → Same template → Same output
+```
+
+If `template.hbs` source passes validation during development, it will ALWAYS produce compliant HTML at runtime. No need to validate the output every time.
+
+**Wrong Approach (Runtime Validation):**
+```typescript
+export function theme(resume: Resume) {
+  const html = template(resume);
+
+  // ❌ DON'T parse output at runtime
+  if (!html.includes('<header>')) throw new Error(...);
+  if (!html.includes('aria-label')) throw new Error(...);
+  // ... 170 lines of HTML parsing every render
+
+  return { html };
+}
+```
+
+**Correct Approach (Development-Time Validation):**
+```typescript
+// Block implementation (~20 lines)
+export function theme(resume: Resume) {
+  // ✓ Validate input data only
+  if (!resume.basics?.name) {
+    throw new Error("Resume must include name");
+  }
+
+  // ✓ Render and trust template (validated at dev time)
+  return { html: template(resume) };
+}
+
+// Validation happens when you run: blocks run theme.modern_professional
+// Domain validator reads template.hbs SOURCE and analyzes it with AI
+```
+
+### Domain Validator Reads ALL Files
+
+The domain validator doesn't just read `block.ts` - it reads **every file in the block directory**.
+
+#### How It Works
+
+1. Recursively read all files in block path
+2. Exclude build artifacts (node_modules, dist, .git)
+3. Pass ALL files to AI with full context
+4. AI analyzes everything together
+
+#### Why This Is Better
+
+- **Complete context** - AI sees templates, styles, utilities, everything
+- **Flexible structure** - Works with any project organization
+- **Holistic validation** - AI understands how files relate
+- **Future-proof** - Handles blocks with multiple components
+
+#### Example
+
+```
+themes/modern-professional/
+├── block.ts          # Implementation
+├── template.hbs      # Handlebars template
+├── index.ts          # Exports
+└── utils.ts          # Helper functions
+
+Domain validator reads ALL 4 files and passes to AI:
+
+"Here are ALL the files for theme.modern_professional:
+
+--- block.ts ---
+```typescript
+export function modernProfessionalTheme(resume: Resume) {
+  // implementation
+}
+```
+
+--- template.hbs ---
+```handlebars
+<header role="banner">
+  <h1>{{basics.name}}</h1>
+```
+
+--- index.ts ---
+```typescript
+export { modernProfessionalTheme } from './block.js';
+```
+
+Analyze ALL files together for domain compliance..."
+```
+
+### Keep Block Implementations Simple
+
+**Target: 20-50 lines** for most blocks.
+
+#### What Belongs in Block Implementations
+
+✅ **DO include:**
+- Input data validation (required fields exist)
+- Business logic
+- Template rendering / computation
+- Output generation
+- Error handling
+
+❌ **DON'T include:**
+- Validation of template compliance
+- Parsing output to check domain rules
+- Runtime enforcement of semantic HTML
+- Checking for ARIA labels in rendered HTML
+- Any logic that duplicates what validators do
+
+#### Before vs After Example
+
+**Before (250 lines):**
+```typescript
+export function modernProfessionalTheme(resume: Resume) {
+  // 40 lines of input validation
+  if (!resume.basics) throw new Error(...);
+  if (!resume.work) throw new Error(...);
+  if (!resume.education) throw new Error(...);
+  if (!resume.skills) throw new Error(...);
+
+  const html = template(resume);
+
+  // 170 lines of runtime HTML validation
+  validateSemanticHTML(html);
+  validateAccessibility(html);
+  validateResponsiveDesign(html);
+  validateVisualHierarchy(html);
+
+  return { html };
+}
+
+function validateSemanticHTML(html: string) {
+  // 30 lines parsing HTML...
+}
+
+function validateAccessibility(html: string) {
+  // 40 lines checking ARIA...
+}
+
+function validateResponsiveDesign(html: string) {
+  // 50 lines checking media queries...
+}
+
+function validateVisualHierarchy(html: string) {
+  // 50 lines checking typography...
+}
+```
+
+**After (20 lines):**
+```typescript
+/**
+ * Domain compliance enforced at development time by Blocks validator.
+ * Validator analyzes template.hbs source for semantic HTML, ARIA, responsiveness.
+ */
+export function modernProfessionalTheme(resume: Resume, config?: ThemeConfig) {
+  // Input validation only
+  if (!resume.basics?.name || !resume.basics?.label) {
+    throw new Error("Resume must include basics.name and basics.label");
+  }
+
+  // Render and return
+  const html = template(resume);
+  return { html };
+}
+```
+
+### Project Structure Flexibility
+
+Users can organize their projects however they want using the `path` field in blocks.yml.
+
+#### Default Structure (If No Path)
+
+```yaml
+blocks:
+  my_block:
+    type: utility
+    # No path specified
+```
+
+Blocks looks in: `blocks/my_block/` (or whatever `targets.discover.root` is set to)
+
+#### Custom Structure (With Path)
+
+```yaml
+blocks:
+  theme.modern_professional:
+    type: template
+    path: "themes/modern-professional"  # Custom location!
+```
+
+Blocks looks in: `themes/modern-professional/` directly
+
+#### Why This Matters
+
+Users aren't forced into a specific folder structure. They can:
+- Put templates in `themes/`
+- Put utilities in `lib/`
+- Put validators in `validators/`
+- Organize by feature, not by "blocks"
+
+The `path` field respects user's project organization.
+
+### Test Data Configuration
+
+Blocks supports flexible test data for validation.
+
+#### Option 1: External File (Recommended)
+
+```yaml
+blocks:
+  theme.modern_professional:
+    test_data: "test-data/sample-resume.json"
+```
+
+Good for: Large, realistic datasets
+
+#### Option 2: Inline Samples
+
+```yaml
+blocks:
+  calculate_score:
+    test_samples:
+      - { user: { id: 1, name: "Alice" } }
+      - { user: { id: 2, name: "Bob" } }
+```
+
+Good for: Simple data, quick tests
+
+#### Option 3: Both
+
+```yaml
+blocks:
+  theme.modern_professional:
+    test_data: "test-data/sample-resume.json"  # Main dataset
+    test_samples:  # Edge cases
+      - { basics: { name: "Minimal" } }
+```
+
+**Note:** In current version, test_data is defined in schema but not yet used by validators. Future feature for output validators.
+
+### AI Validation Context
+
+The AI receives comprehensive context about Blocks philosophy and domain concepts.
+
+#### What AI Knows
+
+When validating, the AI prompt includes:
+
+1. **Blocks Philosophy** (from blocks.yml):
+   ```
+   - "Resume themes must prioritize readability and professionalism."
+   - "All themes must be responsive and accessible."
+   ```
+
+2. **Domain Concepts**:
+   ```
+   - Entities: Core data types (e.g., resume, user)
+   - Signals: Domain concepts to extract (e.g., readability)
+   - Measures: Constraints on outputs (e.g., valid_html)
+   ```
+
+3. **ALL Block Files**:
+   ```
+   --- block.ts ---
+   [full source code]
+
+   --- template.hbs ---
+   [full template source]
+
+   --- index.ts ---
+   [exports]
+   ```
+
+4. **Domain Rules**:
+   ```
+   - Must use semantic HTML tags (header, main, section, article)
+   - Must include proper ARIA labels and semantic structure
+   ```
+
+5. **Validation Instructions**:
+   ```
+   Analyze ALL files together to determine if this block:
+   1. Expresses domain intent clearly in source code
+   2. Uses specified inputs/outputs correctly
+   3. Adheres to all domain rules
+   4. For templates: Check template SOURCE for semantic HTML
+   5. Does NOT introduce undocumented concepts
+   ```
+
+This comprehensive context helps AI provide intelligent, domain-aware feedback.
+
+### Separation of Concerns
+
+Clear boundaries between what blocks do vs what validators do.
+
+#### Block Responsibility
+
+- Implement business logic
+- Validate input data
+- Render output
+- Handle errors
+- ~20-50 lines typical
+
+#### Validator Responsibility
+
+- Analyze source code
+- Check domain compliance
+- Verify semantic alignment
+- Detect drift
+- Provide feedback
+
+**Key Rule:** Blocks implement, validators validate. No overlap.
+
+### Development Workflow
+
+When building features for Blocks:
+
+#### 1. Start with Architecture
+
+Before coding, ask:
+- Is this development-time or runtime?
+- Does this validate source or output?
+- Should this be in the block or a validator?
+- Are we trusting validated code?
+
+#### 2. Keep Validators Separate
+
+Validators are in `packages/validators/`, not in block implementations.
+
+#### 3. Test Both Layers
+
+- **Development validation:** Run `blocks run <name>` with test data
+- **Runtime behavior:** Unit tests for block logic
+- **Integration:** End-to-end with real data
+
+#### 4. Document Decisions
+
+When making architectural choices, document them:
+- In code comments
+- In CLAUDE.md (this file)
+- In docs/validators-architecture.md
+- In commit messages
+
+### Common Mistakes to Avoid
+
+#### ❌ Runtime Validation of Template Compliance
+
+```typescript
+// DON'T do this
+export function theme(resume: Resume) {
+  const html = template(resume);
+  if (!html.includes('<header>')) {
+    throw new Error("Missing header tag");
+  }
+  return { html };
+}
+```
+
+**Why wrong:** Template is deterministic. If it passes dev-time validation, it's correct.
+
+#### ❌ Parsing Output for Domain Rules
+
+```typescript
+// DON'T do this
+const hasAriaLabels = html.match(/aria-label/g)?.length >= 3;
+if (!hasAriaLabels) {
+  throw new Error("Need more ARIA labels");
+}
+```
+
+**Why wrong:** This is what the domain validator does by analyzing SOURCE, not output.
+
+#### ❌ Validating Only block.ts
+
+```typescript
+// In domain validator - DON'T do this
+const code = readFileSync(join(blockPath, 'block.ts'), 'utf-8');
+await ai.validate({ code });  // ❌ Missing template!
+```
+
+**Why wrong:** Need to read ALL files to give AI complete context.
+
+#### ❌ Forcing Specific Folder Structure
+
+```typescript
+// DON'T do this
+const blockPath = join('blocks', blockName);  // ❌ Hardcoded!
+```
+
+**Why wrong:** Users can organize projects however they want. Respect the `path` field.
+
+### Success Patterns
+
+#### ✅ Simple Block Implementation
+
+```typescript
+export function theme(resume: Resume) {
+  if (!resume.basics?.name) {
+    throw new Error("Resume must include name");
+  }
+  return { html: template(resume) };
+}
+```
+
+**Why right:** Simple, focused, trusts validated template.
+
+#### ✅ Read All Files in Validator
+
+```typescript
+const blockFiles = readAllBlockFiles(context.blockPath);
+await ai.validateDomainSemantics({
+  files: blockFiles,  // ✓ All files!
+  philosophy: context.config.philosophy,
+  domainRules,
+});
+```
+
+**Why right:** Complete context for AI analysis.
+
+#### ✅ Respect Custom Paths
+
+```typescript
+const blockPath = block.path
+  ? join(process.cwd(), block.path)
+  : join(process.cwd(), discoverRoot, blockName);
+```
+
+**Why right:** Flexible, respects user's project structure.
+
+#### ✅ Validate Source, Not Output
+
+```typescript
+// In AI prompt
+"For templates: Check template SOURCE for semantic HTML tags.
+Do NOT execute or render - analyze the SOURCE CODE."
+```
+
+**Why right:** Source is deterministic, that's what matters.
+
+### Future Directions
+
+As Blocks evolves:
+
+#### Output Validators (Coming Soon)
+
+Will render with test data and validate output:
+```yaml
+validators:
+  output:
+    - id: html_structure
+      run: "output.html.v1"
+```
+
+Use case: Checking generated output structure, link validation, etc.
+
+#### Visual Validators (Future)
+
+Screenshot-based validation with vision models:
+```yaml
+validators:
+  visual:
+    - id: contrast_check
+      run: "visual.contrast.v1"
+```
+
+Use case: WCAG color contrast, visual hierarchy, responsive layout testing.
+
+#### Progressive Validation
+
+Validate incrementally as you code, not just on save.
+
+#### Auto-Healing
+
+AI proposes fixes for validation failures, not just feedback.
+
+### Key Takeaways for Development
+
+When building Blocks features:
+
+1. **Think layers** - Development-time vs runtime, source vs output
+2. **Keep blocks simple** - Aim for 20-50 lines
+3. **Validators validate** - Don't put validation logic in blocks
+4. **Read all files** - Domain validator needs complete context
+5. **Respect flexibility** - Users organize projects their way
+6. **Trust validated code** - If source passes dev validation, trust it
+7. **Document decisions** - Architecture choices are critical
+8. **Test both layers** - Dev-time validation AND runtime behavior
+
+---
+
 **Remember:** Blocks is a framework for **agentic coding with guardrails**. The spec is your guide, validators are your feedback, and evolution is your goal.
+
+**Critical:** Validate SOURCE CODE at development time. Trust validated code at runtime.

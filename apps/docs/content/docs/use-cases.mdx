@@ -14,7 +14,7 @@ You're building a system where you need 10, 50, or 100+ functions that:
 - Return the same outputs
 - But implement different logic
 
-Without Blocks, AI agents generate inconsistent code. With Blocks, `blocks.yml` defines the pattern once, and AI agents generate compliant implementations automatically.
+Without Blocks, developers (human or AI) produce inconsistent code across many similar functions. With Blocks, `blocks.yml` defines the pattern once, and validation helps maintain consistency regardless of who writes the code.
 
 ## Real-World Examples
 
@@ -41,14 +41,14 @@ blocks:
         description: "Must display specs in structured table format"
 ```
 
-**Why AI Agents Mess It Up:**
-- Some templates have structured data, others don't
+**Why This Gets Inconsistent:**
+- Some templates (written by humans or AI) have structured data, others don't
 - Inconsistent accessibility features (ARIA labels)
 - Different SEO meta tag strategies
 - Some responsive, others not
 
 **How Blocks Helps:**
-Domain validator checks EVERY template for comparison widget and specs table. Measure constraints verify structured data exists. One `blocks.yml`, 50+ consistent implementations.
+Domain validator detects drift from the spec. Whether you or an AI wrote the code, Blocks reports inconsistencies and helps you decide: fix the code or update the spec. One `blocks.yml`, 50+ consistent implementations.
 
 ---
 
@@ -75,7 +75,7 @@ blocks:
         description: "Must handle malformed data gracefully without throwing"
 ```
 
-**Why AI Agents Mess It Up:**
+**Why This Gets Inconsistent:**
 - Different error handling (throw vs return null vs log-and-continue)
 - Timestamp formats vary (Unix vs ISO vs local time)
 - Inconsistent null handling
@@ -111,7 +111,7 @@ blocks:
         description: "Must check rate limits before processing"
 ```
 
-**Why AI Agents Mess It Up:**
+**Why This Gets Inconsistent:**
 - Inconsistent error response formats
 - Auth checks happen in different orders
 - Different HTTP status codes for same scenarios
@@ -147,7 +147,7 @@ blocks:
         description: "Must include unsubscribe link in footer"
 ```
 
-**Why AI Agents Mess It Up:**
+**Why This Gets Inconsistent:**
 - Some emails HTML-only, others have plain text
 - Inconsistent branding (different logos, colors)
 - UTM parameters formatted differently
@@ -185,7 +185,7 @@ blocks:
         description: "Must display last updated timestamp"
 ```
 
-**Why AI Agents Mess It Up:**
+**Why This Gets Inconsistent:**
 - Inconsistent loading indicators (spinners vs skeletons)
 - Some show errors, others fail silently
 - Different data refresh approaches
@@ -221,7 +221,7 @@ blocks:
         description: "Must sanitize input to prevent XSS"
 ```
 
-**Why AI Agents Mess It Up:**
+**Why This Gets Inconsistent:**
 - Some return boolean, others return strings, others throw
 - Generic error messages ("Invalid email")
 - Different regex patterns for same field type
@@ -257,7 +257,7 @@ blocks:
         description: "Must log all policy evaluations"
 ```
 
-**Why AI Agents Mess It Up:**
+**Why This Gets Inconsistent:**
 - Inconsistent default behavior (allow vs deny)
 - Some policies log, others don't
 - Different return types (boolean vs object)
@@ -293,7 +293,7 @@ blocks:
         description: "Must return message_id for tracking"
 ```
 
-**Why AI Agents Mess It Up:**
+**Why This Gets Inconsistent:**
 - Inconsistent retry strategies
 - Different error handling
 - Some batch, others don't
@@ -327,7 +327,7 @@ blocks:
         description: "Must sanitize output to prevent XSS"
 ```
 
-**Why AI Agents Mess It Up:**
+**Why This Gets Inconsistent:**
 - Different parsers used (marked vs remark)
 - Inconsistent edge case handling
 - Some sanitize, others don't
@@ -365,7 +365,7 @@ blocks:
         description: "Must display data timestamp and source"
 ```
 
-**Why AI Agents Mess It Up:**
+**Why This Gets Inconsistent:**
 - Inconsistent formatting (fonts, colors, spacing)
 - Some have executive summaries, others don't
 - Different date formats

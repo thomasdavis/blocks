@@ -222,9 +222,9 @@ blocks:
         measures: [explanation_quality]
 ```
 
-## The Generated Blocks (AI-Maintained)
+## The Blocks (Written by Humans or AI)
 
-AI generates and maintains all 7 modules from the spec above:
+Humans or AI can write and maintain all 7 modules based on the spec above:
 
 ### 1. **Scorers** (5 modules)
 ```typescript title="src/blocks/skill_overlap_scorer.ts"
@@ -376,9 +376,9 @@ blocks:
 ### Why This Works
 
 1. **Single Source of Truth:** All matching rules in ONE file
-2. **AI Maintains Code:** Humans never touch scorer implementations
-3. **Fast Iteration:** Change spec → regenerate → validate → deploy
-4. **No Drift:** Validators catch when code doesn't match spec
+2. **Code is Flexible:** Humans or AI can write/edit implementations
+3. **Fast Iteration:** Change spec → regenerate or edit → validate → deploy
+4. **Drift Detection:** Validators catch when code doesn't match spec
 5. **Composable:** Each scorer is independent, aggregator combines them
 
 ## Who Writes What
@@ -386,9 +386,9 @@ blocks:
 | Component | Maintained By |
 |-----------|--------------|
 | `blocks.yml` | **Human** (business analyst, product manager, developer) |
-| `src/blocks/*.ts` | **AI** (Claude Code, Cursor, etc.) |
+| `src/blocks/*.ts` | **Human or AI** (whoever implements/modifies it) |
 | `src/index.ts` | **Human** (simple orchestration) |
-| Tests | **Mix** (humans write test cases, AI generates test implementations) |
+| Tests | **Mix** (humans write test cases, anyone generates implementations) |
 
 ## Integration with Rest of Codebase
 

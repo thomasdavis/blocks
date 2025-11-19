@@ -5,11 +5,11 @@ description: Build a validated resume theme in 5 minutes
 
 # Quick Start
 
-Learn how Blocks prevents common AI coding mistakes through a real example: building resume themes with proper accessibility and design.
+Learn how Blocks detects drift and helps maintain consistency through a real example: building resume themes with proper accessibility and design.
 
-## The Problem: AI Agents Suck at Visual Design
+## The Problem: Consistency Is Hard at Scale
 
-When AI coding agents (Claude Code, Cursor, ChatGPT) generate HTML/CSS, they commonly produce:
+When building many similar components (whether by humans or AI), common issues emerge:
 
 - ❌ **Text colors matching backgrounds** (completely unreadable)
 - ❌ **Poor color contrast** (fails WCAG accessibility standards)
@@ -17,13 +17,13 @@ When AI coding agents (Claude Code, Cursor, ChatGPT) generate HTML/CSS, they com
 - ❌ **Non-semantic HTML** (terrible for screen readers)
 - ❌ **Missing ARIA labels** (accessibility nightmare)
 
-**Blocks solves this** by validating code against explicit domain rules and catching these issues before they reach production.
+**Blocks helps** by detecting drift from your domain rules and providing specific, actionable feedback to help you maintain consistency.
 
 ## Real Example: JSON Resume Themes
 
 This example is from [`examples/json-resume-themes`](https://github.com/yourusername/blocks/tree/main/examples/json-resume-themes) in the repo.
 
-We'll build a resume theme that AI agents commonly mess up, then show how Blocks catches the mistakes.
+We'll build a resume theme and show how Blocks catches inconsistencies and drift from your domain rules.
 
 ### Step 1: Define Your Domain (NOT in a blocks/ folder!)
 
@@ -263,25 +263,41 @@ Running `blocks run theme.modern_professional`:
   ❌ Block "theme.modern_professional" has 3 warnings
 ```
 
-## How Claude Code Would Use This
+## Humans Can Write Code Too!
 
-When you're coding with **Claude Code** (or Cursor, Copilot, etc.), here's the workflow:
+**CRITICAL:** This example shows AI writing code, but **humans can freely edit any file**:
 
-### 1. AI Writes Code
+- ✅ You can manually edit `template.hbs`
+- ✅ You can manually edit `block.ts`
+- ✅ Blocks detects drift regardless of who wrote the code
+- ✅ Validation helps you decide: fix code or update spec
 
-You: "Create a modern resume theme with professional styling"
+**The workflow is the same:**
+1. Human or AI writes code
+2. Run `blocks run theme.modern_professional`
+3. See drift report
+4. Decide what to fix (code or spec)
+5. Re-validate until consistent
 
-Claude Code generates the theme files.
+## Example: Working with an AI Assistant
 
-### 2. AI Validates Immediately
+When you're coding with **Claude Code** (or Cursor, Copilot, etc.), here's how the workflow looks. **Note: This same workflow applies when humans write code!**
 
-**Claude Code reads `blocks.yml` first** (as instructed in CLAUDE.md), then after writing code, it runs:
+### 1. Someone Writes Code
+
+You or an AI: "Create a modern resume theme with professional styling"
+
+Code gets written (by human or AI agent).
+
+### 2. Run Validation
+
+After writing or modifying code, run validation:
 
 ```bash
 blocks run theme.modern_professional
 ```
 
-### 3. AI Sees Validation Errors
+### 3. Review Drift Report
 
 ```
 ⚠ [domain] Poor color contrast detected
@@ -289,16 +305,16 @@ blocks run theme.modern_professional
 → Contrast ratio: 1.4:1 (WCAG AA requires 4.5:1)
 ```
 
-### 4. AI Auto-Corrects
+### 4. Fix the Issue
 
-Claude Code reads the error, understands the domain rule, and fixes it:
+Read the error, understand the domain rule, and fix it (human or AI can do this):
 
 ```diff
 - color: #e0e0e0;
 + color: #1a1a1a; /* WCAG AA compliant */
 ```
 
-### 5. AI Re-Validates
+### 5. Re-Validate
 
 ```bash
 blocks run theme.modern_professional
@@ -308,7 +324,7 @@ blocks run theme.modern_professional
 ✅ Block "theme.modern_professional" passed all validations
 ```
 
-**This feedback loop happens automatically** while the AI is coding, catching mistakes before you even see them.
+**This feedback loop is the same for humans and AI** - iterative refinement guided by your domain spec, catching drift and helping maintain consistency.
 
 ## Output Validators: Future Vision
 

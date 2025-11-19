@@ -6,7 +6,7 @@ Blocks uses a **multi-layer validation system** to ensure code quality, domain c
 
 ## Philosophy
 
-**Blocks is fundamentally a development-time framework**, not a runtime validation system. The goal is to guide AI agents and developers to write correct code through semantic feedback loops, not to enforce constraints at runtime.
+**Blocks is fundamentally a development-time framework**, not a runtime validation system. The goal is to guide humans and AI agents (equal partners) to write correct code through semantic feedback loops and drift detection, not to enforce constraints at runtime.
 
 ### Key Principles
 
@@ -15,6 +15,7 @@ Blocks uses a **multi-layer validation system** to ensure code quality, domain c
 3. **Semantic alignment** - Ensure code expresses domain intent
 4. **Iterative refinement** - Provide feedback for continuous improvement
 5. **Trust validated code** - If source passes validation, trust its behavior
+6. **Drift detection** - Report when code diverges from spec, let humans decide
 
 ## Validator Types
 
@@ -429,6 +430,14 @@ validators:
 3. **Treat output as instructions** - Fix exactly what validators report
 4. **Iterate until green** - Don't stop at warnings
 5. **Learn from feedback** - Understand why issues are raised
+
+### For Human Developers
+
+1. **Read blocks.yml** - Understand domain before coding
+2. **Write code freely** - No restrictions on editing
+3. **Run validators** - `blocks run <name>`
+4. **Review drift** - Understand what changed
+5. **Decide resolution** - Fix code or update spec
 
 ## Future Directions
 

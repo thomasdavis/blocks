@@ -2,30 +2,29 @@
 
 This document explains how Claude Code (and other AI coding assistants) should work with Blocks.
 
-## Development Philosophy
-
-**CRITICAL:** Always use the latest versions of all dependencies. When updating packages, use:
-
-```bash
-pnpm up -L  # Update all to latest versions
-```
-
-We prioritize staying current with latest releases over version stability. This means:
-- ✅ Always use `pnpm up -L` when updating dependencies
-- ✅ Use latest versions of Next.js, React, Fumadocs, Tailwind, etc.
-- ✅ Embrace breaking changes and adapt code to new APIs
-- ✅ Remove deprecated patterns immediately
-- ❌ Don't pin to specific versions unless absolutely necessary
-- ❌ Don't use `^` or `~` with conservative intent - we want latest
-
 ## Overview
 
-Blocks is designed to guide agentic coding workflows by providing:
+Blocks provides a **negotiation layer** for human-AI collaboration by:
 
 - Explicit domain semantics
 - Multi-layer validation feedback
-- Iterative improvement loops
+- Drift detection and resolution
 - Spec evolution
+
+Both humans and AI agents write code freely. Blocks validates the result and reports drift, helping you decide whether to fix code or update the spec.
+
+## Core Philosophy: Humans and Agents Both Write Code
+
+**CRITICAL:** Blocks does NOT restrict who can edit module code.
+
+- ✅ Humans can write and modify any block
+- ✅ AI agents can write and modify any block
+- ✅ Blocks detects when either introduces drift
+- ✅ You decide: fix code or update spec
+
+**Not a restriction** - a recovery mechanism for consistency.
+**Not enforcing rules** - helping you reason about drift.
+**Not locking down code** - giving you a semantic compass.
 
 ## Core Workflow
 

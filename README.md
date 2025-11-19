@@ -2,7 +2,7 @@
 
 **Domain-driven validation and orchestration for agentic coding workflows**
 
-Blocks is a system for controlling AI code generation through explicit domain semantics, multi-layer validation, and evolutionary design.
+Blocks is a negotiation layer and semantic compass for human-AI collaboration, detecting drift between code and spec to help you maintain consistency through explicit domain semantics, multi-layer validation, and evolutionary design.
 
 ## Why Blocks?
 
@@ -12,8 +12,22 @@ Blocks provides:
 
 - **Domain modeling** (entities, signals, measures — like Cube.dev/Malloy for code)
 - **Multi-validator pipelines** (schema, shape, lint, domain, chain, shadow, scoring)
-- **Agent orchestration** (AI reads spec, writes code, validates, learns from feedback)
-- **Spec evolution** (detect domain drift, update spec or code)
+- **Human-AI collaboration** (anyone reads spec, writes code freely, validates, learns from feedback)
+- **Drift detection** (detect when code diverges from spec, decide: fix code or update spec)
+
+## The Workflow
+
+Blocks is not a restriction — it's a recovery mechanism for consistency:
+
+1. **Define domain** in `blocks.yml` (your source of truth)
+2. **Write code freely** - humans and AI agents both contribute without restrictions
+3. **Run validation** - Blocks detects semantic drift using LLM reasoning
+4. **Review drift report** - See new fields, missing outputs, constraint violations, naming inconsistencies
+5. **Decide what to fix** - Update code to match spec OR update spec to match code
+6. **Return to consistency** - System validates the alignment
+
+Not enforcing rules — helping you reason about drift.
+Not locking down code — giving you a semantic compass.
 
 ## Quick Start
 
@@ -153,26 +167,46 @@ Four validator types:
 
 See [Validators Architecture](./docs/validators-architecture.md) for complete details.
 
-### 🤖 Agentic Integration
+### 🤖 Human-AI Collaboration
 
-Works seamlessly with Claude Code, Cursor, and other AI coding tools:
+Works seamlessly with both human developers and AI coding tools (Claude Code, Cursor, etc.):
 
-1. Agent reads `blocks.yml`
-2. Agent writes code
-3. Agent runs `blocks run <name>`
-4. Agent interprets validator output
-5. Agent fixes issues and re-runs
+1. Anyone reads `blocks.yml` to understand the domain
+2. Anyone writes code (humans or AI agents)
+3. Run `blocks run <name>` for validation
+4. Review drift report with specific, actionable feedback
+5. Decide: fix code to match spec OR update spec to match code
+6. Re-run validation until consistent
 
-### 🔄 Spec Evolution
+**CRITICAL:** No restrictions on who can edit code. Both humans and AI can freely write and modify any block. Blocks detects drift regardless of authorship.
 
-Detects when code introduces new concepts:
+### 🔄 Drift Detection & Spec Evolution
 
+Blocks detects when code diverges from spec and helps you decide how to resolve it:
+
+**Drift scenarios detected:**
+- New fields not defined in spec
+- Missing outputs that should be there
+- Constraint violations
+- Inconsistent naming patterns
+- Blocks in code but not in spec
+- Blocks in spec but not in code
+
+**Example validation output:**
 ```
 ⚠ [domain] Undocumented output field: alerts_es
 → Suggestion: Add alerts_es to outputs in blocks.yml
+
+⚠ [domain] Block "user_profile_enricher" exists in code but not in spec
+→ Suggestion: Add to blocks.yml or remove implementation
+
+⚠ [domain] Output "score" violates measure constraint (value: 1.5, expected: 0-1)
+→ Suggestion: Fix calculation to return value between 0 and 1
 ```
 
-Agent can propose spec updates → User approves → Spec evolves with code.
+**You decide:** Fix code to match spec OR update spec to match code. Anyone (human or AI) can propose spec updates → Human approves → Spec evolves with code.
+
+**Not enforcement — negotiation.** Blocks doesn't prevent drift, it helps you reason about it and resolve it intentionally.
 
 ## Architecture
 

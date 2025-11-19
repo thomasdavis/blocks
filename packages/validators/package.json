@@ -1,5 +1,5 @@
 {
-  "name": "@blocks/validators",
+  "name": "@blocksai/validators",
   "version": "0.1.0",
   "description": "Core validator implementations for Blocks",
   "type": "module",
@@ -22,9 +22,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@blocks/schema": "workspace:*",
-    "@blocks/domain": "workspace:*",
-    "@blocks/ai": "workspace:*"
+    "@blocksai/schema": "workspace:*",
+    "@blocksai/domain": "workspace:*",
+    "@blocksai/ai": "workspace:*"
   },
   "devDependencies": {
     "@blocks/tsconfig": "workspace:*",

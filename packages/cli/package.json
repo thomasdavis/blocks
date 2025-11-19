@@ -1,5 +1,5 @@
 {
-  "name": "@blocks/cli",
+  "name": "@blocksai/cli",
   "version": "0.1.0",
   "description": "Command-line interface for Blocks",
   "type": "module",
@@ -25,10 +25,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@blocks/schema": "workspace:*",
-    "@blocks/domain": "workspace:*",
-    "@blocks/ai": "workspace:*",
-    "@blocks/validators": "workspace:*",
+    "@blocksai/schema": "workspace:*",
+    "@blocksai/domain": "workspace:*",
+    "@blocksai/ai": "workspace:*",
+    "@blocksai/validators": "workspace:*",
     "commander": "^12.1.0",
     "chalk": "^5.4.1",
     "ora": "^8.1.1"

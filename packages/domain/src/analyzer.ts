@@ -1,4 +1,4 @@
-import type { BlockDefinition } from "@blocks/schema";
+import type { BlockDefinition } from "@blocksai/schema";
 import { DomainRegistry } from "./registry.js";
 
 export interface DomainIssue {

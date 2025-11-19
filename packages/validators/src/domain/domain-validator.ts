@@ -1,6 +1,6 @@
-import type { BlockDefinition } from "@blocks/schema";
-import { DomainAnalyzer, DomainRegistry } from "@blocks/domain";
-import { AIProvider } from "@blocks/ai";
+import type { BlockDefinition } from "@blocksai/schema";
+import { DomainAnalyzer, DomainRegistry } from "@blocksai/domain";
+import { AIProvider } from "@blocksai/ai";
 import type { Validator, ValidatorContext, ValidationResult, ValidationIssue } from "../types.js";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";

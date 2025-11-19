@@ -1,5 +1,5 @@
 /**
- * @blocks/domain
+ * @blocksai/domain
  * Domain modeling and semantic validation engine
  */
 

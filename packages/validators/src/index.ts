@@ -1,5 +1,5 @@
 /**
- * @blocks/validators
+ * @blocksai/validators
  * Core validator implementations
  */
 

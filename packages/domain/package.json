@@ -1,5 +1,5 @@
 {
-  "name": "@blocks/domain",
+  "name": "@blocksai/domain",
   "version": "0.1.0",
   "description": "Domain modeling and semantic validation engine for Blocks",
   "type": "module",
@@ -22,7 +22,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@blocks/schema": "workspace:*"
+    "@blocksai/schema": "workspace:*"
   },
   "devDependencies": {
     "@blocks/tsconfig": "workspace:*",

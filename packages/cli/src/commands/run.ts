@@ -3,9 +3,9 @@ import chalk from "chalk";
 import ora from "ora";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
-import { parseBlocksConfig } from "@blocks/schema";
-import { AIProvider } from "@blocks/ai";
-import { IOSchemaValidator, ExportsShapeValidator, DomainValidator } from "@blocks/validators";
+import { parseBlocksConfig } from "@blocksai/schema";
+import { AIProvider } from "@blocksai/ai";
+import { IOSchemaValidator, ExportsShapeValidator, DomainValidator } from "@blocksai/validators";
 
 export const runCommand = new Command("run")
   .description("Run validators against a block")

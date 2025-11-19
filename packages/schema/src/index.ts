@@ -1,5 +1,5 @@
 /**
- * @blocks/schema
+ * @blocksai/schema
  * Core schema definitions and blocks.yml parser
  */
 

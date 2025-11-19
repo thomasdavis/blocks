@@ -1,4 +1,4 @@
-import type { BlockDefinition } from "@blocks/schema";
+import type { BlockDefinition } from "@blocksai/schema";
 import type { Validator, ValidatorContext, ValidationResult, ValidationIssue } from "../types.js";
 
 /**

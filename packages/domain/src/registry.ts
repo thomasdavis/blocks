@@ -1,4 +1,4 @@
-import type { BlocksConfig, BlockDefinition } from "@blocks/schema";
+import type { BlocksConfig, BlockDefinition } from "@blocksai/schema";
 
 /**
  * Domain Registry - Central registry for domain entities, signals, and measures

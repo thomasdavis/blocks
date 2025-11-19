@@ -35,10 +35,10 @@ importers:
       '@ai-sdk/openai':
         specifier: latest
         version: 2.0.68(zod@3.25.76)
-      '@blocks/domain':
+      '@blocksai/domain':
         specifier: workspace:*
         version: link:../domain
-      '@blocks/schema':
+      '@blocksai/schema':
         specifier: workspace:*
         version: link:../schema
       ai:
@@ -63,16 +63,16 @@ importers:
 
   packages/cli:
     dependencies:
-      '@blocks/ai':
+      '@blocksai/ai':
         specifier: workspace:*
         version: link:../ai
-      '@blocks/domain':
+      '@blocksai/domain':
         specifier: workspace:*
         version: link:../domain
-      '@blocks/schema':
+      '@blocksai/schema':
         specifier: workspace:*
         version: link:../schema
-      '@blocks/validators':
+      '@blocksai/validators':
         specifier: workspace:*
         version: link:../validators
       chalk:
@@ -103,7 +103,7 @@ importers:
 
   packages/domain:
     dependencies:
-      '@blocks/schema':
+      '@blocksai/schema':
         specifier: workspace:*
         version: link:../schema
     devDependencies:
@@ -146,13 +146,13 @@ importers:
 
   packages/validators:
     dependencies:
-      '@blocks/ai':
+      '@blocksai/ai':
         specifier: workspace:*
         version: link:../ai
-      '@blocks/domain':
+      '@blocksai/domain':
         specifier: workspace:*
         version: link:../domain
-      '@blocks/schema':
+      '@blocksai/schema':
         specifier: workspace:*
         version: link:../schema
     devDependencies:

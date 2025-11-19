@@ -1,5 +1,5 @@
 {
-  "name": "@blocks/ai",
+  "name": "@blocksai/ai",
   "version": "0.1.0",
   "description": "AI-powered validation using Vercel AI SDK v6",
   "type": "module",
@@ -22,8 +22,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@blocks/schema": "workspace:*",
-    "@blocks/domain": "workspace:*",
+    "@blocksai/schema": "workspace:*",
+    "@blocksai/domain": "workspace:*",
     "@ai-sdk/openai": "latest",
     "ai": "latest",
     "zod": "^3.24.1"

@@ -52,7 +52,6 @@ Blocks can extract or calculate signals:
 ```yaml
 blocks:
   civic_mindedness:
-    type: utility
     description: "Extract civic-mindedness signal from candidate data"
     inputs:
       - name: candidate
@@ -178,7 +177,7 @@ domain:
 
 blocks:
   technical_strength:
-    type: utility
+    description: "Calculate technical strength score"
     inputs:
       - name: candidate
         type: entity.candidate
@@ -187,7 +186,7 @@ blocks:
         measures: [score_0_1]
 
   culture_fit:
-    type: utility
+    description: "Calculate culture fit score"
     inputs:
       - name: candidate
         type: entity.candidate

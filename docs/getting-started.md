@@ -73,7 +73,6 @@ Add block definitions to `blocks.yml`:
 ```yaml
 blocks:
   culture_fit:
-    type: utility
     description: "Calculate culture fit score"
     inputs:
       - name: candidate

@@ -31,14 +31,6 @@ export const DomainSchema = z.object({
 });
 
 // ——————————————————————————————————————————
-// Templates
-// ——————————————————————————————————————————
-
-export const TemplateSchema = z.object({
-  required_sections: z.array(z.string()),
-});
-
-// ——————————————————————————————————————————
 // Block Definitions
 // ——————————————————————————————————————————
 
@@ -61,14 +53,11 @@ export const DomainRuleSchema = z.object({
 });
 
 export const BlockDefinitionSchema = z.object({
-  type: z.enum(["utility", "template", "validator", "custom"]),
   description: z.string(),
   path: z.string().optional(), // Custom path to block implementation
   inputs: z.array(BlockInputSchema).optional(),
   outputs: z.array(BlockOutputSchema).optional(),
   domain_rules: z.array(DomainRuleSchema).optional(),
-  template_engine: z.string().optional(),
-  sections: z.array(z.string()).optional(),
   test_data: z.string().optional(), // Path to test data file for validation
   test_samples: z.array(z.any()).optional(), // Inline test data samples
 });
@@ -151,7 +140,6 @@ export const BlocksConfigSchema = z.object({
   project: ProjectSchema,
   philosophy: z.array(z.string()).optional(),
   domain: DomainSchema.optional(),
-  templates: TemplateSchema.optional(),
   blocks: z.record(z.string(), BlockDefinitionSchema),
   validators: ValidatorsSchema.optional(),
   pipeline: PipelineSchema.optional(),
@@ -168,8 +156,6 @@ export type DomainEntity = z.infer<typeof DomainEntitySchema>;
 export type DomainSignal = z.infer<typeof DomainSignalSchema>;
 export type DomainMeasure = z.infer<typeof DomainMeasureSchema>;
 export type Domain = z.infer<typeof DomainSchema>;
-
-export type Template = z.infer<typeof TemplateSchema>;
 
 export type BlockInput = z.infer<typeof BlockInputSchema>;
 export type BlockOutput = z.infer<typeof BlockOutputSchema>;

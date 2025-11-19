@@ -28,7 +28,6 @@ domain:
 
 blocks:
   example_block:
-    type: utility
     description: "An example block"
     inputs:
       - name: user

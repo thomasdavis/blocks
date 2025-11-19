@@ -134,25 +134,13 @@ domain:
 
 Reference measures in block outputs using `measures: [score_0_1]`.
 
-## Templates
-
-Configuration for template blocks.
-
-```yaml
-templates:
-  required_sections: [summary, experience, education, skills]
-```
-
-Template blocks can specify which sections are required.
-
 ## Blocks
 
-Define individual blocks.
+Blocks are functions that live in folders with whatever files they need.
 
 ```yaml
 blocks:
   user_engagement_score:
-    type: utility
     description: "Calculate user engagement score"
     path: "lib/engagement"  # Optional custom path
     inputs:
@@ -176,16 +164,12 @@ blocks:
         activity_days: 30
 ```
 
-### Block Types
+### What Are Blocks?
 
-- **utility** - Pure function, deterministic transformation
-- **template** - Renders output (HTML, JSON, etc.)
-- **validator** - Custom validation logic
-- **custom** - User-defined type
+Blocks are just functions. When you have many functions with the same input/output signature but different implementations (like 50+ product page generators, or 100+ data transformers), blocks.yml defines the pattern so AI agents can generate consistent implementations.
 
 ### Block Fields
 
-- **type** (required) - Block type (utility, template, validator, custom)
 - **description** (required) - What this block does
 - **path** (optional) - Custom location (default: `{discover.root}/{block_name}`)
 - **inputs** (optional) - Array of input definitions
@@ -193,8 +177,6 @@ blocks:
 - **domain_rules** (optional) - Custom domain validation rules
 - **test_data** (optional) - Path to external test data file
 - **test_samples** (optional) - Inline test data samples
-- **sections** (optional) - Required sections (for templates)
-- **template_engine** (optional) - Template engine (hbs, ejs, etc.)
 
 ### Input/Output Definition
 

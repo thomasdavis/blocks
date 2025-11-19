@@ -139,7 +139,6 @@ outputs:
 ```yaml
 blocks:
   get_weather_and_translate:
-    type: utility
     description: "Fetch weather & output Spanish description."
     inputs:
       - name: location
@@ -603,7 +602,7 @@ Users can organize their projects however they want using the `path` field in bl
 ```yaml
 blocks:
   my_block:
-    type: utility
+    description: "My block description"
     # No path specified
 ```
 
@@ -614,7 +613,7 @@ Blocks looks in: `blocks/my_block/` (or whatever `targets.discover.root` is set 
 ```yaml
 blocks:
   theme.modern_professional:
-    type: template
+    description: "Modern professional resume theme"
     path: "themes/modern-professional"  # Custom location!
 ```
 

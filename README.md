@@ -59,7 +59,6 @@ domain:
 
 blocks:
   user_engagement_score:
-    type: utility
     description: "Calculate user engagement score"
     inputs:
       - name: user
@@ -293,17 +292,13 @@ domain:
   signals: { [name]: { description, extraction_hint? } }
   measures: { [name]: { constraints: string[] } }
 
-templates:
-  required_sections: string[]
-
 blocks:
   [name]:
-    type: "utility" | "template" | "validator" | "custom"
     description: string
     inputs?: Array<{ name, type, optional? }>
     outputs?: Array<{ name, type, measures?, constraints? }>
     domain_rules?: Array<{ id, description }>
-    sections?: string[]  # for templates
+    path?: string  # custom path to block folder
 
 validators:
   schema?: Validator[]

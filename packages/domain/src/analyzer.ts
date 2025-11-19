@@ -60,20 +60,7 @@ export class DomainAnalyzer {
       }
     }
 
-    // Check template sections
-    if (block.type === "template" && block.sections) {
-      const requiredSections = this.registry.getRequiredTemplateSections();
-      const missingSections = requiredSections.filter((req) => !block.sections?.includes(req));
-
-      if (missingSections.length > 0) {
-        issues.push({
-          type: "warning",
-          code: "MISSING_TEMPLATE_SECTIONS",
-          message: `Template is missing required sections: ${missingSections.join(", ")}`,
-          suggestion: `Add sections: ${missingSections.join(", ")}`,
-        });
-      }
-    }
+    // Template sections check removed - blocks are just functions
 
     return issues;
   }

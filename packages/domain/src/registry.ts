@@ -88,10 +88,10 @@ export class DomainRegistry {
   }
 
   /**
-   * Get required template sections
+   * Get required template sections (removed - blocks are just functions)
    */
   getRequiredTemplateSections(): string[] {
-    return this.config.templates?.required_sections ?? [];
+    return [];
   }
 
   /**

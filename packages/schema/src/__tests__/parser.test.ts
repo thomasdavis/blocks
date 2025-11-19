@@ -8,7 +8,6 @@ project:
 
 blocks:
   test_block:
-    type: utility
     description: "Test block"
 `;
 
@@ -18,7 +17,7 @@ describe("parseBlocksConfig", () => {
     expect(config.project.name).toBe("Test Project");
     expect(config.project.domain).toBe("test.domain");
     expect(config.blocks.test_block).toBeDefined();
-    expect(config.blocks.test_block.type).toBe("utility");
+    expect(config.blocks.test_block.description).toBe("Test block");
   });
 
   it("should throw on invalid YAML", () => {
@@ -29,7 +28,7 @@ describe("parseBlocksConfig", () => {
     const invalidYaml = `
 blocks:
   test_block:
-    type: utility
+    path: "blocks/test"
 `;
     expect(() => parseBlocksConfig(invalidYaml)).toThrow();
   });
@@ -44,7 +43,6 @@ describe("validateBlocksConfig", () => {
       },
       blocks: {
         test: {
-          type: "utility",
           description: "Test",
         },
       },
@@ -62,7 +60,6 @@ describe("isValidBlocksConfig", () => {
       },
       blocks: {
         test: {
-          type: "utility",
           description: "Test",
         },
       },

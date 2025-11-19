@@ -35,7 +35,7 @@ Reference entities in block inputs using `entity.<name>`:
 ```yaml title="blocks.yml"
 blocks:
   calculate_engagement:
-    type: utility
+    description: "Calculate user engagement score"
     inputs:
       - name: user
         type: entity.user  # References the user entity
@@ -74,7 +74,7 @@ Blocks can accept multiple entities as inputs:
 ```yaml
 blocks:
   match_candidate_to_job:
-    type: utility
+    description: "Calculate candidate-job match score"
     inputs:
       - name: candidate
         type: entity.candidate
@@ -134,7 +134,7 @@ domain:
 
 blocks:
   theme.modern_professional:
-    type: template
+    description: "Render resume with modern professional theme"
     inputs:
       - name: resume
         type: entity.resume
@@ -143,7 +143,7 @@ blocks:
         measures: [semantic_html, valid_html]
 
   calculate_experience_years:
-    type: utility
+    description: "Calculate total years of work experience"
     inputs:
       - name: work_history
         type: array<entity.work_experience>

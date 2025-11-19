@@ -1,11 +1,8 @@
-import { defineDocs, defineConfig } from 'fumadocs-mdx/config';
-import type { InferMetaType, InferPageType } from 'fumadocs-core/source';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 
-const result = defineDocs({
+// @ts-ignore - Zod portability issue in monorepo on Vercel, but not used at runtime
+export const { docs, meta } = defineDocs({
   dir: 'content/docs',
 });
-
-export const docs: InferPageType<typeof result.docs> = result.docs;
-export const meta: InferMetaType<typeof result.meta> = result.meta;
 
 export default defineConfig();

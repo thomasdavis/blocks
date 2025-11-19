@@ -205,6 +205,56 @@ Validate all blocks.
 blocks run --all
 ```
 
+## API Key Configuration
+
+Blocks uses OpenAI for AI-powered domain validation. To enable full validation features, you need to configure your OpenAI API key.
+
+### Option 1: Environment Variable (Recommended)
+
+Set the `OPENAI_API_KEY` environment variable in your shell:
+
+```bash
+export OPENAI_API_KEY="sk-your-key-here"
+```
+
+To make this permanent, add it to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.).
+
+### Option 2: .env File
+
+Create a `.env` file in your project directory:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and add your API key:
+
+```
+OPENAI_API_KEY=sk-your-key-here
+```
+
+The CLI will automatically load environment variables from `.env` when running validations.
+
+### Getting an API Key
+
+1. Go to [OpenAI Platform](https://platform.openai.com/api-keys)
+2. Sign in or create an account
+3. Click "Create new secret key"
+4. Copy the key and save it securely
+
+### What Happens Without an API Key?
+
+Without an API key, domain validation will be skipped:
+
+```
+📦 Validating: my_block
+  ✓ schema ok
+  ✓ shape ok
+  ⚠ [domain] AI validation failed: OpenAI API key is missing
+```
+
+Schema and shape validation will still work, but you won't get AI-powered semantic feedback.
+
 ## Configuration
 
 `blocks.yml` structure:

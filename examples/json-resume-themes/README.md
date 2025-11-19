@@ -126,12 +126,43 @@ When you run `blocks run theme.modern_professional`, you'll see:
 
 ### Running with AI Validation
 
-To enable full domain validation, set your OpenAI API key:
+To enable full domain validation, you need to configure your OpenAI API key.
+
+#### Option 1: Environment Variable
 
 ```bash
-export OPENAI_API_KEY="sk-..."
+export OPENAI_API_KEY="sk-your-key-here"
 blocks run theme.modern_professional
 ```
+
+#### Option 2: .env File (Recommended for Development)
+
+Create a `.env` file in this directory:
+
+```bash
+cp ../../.env.example .env
+```
+
+Edit `.env` and add your OpenAI API key:
+
+```
+OPENAI_API_KEY=sk-your-key-here
+```
+
+Then run validation normally:
+
+```bash
+npm run validate
+```
+
+#### Getting an API Key
+
+1. Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+2. Sign in or create an account
+3. Click "Create new secret key"
+4. Copy the key and save it in your `.env` file
+
+#### What the AI Validator Checks
 
 The AI validator will analyze:
 - Whether semantic HTML tags are used properly
@@ -139,6 +170,19 @@ The AI validator will analyze:
 - Whether the design conveys professionalism
 - If responsive design is implemented
 - Overall alignment with domain philosophy
+
+Example output with AI validation enabled:
+
+```
+📦 Validating: theme.modern_professional
+  ✓ schema ok
+  ✓ shape ok
+  ✗ [domain] The implementation does not specifically ensure the use of semantic HTML tags...
+  ✗ [domain] There is no validation or check implemented to ensure that ARIA labels...
+  ⚠ [domain] The method signature could benefit from more explicit documentation...
+```
+
+The validator provides specific, actionable feedback on how to improve your implementation.
 
 ## Theme Implementation
 

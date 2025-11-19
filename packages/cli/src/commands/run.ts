@@ -3,9 +3,14 @@ import chalk from "chalk";
 import ora from "ora";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
+import { config as loadEnv } from "dotenv";
 import { parseBlocksConfig } from "@blocksai/schema";
 import { AIProvider } from "@blocksai/ai";
 import { IOSchemaValidator, ExportsShapeValidator, DomainValidator } from "@blocksai/validators";
+
+// Load environment variables from .env file in current directory
+// Users can also set OPENAI_API_KEY in their shell environment
+loadEnv();
 
 export const runCommand = new Command("run")
   .description("Run validators against a block")

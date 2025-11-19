@@ -1,0 +1,116 @@
+---
+title: Core Concepts
+description: Understanding domain modeling in Blocks
+---
+
+# Core Concepts
+
+Blocks treats domain concepts as first-class, executable artifacts — inspired by Cube.dev, Malloy, and PDDL.
+
+## The Three Pillars
+
+### Entities
+
+**Entities** are the "things" in your domain.
+
+```yaml
+domain:
+  entities:
+    user:
+      fields: [id, name, email, created_at]
+    resume:
+      fields: [basics, work, education, skills]
+```
+
+Reference entities using `entity.<name>`:
+
+```yaml
+blocks:
+  my_block:
+    inputs:
+      - name: user
+        type: entity.user
+```
+
+### Signals
+
+**Signals** are domain-specific concepts to extract or calculate.
+
+```yaml
+domain:
+  signals:
+    engagement:
+      description: "How engaged is the user?"
+      extraction_hint: "Based on activity frequency and recency"
+    readability:
+      description: "Clear visual hierarchy and typography"
+```
+
+Signals guide AI validation and give semantic meaning to data.
+
+### Measures
+
+**Measures** are constraints on output values.
+
+```yaml
+domain:
+  measures:
+    score_0_1:
+      constraints:
+        - "Value must be between 0 and 1."
+        - "Higher values indicate stronger signal."
+    semantic_html:
+      constraints:
+        - "Use semantic tags (header, main, section)"
+        - "Proper heading hierarchy (h1 → h2 → h3)"
+```
+
+Reference measures in outputs:
+
+```yaml
+blocks:
+  my_facet:
+    outputs:
+      - name: score
+        measures: [score_0_1]
+```
+
+## Why Domain Modeling Matters
+
+**Without domain modeling:**
+- AI agents hallucinate structures
+- Conventions drift over time
+- Semantic meaning is lost in code
+- No consistency across blocks
+
+**With domain modeling:**
+- ✅ Explicit semantics
+- ✅ Enforced constraints
+- ✅ Drift detection
+- ✅ Evolutionary design
+- ✅ AI agents stay aligned
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Entities"
+    description="Learn about domain entities in depth"
+    href="/docs/core-concepts/entities"
+  />
+  <Card
+    title="Signals"
+    description="Understand domain signals"
+    href="/docs/core-concepts/signals"
+  />
+  <Card
+    title="Measures"
+    description="Define output constraints"
+    href="/docs/core-concepts/measures"
+  />
+  <Card
+    title="Philosophy"
+    description="Guide development with design principles"
+    href="/docs/core-concepts/philosophy"
+  />
+</Cards>

@@ -6,6 +6,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "docs:dev": "pnpm --filter @blocks/docs dev",
+    "docs:build": "pnpm --filter @blocks/docs build",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",

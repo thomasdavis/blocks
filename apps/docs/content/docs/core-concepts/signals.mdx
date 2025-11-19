@@ -1,0 +1,244 @@
+---
+title: Signals
+description: Extract domain-specific concepts from your data
+---
+
+# Signals
+
+Signals are **domain-specific concepts** that you want to extract or calculate from your data.
+
+## What Are Signals?
+
+Signals represent abstract domain concepts that have meaning in your business logic:
+
+- **Engagement** - How active is a user?
+- **Culture Fit** - Does a candidate align with company values?
+- **Readability** - Is this text easy to understand?
+- **Professionalism** - Does this output meet business standards?
+
+Signals are **not** simple data fields — they're higher-level concepts that require interpretation.
+
+## Defining Signals
+
+Define signals in `blocks.yml`:
+
+```yaml title="blocks.yml"
+domain:
+  signals:
+    engagement:
+      description: "How engaged is the user?"
+      extraction_hint: "Based on activity frequency and recency"
+
+    civic_mindedness:
+      description: "How community-oriented is the candidate?"
+      extraction_hint: "Look for volunteer work, activism, community roles"
+
+    readability:
+      description: "Clear visual hierarchy and typography"
+```
+
+Each signal has:
+- **description** - What this signal represents
+- **extraction_hint** (optional) - Guide for how to calculate/extract it
+
+## Using Signals
+
+Signals guide AI validators and document domain intent.
+
+### In Facet Blocks
+
+Facets are blocks that extract signals:
+
+```yaml
+blocks:
+  facet.civic_mindedness:
+    type: facet
+    description: "Extract civic-mindedness signal from candidate data"
+    inputs:
+      - name: candidate
+        type: entity.candidate
+    outputs:
+      - name: civic_score
+        measures: [score_0_1]
+```
+
+The block name `facet.civic_mindedness` maps to the `civic_mindedness` signal.
+
+### In Domain Rules
+
+Reference signals in domain rules:
+
+```yaml
+blocks:
+  facet.civic_mindedness:
+    domain_rules:
+      - id: use_volunteer_data
+        description: "Civic signal must analyze volunteer work and community involvement"
+```
+
+The domain validator will check that your implementation actually extracts the intended signal.
+
+## Signal Extraction Hints
+
+Extraction hints tell AI validators **how** to recognize proper signal extraction:
+
+```yaml
+domain:
+  signals:
+    culture_fit:
+      description: "Behavioral and values alignment"
+      extraction_hint: "Compare candidate values with job culture requirements. Consider: work style, communication preferences, team dynamics."
+```
+
+When validating, the AI uses these hints to verify your code implements the signal correctly.
+
+## Signals vs Measures
+
+**Signals** = What you're trying to find
+**Measures** = Constraints on how you express it
+
+Example:
+
+```yaml
+domain:
+  signals:
+    engagement:
+      description: "User activity level"
+      extraction_hint: "Recent activity frequency"
+
+  measures:
+    score_0_1:
+      constraints:
+        - "Value between 0 and 1"
+
+blocks:
+  calculate_engagement:
+    outputs:
+      - name: engagement_score
+        measures: [score_0_1]  # HOW it's expressed
+```
+
+The signal (`engagement`) defines **what** you're calculating.
+The measure (`score_0_1`) defines **how** it's represented.
+
+## Validation
+
+The domain validator checks:
+- ✅ Signal is extracted using appropriate data
+- ✅ Extraction follows the hint guidance
+- ✅ Code expresses signal intent clearly
+- ✅ Output actually represents the signal
+
+### Example Validation
+
+```typescript title="blocks/facet/civic_mindedness/block.ts"
+// ❌ Bad: Doesn't actually extract civic-mindedness
+export function civicMindedness(candidate: Candidate) {
+  return { score: Math.random() };  // Random! Not civic at all
+}
+```
+
+Validator output:
+```
+⚠ [domain] Implementation does not extract civic_mindedness signal
+→ Expected: Analysis of volunteer work, community involvement
+→ Found: Random number generation
+```
+
+```typescript title="blocks/facet/civic_mindedness/block.ts"
+// ✅ Good: Actually extracts the signal
+export function civicMindedness(candidate: Candidate) {
+  const volunteerScore = candidate.volunteer_roles?.length || 0;
+  const communityScore = candidate.community_involvement ? 1 : 0;
+  const activismScore = candidate.activism_history?.length || 0;
+
+  const totalSignals = volunteerScore + communityScore + activismScore;
+  const score = Math.min(totalSignals / 5, 1.0);
+
+  return { score };
+}
+```
+
+## Example: Talent Matching Domain
+
+```yaml
+domain:
+  signals:
+    technical_strength:
+      description: "Candidate's technical skill level"
+      extraction_hint: "Evaluate: years of experience, project complexity, technologies mastered"
+
+    culture_fit:
+      description: "Alignment with company values and work style"
+      extraction_hint: "Compare: work preferences, communication style, team dynamics"
+
+    growth_potential:
+      description: "Likelihood of skill development"
+      extraction_hint: "Consider: learning history, adaptability, curiosity indicators"
+
+blocks:
+  facet.technical_strength:
+    type: facet
+    inputs:
+      - name: candidate
+        type: entity.candidate
+    outputs:
+      - name: strength_score
+        measures: [score_0_1]
+
+  facet.culture_fit:
+    type: facet
+    inputs:
+      - name: candidate
+        type: entity.candidate
+      - name: job
+        type: entity.job
+    outputs:
+      - name: fit_score
+        measures: [score_0_1]
+```
+
+## Best Practices
+
+### DO:
+
+- ✅ Define signals that represent real domain concepts
+- ✅ Write clear, specific extraction hints
+- ✅ Use descriptive signal names
+- ✅ Document why the signal matters to your domain
+
+### DON'T:
+
+- ❌ Create signals for simple data fields (`user_name`, `email_address`)
+- ❌ Make signals too vague (`quality`, `score`)
+- ❌ Duplicate signals across domains without reason
+- ❌ Skip extraction hints for complex signals
+
+## Comparison to Other Systems
+
+| System | Concept | Blocks Equivalent |
+|--------|---------|-------------------|
+| Cube.dev | Measures | Signals (similar concept) |
+| Malloy | Calculations | Signals |
+| Feature Engineering | Features | Signals |
+| Domain-Driven Design | Value Objects | Signals |
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Measures"
+    description="Define constraints on signal outputs"
+    href="/docs/core-concepts/measures"
+  />
+  <Card
+    title="Blocks"
+    description="Create facets that extract signals"
+    href="/docs/core-concepts/blocks"
+  />
+  <Card
+    title="Validation"
+    description="How signals are validated"
+    href="/docs/validation/domain"
+  />
+</Cards>

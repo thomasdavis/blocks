@@ -1,0 +1,242 @@
+---
+title: Quick Start
+description: Create your first block in 5 minutes
+---
+
+# Quick Start
+
+Learn how to create and validate your first block.
+
+## Step 1: Define Your Domain
+
+Edit your `blocks.yml` file to define domain concepts:
+
+```yaml title="blocks.yml"
+project:
+  name: "my-project"
+  domain: "myproject.general"
+
+philosophy:
+  - "Blocks must be small, composable, deterministic."
+
+domain:
+  entities:
+    user:
+      fields: [id, name, email, created_at]
+
+  signals:
+    engagement:
+      description: "How engaged is the user?"
+      extraction_hint: "Based on activity frequency and recency"
+
+  measures:
+    score_0_1:
+      constraints:
+        - "Value must be between 0 and 1."
+        - "Higher values indicate stronger signal."
+
+blocks:
+  user_engagement_score:
+    type: facet
+    description: "Calculate user engagement score from activity patterns"
+    inputs:
+      - name: user
+        type: entity.user
+      - name: activity_days
+        type: number
+        optional: false
+    outputs:
+      - name: score
+        type: number
+        measures: [score_0_1]
+      - name: level
+        type: string
+```
+
+## Step 2: Create Block Directory
+
+Create a directory for your block:
+
+```bash
+mkdir -p blocks/user_engagement_score
+```
+
+<Callout type="info">
+  You can organize blocks anywhere in your project using the `path` field in `blocks.yml`. The default location is `blocks/<block-name>/`.
+</Callout>
+
+## Step 3: Implement the Block
+
+Create `blocks/user_engagement_score/block.ts`:
+
+```typescript title="blocks/user_engagement_score/block.ts"
+export async function userEngagementScore(params: {
+  user: { id: string; name: string; email: string; created_at: string };
+  activity_days: number;
+}) {
+  const { user, activity_days } = params;
+
+  // Calculate engagement score (0-1)
+  // More recent activity = higher score
+  const accountAgeDays = Math.floor(
+    (Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  const rawScore = activity_days / Math.max(accountAgeDays, 1);
+  const score = Math.min(rawScore, 1.0);
+
+  // Categorize engagement level
+  let level: string;
+  if (score >= 0.7) level = "high";
+  else if (score >= 0.3) level = "medium";
+  else level = "low";
+
+  return {
+    score,
+    level,
+  };
+}
+```
+
+Create `blocks/user_engagement_score/index.ts`:
+
+```typescript title="blocks/user_engagement_score/index.ts"
+export { userEngagementScore } from "./block.js";
+```
+
+## Step 4: Validate Your Block
+
+Run the Blocks validator:
+
+```bash
+pnpm blocks run user_engagement_score
+```
+
+You should see output like this:
+
+```
+🧱 Blocks Validator
+
+📦 Validating: user_engagement_score
+
+  ✓ schema ok
+  ✓ shape ok
+  ✓ domain ok
+
+  ✅ Block "user_engagement_score" passed all validations
+```
+
+## Understanding the Validation
+
+Let's break down what each validator checked:
+
+### Schema Validator
+
+- ✅ Inputs match the definition in `blocks.yml`
+- ✅ Outputs match the definition
+- ✅ Types are correct
+
+### Shape Validator
+
+- ✅ `block.ts` file exists
+- ✅ `index.ts` file exists
+- ✅ Required exports are present
+
+### Domain Validator
+
+- ✅ Code expresses domain intent clearly
+- ✅ Uses specified entities (`entity.user`)
+- ✅ Outputs respect measures (`score_0_1` constraint)
+- ✅ No undocumented concepts introduced
+
+## What If Validation Fails?
+
+If you introduce an error, Blocks will tell you exactly what's wrong:
+
+```typescript title="blocks/user_engagement_score/block.ts"
+export async function userEngagementScore(params: any) {
+  return {
+    score: 2.5,  // ❌ Violates score_0_1 measure!
+    level: "high",
+  };
+}
+```
+
+Running validation:
+
+```bash
+pnpm blocks run user_engagement_score
+```
+
+Output:
+
+```
+🧱 Blocks Validator
+
+📦 Validating: user_engagement_score
+
+  ✓ schema ok
+  ✓ shape ok
+
+  ⚠ [domain] Output score violates measure score_0_1
+  → Constraint: "Value must be between 0 and 1."
+  → Found: 2.5
+  → Fix: Ensure score is clamped to [0, 1] range
+
+  ❌ Block "user_engagement_score" has warnings
+```
+
+Fix the issue and re-run validation until it passes.
+
+## Using Test Data
+
+You can add test data to your `blocks.yml` for more comprehensive validation:
+
+```yaml title="blocks.yml"
+blocks:
+  user_engagement_score:
+    type: facet
+    description: "Calculate user engagement score from activity patterns"
+    # ... inputs/outputs ...
+    test_samples:
+      - user: { id: "1", name: "Alice", email: "alice@example.com", created_at: "2024-01-01" }
+        activity_days: 30
+      - user: { id: "2", name: "Bob", email: "bob@example.com", created_at: "2023-01-01" }
+        activity_days: 5
+```
+
+Or reference an external file:
+
+```yaml title="blocks.yml"
+blocks:
+  user_engagement_score:
+    # ... other config ...
+    test_data: "test-data/user-engagement-samples.json"
+```
+
+## Next Steps
+
+Congratulations! You've created and validated your first block.
+
+<Cards>
+  <Card
+    title="Core Concepts"
+    description="Understand entities, signals, and measures"
+    href="/docs/core-concepts"
+  />
+  <Card
+    title="Validation Architecture"
+    description="Learn how multi-layer validation works"
+    href="/docs/validation/architecture"
+  />
+  <Card
+    title="CLI Reference"
+    description="Explore all CLI commands"
+    href="/docs/cli"
+  />
+  <Card
+    title="Examples"
+    description="See more complex real-world examples"
+    href="/docs/examples"
+  />
+</Cards>

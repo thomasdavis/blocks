@@ -1,0 +1,201 @@
+---
+title: Entities
+description: Define the core data types in your domain
+---
+
+# Entities
+
+Entities are the "things" in your domain — the core data types that blocks operate on.
+
+## Defining Entities
+
+Define entities in the `domain.entities` section of `blocks.yml`:
+
+```yaml title="blocks.yml"
+domain:
+  entities:
+    user:
+      fields: [id, name, email, created_at, updated_at]
+
+    resume:
+      fields: [basics, work, education, skills, languages]
+
+    location:
+      fields: [city, region, country_code]
+```
+
+Each entity has:
+- **name** - Identifier (e.g., `user`, `resume`)
+- **fields** - Array of field names that belong to this entity
+
+## Using Entities in Blocks
+
+Reference entities in block inputs using `entity.<name>`:
+
+```yaml title="blocks.yml"
+blocks:
+  calculate_engagement:
+    type: facet
+    inputs:
+      - name: user
+        type: entity.user  # References the user entity
+```
+
+The validator will check that your implementation accepts data matching the entity structure.
+
+## Entity Structure
+
+Entities don't define field *types* — they define field *names*. This keeps the schema flexible while maintaining semantic meaning.
+
+**Why?**
+
+Because Blocks is about **domain semantics**, not runtime types. The entity tells validators "this is a user" — not the exact TypeScript type.
+
+For TypeScript types, use your language's type system:
+
+```typescript title="blocks/calculate_engagement/block.ts"
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function calculateEngagement(params: { user: User }) {
+  // Implementation
+}
+```
+
+## Multiple Entities
+
+Blocks can accept multiple entities as inputs:
+
+```yaml
+blocks:
+  match_candidate_to_job:
+    type: facet
+    inputs:
+      - name: candidate
+        type: entity.candidate
+      - name: job
+        type: entity.job
+    outputs:
+      - name: match_score
+        measures: [score_0_1]
+```
+
+## Nested Entities
+
+For complex domains, entities can reference other entities in their fields:
+
+```yaml
+domain:
+  entities:
+    address:
+      fields: [street, city, postal_code, country]
+
+    company:
+      fields: [name, industry, size, address]
+```
+
+The `address` field in `company` semantically refers to an `address` entity.
+
+## Validation
+
+The schema validator checks:
+- ✅ Referenced entities exist in `domain.entities`
+- ✅ Entity names are valid identifiers
+- ✅ Fields are defined
+
+The domain validator checks:
+- ✅ Implementation uses entity fields appropriately
+- ✅ Code expresses domain intent clearly
+- ✅ Entity semantics are respected
+
+## Example: Resume Builder
+
+Here's a complete example for a resume builder domain:
+
+```yaml title="blocks.yml"
+domain:
+  entities:
+    resume:
+      fields: [basics, work, education, skills, languages, interests]
+
+    basics:
+      fields: [name, label, email, phone, url, summary, location]
+
+    work_experience:
+      fields: [company, position, startDate, endDate, summary, highlights]
+
+    education:
+      fields: [institution, area, studyType, startDate, endDate, score]
+
+blocks:
+  theme.modern_professional:
+    type: template
+    inputs:
+      - name: resume
+        type: entity.resume
+    outputs:
+      - name: html
+        measures: [semantic_html, valid_html]
+
+  calculate_experience_years:
+    type: utility
+    inputs:
+      - name: work_history
+        type: array<entity.work_experience>
+    outputs:
+      - name: total_years
+        type: number
+```
+
+## Best Practices
+
+### DO:
+
+- ✅ Use descriptive entity names that reflect your domain
+- ✅ Group related fields together
+- ✅ Keep entities focused (single responsibility)
+- ✅ Document entity purpose in code comments
+
+### DON'T:
+
+- ❌ Create overly generic entities (e.g., `data`, `object`)
+- ❌ Mix unrelated fields in one entity
+- ❌ Over-specify with too many tiny entities
+- ❌ Duplicate entities across domains
+
+## Comparison to Other Systems
+
+| System | Concept | Blocks Equivalent |
+|--------|---------|-------------------|
+| Cube.dev | Cubes | Entities |
+| GraphQL | Types | Entities |
+| JSON Schema | Objects | Entities |
+| SQL | Tables | Entities |
+| Domain-Driven Design | Aggregates | Entities |
+
+Entities in Blocks serve a similar purpose: they define the **semantic structure** of your domain.
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Signals"
+    description="Learn about domain signals"
+    href="/docs/core-concepts/signals"
+  />
+  <Card
+    title="Measures"
+    description="Define constraints on outputs"
+    href="/docs/core-concepts/measures"
+  />
+  <Card
+    title="Blocks"
+    description="Create blocks that use entities"
+    href="/docs/core-concepts/blocks"
+  />
+</Cards>

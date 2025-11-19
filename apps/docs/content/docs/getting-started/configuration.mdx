@@ -1,0 +1,405 @@
+---
+title: Configuration
+description: Complete blocks.yml reference guide
+---
+
+# Configuration
+
+Complete reference for `blocks.yml` configuration file.
+
+## File Structure
+
+```yaml
+project:
+  name: string
+  domain: string
+
+philosophy: string[]
+
+domain:
+  entities: { [name]: EntityDefinition }
+  signals: { [name]: SignalDefinition }
+  measures: { [name]: MeasureDefinition }
+
+templates:
+  required_sections: string[]
+
+blocks:
+  [name]: BlockDefinition
+
+validators:
+  schema?: Validator[]
+  shape?: Validator[]
+  lint?: Validator[]
+  domain?: Validator[]
+  chain?: Validator[]
+  shadow?: Validator[]
+  scoring?: Validator[]
+
+pipeline:
+  name: string
+  steps: Step[]
+
+agent:
+  mode: string
+  rules: string[]
+  cli: { single: string, all: string }
+
+targets:
+  kind: string
+  discover: { root: string }
+```
+
+## Project
+
+Basic project information.
+
+```yaml
+project:
+  name: "my-project"
+  domain: "myproject.general"
+```
+
+- **name** - Human-readable project name
+- **domain** - Semantic domain identifier (like a namespace)
+
+## Philosophy
+
+Design principles that guide block development.
+
+```yaml
+philosophy:
+  - "Blocks must be small, composable, deterministic."
+  - "All blocks must validate through multi-layer checks."
+  - "Spec and implementation must evolve together."
+```
+
+Philosophy statements are passed to the AI domain validator to guide semantic analysis.
+
+## Domain
+
+Define domain semantics: the "things" (entities), "concepts" (signals), and "constraints" (measures).
+
+### Entities
+
+Core data types in your system.
+
+```yaml
+domain:
+  entities:
+    user:
+      fields: [id, name, email, created_at]
+    resume:
+      fields: [basics, work, education, skills]
+```
+
+Reference entities in blocks using `entity.user`, `entity.resume`, etc.
+
+### Signals
+
+Domain concepts to extract or calculate.
+
+```yaml
+domain:
+  signals:
+    engagement:
+      description: "How engaged is the user?"
+      extraction_hint: "Based on activity frequency and recency"
+    readability:
+      description: "Clear visual hierarchy and typography"
+```
+
+Signals help AI understand what you're trying to measure or extract.
+
+### Measures
+
+Constraints on outputs.
+
+```yaml
+domain:
+  measures:
+    score_0_1:
+      constraints:
+        - "Value must be between 0 and 1."
+        - "Higher values indicate stronger signal."
+    valid_html:
+      constraints:
+        - "Must be valid HTML5"
+        - "No syntax errors"
+    semantic_html:
+      constraints:
+        - "Use semantic tags (header, main, section, article)"
+        - "Proper heading hierarchy (h1 → h2 → h3)"
+```
+
+Reference measures in block outputs using `measures: [score_0_1]`.
+
+## Templates
+
+Configuration for template blocks.
+
+```yaml
+templates:
+  required_sections: [summary, experience, education, skills]
+```
+
+Template blocks can specify which sections are required.
+
+## Blocks
+
+Define individual blocks.
+
+```yaml
+blocks:
+  user_engagement_score:
+    type: facet
+    description: "Calculate user engagement score"
+    path: "lib/engagement"  # Optional custom path
+    inputs:
+      - name: user
+        type: entity.user
+      - name: activity_days
+        type: number
+        optional: false
+    outputs:
+      - name: score
+        type: number
+        measures: [score_0_1]
+        constraints:
+          - "Score reflects recent activity patterns"
+    domain_rules:
+      - id: use_activity_data
+        description: "Must calculate score from activity_days input"
+    test_data: "test-data/engagement-samples.json"
+    test_samples:
+      - user: { id: "1", name: "Alice" }
+        activity_days: 30
+```
+
+### Block Types
+
+- **utility** - Pure function, deterministic transformation
+- **facet** - Extracts/calculates a specific signal
+- **template** - Renders output (HTML, JSON, etc.)
+- **validator** - Custom validation logic
+- **custom** - User-defined type
+
+### Block Fields
+
+- **type** (required) - Block type (utility, facet, template, validator, custom)
+- **description** (required) - What this block does
+- **path** (optional) - Custom location (default: `{discover.root}/{block_name}`)
+- **inputs** (optional) - Array of input definitions
+- **outputs** (optional) - Array of output definitions
+- **domain_rules** (optional) - Custom domain validation rules
+- **test_data** (optional) - Path to external test data file
+- **test_samples** (optional) - Inline test data samples
+- **sections** (optional) - Required sections (for templates)
+- **template_engine** (optional) - Template engine (hbs, ejs, etc.)
+
+### Input/Output Definition
+
+```yaml
+inputs:
+  - name: user
+    type: entity.user  # Can reference entities
+    optional: false
+
+outputs:
+  - name: score
+    type: number
+    measures: [score_0_1]  # Apply measures
+    constraints:  # Additional constraints
+      - "Must be calculated from inputs"
+```
+
+## Validators
+
+Configure validation pipeline.
+
+```yaml
+validators:
+  schema:
+    - run: "schema.io.v1"
+
+  shape:
+    - run: "shape.structure.v1"
+
+  domain:
+    - run: "domain.semantics.v1"
+```
+
+Available validator types:
+
+- **schema** - I/O type validation (fast, deterministic)
+- **shape** - File structure validation (fast, deterministic)
+- **domain** - Semantic validation (slow, AI-powered)
+- **lint** - Code quality checks (coming soon)
+- **chain** - Multi-step pipelines (coming soon)
+- **shadow** - Advisory warnings (coming soon)
+- **scoring** - Metrics for dashboards (coming soon)
+
+## Pipeline
+
+Define the validation execution order.
+
+```yaml
+pipeline:
+  name: "default"
+  steps:
+    - id: "schema"
+      run: "schema.io.v1"
+    - id: "shape"
+      run: "shape.structure.v1"
+    - id: "domain"
+      run: "domain.semantics.v1"
+```
+
+Validators run in the order specified in the pipeline.
+
+## Agent
+
+Configuration for AI agent integration.
+
+```yaml
+agent:
+  mode: "guided"
+  rules:
+    - "Read blocks.yml before coding"
+    - "Run validators after every change"
+    - "Treat validator output as instructions"
+  cli:
+    single: "blocks run <name>"
+    all: "blocks run --all"
+```
+
+This helps AI coding assistants (Claude Code, Cursor, etc.) understand how to use Blocks.
+
+## Targets
+
+Where to find blocks.
+
+```yaml
+targets:
+  kind: "blocks"
+  discover:
+    root: "blocks"  # Default directory for blocks
+```
+
+Individual blocks can override this using the `path` field.
+
+## Example: Complete Configuration
+
+Here's a complete example combining all concepts:
+
+```yaml title="blocks.yml"
+project:
+  name: "resume-builder"
+  domain: "resumes.themes"
+
+philosophy:
+  - "Resume themes must prioritize readability and professionalism."
+  - "All themes must be responsive and accessible."
+  - "Templates must use semantic HTML5."
+
+domain:
+  entities:
+    resume:
+      fields: [basics, work, education, skills, languages]
+
+  signals:
+    readability:
+      description: "Clear visual hierarchy and typography"
+    professionalism:
+      description: "Appropriate for business contexts"
+
+  measures:
+    valid_html:
+      constraints:
+        - "Must be valid HTML5"
+    semantic_html:
+      constraints:
+        - "Use semantic tags (header, main, section)"
+        - "Include proper ARIA labels"
+    responsive_design:
+      constraints:
+        - "Must include media queries"
+        - "Mobile-first approach"
+
+templates:
+  required_sections: [summary, experience, education, skills]
+
+blocks:
+  theme.modern_professional:
+    type: template
+    description: "Clean, modern resume theme with professional styling"
+    path: "themes/modern-professional"
+    template_engine: hbs
+    inputs:
+      - name: resume
+        type: entity.resume
+    outputs:
+      - name: html
+        type: string
+        measures: [valid_html, semantic_html, responsive_design]
+    domain_rules:
+      - id: semantic_structure
+        description: "Must use semantic HTML tags (header, main, section, article)"
+      - id: accessibility
+        description: "Must include proper ARIA labels and semantic structure"
+      - id: responsive
+        description: "Must include CSS media queries for mobile/tablet/desktop"
+    test_data: "test-data/sample-resume.json"
+
+validators:
+  schema:
+    - run: "schema.io.v1"
+  shape:
+    - run: "shape.structure.v1"
+  domain:
+    - run: "domain.semantics.v1"
+
+pipeline:
+  name: "default"
+  steps:
+    - id: "schema"
+      run: "schema.io.v1"
+    - id: "shape"
+      run: "shape.structure.v1"
+    - id: "domain"
+      run: "domain.semantics.v1"
+
+agent:
+  mode: "guided"
+  rules:
+    - "Read blocks.yml before coding"
+    - "Run validators after every change"
+  cli:
+    single: "blocks run <name>"
+    all: "blocks run --all"
+
+targets:
+  kind: "blocks"
+  discover:
+    root: "themes"
+```
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Core Concepts"
+    description="Understand domain modeling deeply"
+    href="/docs/core-concepts"
+  />
+  <Card
+    title="Validation"
+    description="Learn how validators work"
+    href="/docs/validation/architecture"
+  />
+  <Card
+    title="Examples"
+    description="See real-world configurations"
+    href="/docs/examples"
+  />
+</Cards>

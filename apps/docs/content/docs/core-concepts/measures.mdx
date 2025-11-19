@@ -1,0 +1,335 @@
+---
+title: Measures
+description: Define constraints on block outputs
+---
+
+# Measures
+
+Measures are **constraints on output values** — they define the "shape" and validity of what blocks produce.
+
+## What Are Measures?
+
+Measures specify requirements that outputs must satisfy:
+
+- **score_0_1** - Must be between 0 and 1
+- **valid_html** - Must be syntactically valid HTML5
+- **semantic_html** - Must use proper semantic tags
+- **spanish_quality** - Must be proper Spanish text
+
+Measures are **validators for outputs**, enforced during development.
+
+## Defining Measures
+
+Define measures in `blocks.yml`:
+
+```yaml title="blocks.yml"
+domain:
+  measures:
+    score_0_1:
+      constraints:
+        - "Value must be between 0 and 1."
+        - "Higher values indicate stronger signal."
+
+    semantic_html:
+      constraints:
+        - "Use semantic HTML5 tags (header, main, section, article)"
+        - "Proper heading hierarchy (h1 → h2 → h3)"
+        - "Include ARIA labels for accessibility"
+
+    valid_json:
+      constraints:
+        - "Must parse as valid JSON"
+        - "No syntax errors"
+```
+
+Each measure has:
+- **name** - Identifier (e.g., `score_0_1`)
+- **constraints** - Array of requirements the output must meet
+
+## Using Measures in Blocks
+
+Reference measures in block outputs:
+
+```yaml
+blocks:
+  calculate_engagement:
+    outputs:
+      - name: score
+        type: number
+        measures: [score_0_1]  # Apply measure constraint
+
+  theme.modern_professional:
+    outputs:
+      - name: html
+        type: string
+        measures: [valid_html, semantic_html, responsive_design]
+```
+
+Multiple measures can be applied to a single output.
+
+## How Measures Are Validated
+
+### Schema Validator
+
+Checks that:
+- ✅ Referenced measures exist in `domain.measures`
+- ✅ Measure names are valid
+
+### Domain Validator (AI)
+
+Checks that:
+- ✅ Output satisfies all measure constraints
+- ✅ Code is structured to produce compliant output
+- ✅ For templates: source code contains required patterns
+
+## Development-Time vs Runtime
+
+**Important:** Measures are validated at **development time**, not runtime.
+
+### Development-Time Validation
+
+The domain validator analyzes **source code** to ensure it will produce compliant output:
+
+```typescript title="blocks/theme/modern/template.hbs"
+<header role="banner">
+  <h1>{{basics.name}}</h1>
+  <nav aria-label="Contact information">
+    <!-- ... -->
+  </nav>
+</header>
+```
+
+✅ Validator checks template **source** for semantic HTML tags and ARIA labels.
+
+### What Happens at Runtime
+
+At runtime, blocks only validate **input data**:
+
+```typescript title="blocks/theme/modern/block.ts"
+export function modernProfessionalTheme(resume: Resume) {
+  // ✓ Validate inputs
+  if (!resume.basics?.name) {
+    throw new Error("Resume must include name");
+  }
+
+  // ✓ Render (validated at dev time)
+  return { html: template(resume) };
+}
+```
+
+No runtime HTML parsing or validation — trust the validated source code.
+
+## Measure Types
+
+### Numeric Constraints
+
+```yaml
+measures:
+  score_0_1:
+    constraints:
+      - "Value between 0 and 1"
+
+  percentage:
+    constraints:
+      - "Value between 0 and 100"
+      - "Represents percentage"
+```
+
+### Format Constraints
+
+```yaml
+measures:
+  valid_html:
+    constraints:
+      - "Valid HTML5 syntax"
+      - "No parsing errors"
+
+  valid_json:
+    constraints:
+      - "Valid JSON format"
+      - "Parseable with JSON.parse()"
+```
+
+### Semantic Constraints
+
+```yaml
+measures:
+  semantic_html:
+    constraints:
+      - "Use semantic tags (header, main, section, article)"
+      - "Proper heading hierarchy"
+      - "ARIA labels for accessibility"
+
+  professional_tone:
+    constraints:
+      - "Formal language"
+      - "No slang or casual expressions"
+```
+
+### Quality Constraints
+
+```yaml
+measures:
+  spanish_quality:
+    constraints:
+      - "Grammatically correct Spanish"
+      - "Natural phrasing"
+      - "No machine translation artifacts"
+
+  readability:
+    constraints:
+      - "Clear visual hierarchy"
+      - "Readable typography"
+      - "Adequate spacing"
+```
+
+## Multiple Measures
+
+Blocks can have multiple measures per output:
+
+```yaml
+blocks:
+  theme.modern_professional:
+    outputs:
+      - name: html
+        measures:
+          - valid_html       # Syntactically valid
+          - semantic_html    # Semantic structure
+          - responsive       # Mobile-friendly
+          - accessible       # WCAG compliant
+```
+
+All measures must be satisfied for validation to pass.
+
+## Custom Constraints
+
+Add block-specific constraints in addition to measures:
+
+```yaml
+blocks:
+  theme.modern_professional:
+    outputs:
+      - name: html
+        measures: [semantic_html]
+        constraints:
+          - "Must include work experience section"
+          - "Education section required"
+```
+
+Constraints are checked in addition to measure constraints.
+
+## Validation Example
+
+```yaml
+domain:
+  measures:
+    score_0_1:
+      constraints:
+        - "Value must be between 0 and 1."
+
+blocks:
+  calculate_engagement:
+    outputs:
+      - name: score
+        measures: [score_0_1]
+```
+
+**Implementation that fails:**
+
+```typescript
+export function calculateEngagement(user: User) {
+  return { score: 2.5 };  // ❌ Violates score_0_1
+}
+```
+
+Validation output:
+```
+⚠ [domain] Output 'score' violates measure 'score_0_1'
+→ Constraint: "Value must be between 0 and 1."
+→ Found: 2.5
+→ Fix: Clamp score to [0, 1] range
+```
+
+**Implementation that passes:**
+
+```typescript
+export function calculateEngagement(user: User) {
+  const rawScore = calculateRawScore(user);
+  const score = Math.min(Math.max(rawScore, 0), 1);  // ✓ Clamped
+  return { score };
+}
+```
+
+## Best Practices
+
+### DO:
+
+- ✅ Create reusable measures for common constraints
+- ✅ Write clear, specific constraint descriptions
+- ✅ Group related constraints in one measure
+- ✅ Use measures to document expected output quality
+
+### DON'T:
+
+- ❌ Create overly specific measures used only once
+- ❌ Make constraint descriptions vague
+- ❌ Duplicate constraints across multiple measures
+- ❌ Skip measures for important outputs
+
+## Common Measures Library
+
+Here are some common measures you might define:
+
+```yaml
+domain:
+  measures:
+    # Numeric
+    score_0_1:
+      constraints: ["Value between 0 and 1"]
+    percentage:
+      constraints: ["Value between 0 and 100"]
+
+    # Format
+    valid_html:
+      constraints: ["Valid HTML5 syntax"]
+    valid_json:
+      constraints: ["Valid JSON format"]
+    valid_url:
+      constraints: ["Valid HTTP/HTTPS URL"]
+
+    # Semantic
+    semantic_html:
+      constraints:
+        - "Semantic tags (header, main, section)"
+        - "ARIA labels"
+    accessible:
+      constraints:
+        - "WCAG 2.1 AA compliant"
+        - "Keyboard navigable"
+
+    # Quality
+    professional_tone:
+      constraints: ["Formal, business-appropriate language"]
+    readable:
+      constraints: ["Clear typography and spacing"]
+```
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Blocks"
+    description="Create blocks with validated outputs"
+    href="/docs/core-concepts/blocks"
+  />
+  <Card
+    title="Domain Validation"
+    description="How measures are checked"
+    href="/docs/validation/domain"
+  />
+  <Card
+    title="Philosophy"
+    description="Guide development principles"
+    href="/docs/core-concepts/philosophy"
+  />
+</Cards>

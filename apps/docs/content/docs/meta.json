@@ -1,0 +1,4 @@
+{
+  "title": "Documentation",
+  "pages": ["index", "getting-started", "core-concepts", "validation", "cli", "ai-integration", "api", "examples", "advanced", "contributing"]
+}

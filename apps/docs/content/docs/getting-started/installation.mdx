@@ -1,0 +1,145 @@
+---
+title: Installation
+description: Install Blocks and configure your environment
+---
+
+# Installation
+
+Get Blocks up and running in your project.
+
+## Prerequisites
+
+- **Node.js** - Version 18 or higher
+- **pnpm** - Version 9 or higher (recommended) or npm/yarn
+
+## Install Blocks CLI
+
+Install the Blocks CLI package in your project:
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add -D @blocksai/cli
+    ```
+  </Tab>
+  <Tab value="npm">
+    ```bash
+    npm install -D @blocksai/cli
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add -D @blocksai/cli
+    ```
+  </Tab>
+</Tabs>
+
+## Initialize Configuration
+
+Create a `blocks.yml` configuration file:
+
+```bash
+pnpm blocks init
+```
+
+This creates a basic configuration file in your project root:
+
+```yaml title="blocks.yml"
+project:
+  name: "my-project"
+  domain: "myproject.general"
+
+philosophy:
+  - "Blocks must be small, composable, deterministic."
+
+domain:
+  entities: {}
+  signals: {}
+  measures: {}
+
+blocks: {}
+
+validators:
+  schema:
+    - run: "schema.io.v1"
+  shape:
+    - run: "shape.structure.v1"
+  domain:
+    - run: "domain.semantics.v1"
+
+pipeline:
+  name: "default"
+  steps:
+    - id: "schema"
+      run: "schema.io.v1"
+    - id: "shape"
+      run: "shape.structure.v1"
+    - id: "domain"
+      run: "domain.semantics.v1"
+```
+
+## Configure OpenAI API Key
+
+Blocks uses OpenAI for AI-powered domain validation. You have two options:
+
+### Option 1: Environment Variable (Recommended)
+
+Set the `OPENAI_API_KEY` environment variable:
+
+```bash
+export OPENAI_API_KEY="sk-your-key-here"
+```
+
+To make this permanent, add it to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.):
+
+```bash title="~/.zshrc"
+export OPENAI_API_KEY="sk-your-key-here"
+```
+
+### Option 2: .env File
+
+Create a `.env` file in your project directory:
+
+```env title=".env"
+OPENAI_API_KEY=sk-your-key-here
+```
+
+The CLI will automatically load environment variables from `.env`.
+
+<Callout type="warn">
+  Make sure to add `.env` to your `.gitignore` file to avoid committing your API key!
+</Callout>
+
+### Getting an OpenAI API Key
+
+1. Go to [OpenAI Platform](https://platform.openai.com/api-keys)
+2. Sign in or create an account
+3. Click "Create new secret key"
+4. Copy the key and save it securely
+
+## Verify Installation
+
+Check that Blocks is installed correctly:
+
+```bash
+pnpm blocks --version
+```
+
+You should see the version number printed.
+
+## What Happens Without an API Key?
+
+Without an API key, domain validation will be skipped:
+
+```
+📦 Validating: my_block
+  ✓ schema ok
+  ✓ shape ok
+  ⚠ [domain] AI validation failed: OpenAI API key is missing
+```
+
+Schema and shape validation will still work, but you won't get AI-powered semantic feedback.
+
+## Next Steps
+
+Now that you have Blocks installed, follow the [Quick Start](/docs/getting-started/quick-start) guide to create your first block.

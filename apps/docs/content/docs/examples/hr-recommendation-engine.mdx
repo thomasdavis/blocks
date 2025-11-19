@@ -1,0 +1,467 @@
+---
+title: HR Recommendation Engine
+description: Complete example showing Blocks in a production Turborepo
+---
+
+# HR Recommendation Engine Example
+
+This is a **real-world example** of how an HR company uses Blocks to power their AI-driven job matching system.
+
+## The Architecture
+
+Blocks lives in **ONE package** in their Turborepo—not scattered across the codebase.
+
+```
+hr-reco-monorepo/
+├─ apps/
+│  ├─ web/                     # Recruiter & candidate UI (NO Blocks)
+│  └─ api/                     # Backend API (NO Blocks)
+│
+├─ packages/
+│  ├─ core-domain/             # Shared types (NO Blocks)
+│  ├─ job-ingestion/           # ATS connectors (NO Blocks)
+│  │
+│  └─ recommendation-engine/   # 🔴 Blocks lives HERE (only here)
+│     ├─ blocks.yml           # ONE file controls everything
+│     ├─ package.json
+│     └─ src/
+│        ├─ blocks/            # AI-generated scoring modules
+│        │  ├─ skill_overlap_scorer.ts
+│        │  ├─ experience_alignment_scorer.ts
+│        │  ├─ location_match_scorer.ts
+│        │  ├─ compensation_fit_scorer.ts
+│        │  ├─ culture_fit_scorer.ts
+│        │  ├─ final_match_aggregator.ts
+│        │  └─ explanation_builder.ts
+│        └─ index.ts           # Public API: recommend(resume, job)
+```
+
+## Key Insight: Scoped, Not Scattered
+
+**Blocks is used in:**
+- ✅ `packages/recommendation-engine` (business logic for matching)
+
+**Blocks is NOT used in:**
+- ❌ `apps/web` (UI layer)
+- ❌ `apps/api` (HTTP routing layer)
+- ❌ `packages/core-domain` (shared types)
+- ❌ `packages/job-ingestion` (data pipeline)
+
+This keeps Blocks focused on what it's good at: **composable business logic that changes frequently**.
+
+## The blocks.yml (Domain Contract)
+
+ONE file controls 7 matching modules:
+
+```yaml title="packages/recommendation-engine/blocks.yml"
+domain:
+  entities:
+    resume:
+      fields:
+        - basics
+        - work
+        - education
+        - skills
+        - languages
+        - location
+        - seniority
+        - salary_expectation
+
+    job_description:
+      fields:
+        - title
+        - summary
+        - responsibilities
+        - required_skills
+        - nice_to_have_skills
+        - location
+        - seniority_level
+        - salary_range
+        - employment_type
+
+  signals:
+    skill_overlap:
+      description: "How well candidate skills match job requirements"
+
+    experience_alignment:
+      description: "How relevant is candidate's experience"
+
+    location_match:
+      description: "Geographic compatibility"
+
+    compensation_fit:
+      description: "Salary expectations vs offered range"
+
+    culture_fit:
+      description: "Behavioral and values alignment"
+
+  measures:
+    match_score:
+      constraints:
+        - "Value between 0 and 1"
+        - "Higher scores indicate better matches"
+
+    explanation_quality:
+      constraints:
+        - "Must reference actual resume and job fields"
+        - "Must be human-readable"
+
+blocks:
+  skill_overlap_scorer:
+    description: "Score overlap between candidate skills and job requirements"
+    inputs:
+      - name: resume
+        type: entity.resume
+      - name: job_description
+        type: entity.job_description
+    outputs:
+      - name: score
+        type: number
+        measures: [match_score]
+    domain_rules:
+      - id: required_skills_weight
+        description: "Required skills weighted more than nice-to-have"
+
+  experience_alignment_scorer:
+    description: "Score relevance of candidate's work experience"
+    inputs:
+      - name: resume
+        type: entity.resume
+      - name: job_description
+        type: entity.job_description
+    outputs:
+      - name: score
+        type: number
+        measures: [match_score]
+    domain_rules:
+      - id: seniority_match
+        description: "Consider seniority level alignment"
+
+  location_match_scorer:
+    description: "Score geographic compatibility"
+    inputs:
+      - name: resume
+        type: entity.resume
+      - name: job_description
+        type: entity.job_description
+    outputs:
+      - name: score
+        type: number
+        measures: [match_score]
+    domain_rules:
+      - id: remote_vs_onsite
+        description: "Handle remote work preferences"
+
+  compensation_fit_scorer:
+    description: "Score salary expectations vs offered range"
+    inputs:
+      - name: resume
+        type: entity.resume
+      - name: job_description
+        type: entity.job_description
+    outputs:
+      - name: score
+        type: number
+        measures: [match_score]
+
+  culture_fit_scorer:
+    description: "Score behavioral and values alignment"
+    inputs:
+      - name: resume
+        type: entity.resume
+      - name: job_description
+        type: entity.job_description
+    outputs:
+      - name: score
+        type: number
+        measures: [match_score]
+
+  final_match_aggregator:
+    description: "Combine all scores into final match score"
+    inputs:
+      - name: skill_overlap
+        type: number
+      - name: experience_alignment
+        type: number
+      - name: location_match
+        type: number
+      - name: compensation_fit
+        type: number
+      - name: culture_fit
+        type: number
+    outputs:
+      - name: final_score
+        type: number
+        measures: [match_score]
+    domain_rules:
+      - id: weighted_combination
+        description: "Skills and experience weighted 60%, other factors 40%"
+
+  explanation_builder:
+    description: "Generate human-readable explanation of match"
+    inputs:
+      - name: resume
+        type: entity.resume
+      - name: job_description
+        type: entity.job_description
+      - name: final_score
+        type: number
+      - name: skill_overlap
+        type: number
+      - name: experience_alignment
+        type: number
+      - name: location_match
+        type: number
+      - name: compensation_fit
+        type: number
+      - name: culture_fit
+        type: number
+    outputs:
+      - name: explanation
+        type: string
+        measures: [explanation_quality]
+```
+
+## The Generated Blocks (AI-Maintained)
+
+AI generates and maintains all 7 modules from the spec above:
+
+### 1. **Scorers** (5 modules)
+```typescript title="src/blocks/skill_overlap_scorer.ts"
+// Generated by AI from blocks.yml
+export async function scoreSkillOverlap(
+  resume: Resume,
+  jobDescription: JobDescription
+): Promise<number> {
+  const requiredSkills = jobDescription.required_skills;
+  const candidateSkills = resume.skills;
+
+  // AI implements matching logic following domain rules
+  const matchCount = requiredSkills.filter(req =>
+    candidateSkills.some(skill => skill.includes(req))
+  ).length;
+
+  return Math.min(matchCount / requiredSkills.length, 1.0);
+}
+```
+
+Similar structure for:
+- `experience_alignment_scorer.ts`
+- `location_match_scorer.ts`
+- `compensation_fit_scorer.ts`
+- `culture_fit_scorer.ts`
+
+### 2. **Aggregator** (1 module)
+```typescript title="src/blocks/final_match_aggregator.ts"
+// Generated by AI following "weighted_combination" domain rule
+export async function aggregateFinalScore(scores: {
+  skill_overlap: number;
+  experience_alignment: number;
+  location_match: number;
+  compensation_fit: number;
+  culture_fit: number;
+}): Promise<number> {
+  // Skills and experience: 60%
+  const coreScore = (scores.skill_overlap * 0.35) +
+                    (scores.experience_alignment * 0.25);
+
+  // Other factors: 40%
+  const contextScore = (scores.location_match * 0.15) +
+                       (scores.compensation_fit * 0.15) +
+                       (scores.culture_fit * 0.10);
+
+  return coreScore + contextScore;
+}
+```
+
+### 3. **Explainer** (1 module)
+```typescript title="src/blocks/explanation_builder.ts"
+// Generated by AI following "explanation_quality" measure
+export async function buildExplanation(context: ExplanationContext): Promise<string> {
+  const { resume, jobDescription, final_score, ...scores } = context;
+
+  const parts = [];
+
+  if (scores.skill_overlap > 0.7) {
+    parts.push(`Strong skill match: ${resume.skills.join(", ")}`);
+  }
+
+  if (scores.experience_alignment > 0.6) {
+    parts.push(`Relevant experience in ${jobDescription.responsibilities}`);
+  }
+
+  // ... more explanation logic
+
+  return parts.join(". ");
+}
+```
+
+## The Public API (Human-Written)
+
+The orchestration layer is **simple** because Blocks handles the complexity:
+
+```typescript title="src/index.ts"
+import {
+  scoreSkillOverlap,
+  scoreExperienceAlignment,
+  scoreLocationMatch,
+  scoreCompensationFit,
+  scoreCultureFit,
+  aggregateFinalScore,
+  buildExplanation,
+} from "./blocks";
+
+export async function recommend(
+  resume: Resume,
+  jobDescription: JobDescription
+) {
+  // Call all 5 scorers
+  const skillOverlap = await scoreSkillOverlap(resume, jobDescription);
+  const experienceAlignment = await scoreExperienceAlignment(resume, jobDescription);
+  const locationMatch = await scoreLocationMatch(resume, jobDescription);
+  const compensationFit = await scoreCompensationFit(resume, jobDescription);
+  const cultureFit = await scoreCultureFit(resume, jobDescription);
+
+  // Aggregate scores
+  const finalScore = await aggregateFinalScore({
+    skill_overlap: skillOverlap,
+    experience_alignment: experienceAlignment,
+    location_match: locationMatch,
+    compensation_fit: compensationFit,
+    culture_fit: cultureFit,
+  });
+
+  // Build explanation
+  const explanation = await buildExplanation({
+    resume,
+    jobDescription,
+    final_score: finalScore,
+    skill_overlap: skillOverlap,
+    experience_alignment: experienceAlignment,
+    location_match: locationMatch,
+    compensation_fit: compensationFit,
+    culture_fit: cultureFit,
+  });
+
+  return { matchScore: finalScore, explanation };
+}
+```
+
+## The Workflow: When Matching Logic Changes
+
+Business requirements change **frequently** in HR—this is why Blocks is valuable.
+
+### Example Change Request
+
+**Business:** "We need to weight location match more heavily for remote positions."
+
+**Developer:** Updates `blocks.yml`
+
+```yaml
+blocks:
+  final_match_aggregator:
+    domain_rules:
+      - id: weighted_combination
+        description: "Skills 30%, experience 25%, location 25%, other 20%"  # Changed weights
+```
+
+**AI:** Regenerates `final_match_aggregator.ts`
+
+**Validator:** Checks new implementation follows updated weights
+
+**Test:** Run test suite to verify behavior
+
+**Deploy:** New scoring logic goes live
+
+### Why This Works
+
+1. **Single Source of Truth:** All matching rules in ONE file
+2. **AI Maintains Code:** Humans never touch scorer implementations
+3. **Fast Iteration:** Change spec → regenerate → validate → deploy
+4. **No Drift:** Validators catch when code doesn't match spec
+5. **Composable:** Each scorer is independent, aggregator combines them
+
+## Who Writes What
+
+| Component | Maintained By |
+|-----------|--------------|
+| `blocks.yml` | **Human** (business analyst, product manager, developer) |
+| `src/blocks/*.ts` | **AI** (Claude Code, Cursor, etc.) |
+| `src/index.ts` | **Human** (simple orchestration) |
+| Tests | **Mix** (humans write test cases, AI generates test implementations) |
+
+## Integration with Rest of Codebase
+
+### From the API Layer
+
+```typescript title="apps/api/src/routes/recommend.ts"
+import { recommend } from "@hr-company/recommendation-engine";
+
+app.post("/api/recommend", async (req, res) => {
+  const { resume, jobDescription } = req.body;
+
+  // Call into recommendation engine (which uses Blocks internally)
+  const result = await recommend(resume, jobDescription);
+
+  res.json(result);
+});
+```
+
+**Note:** The API layer doesn't know or care about Blocks. It just calls `recommend()`.
+
+### From the Web App
+
+```typescript title="apps/web/src/components/RecommendationCard.tsx"
+// Web app calls API, which calls recommendation-engine
+const response = await fetch("/api/recommend", {
+  method: "POST",
+  body: JSON.stringify({ resume, jobDescription }),
+});
+
+const { matchScore, explanation } = await response.json();
+```
+
+**Note:** The web app is completely isolated from Blocks implementation.
+
+## Key Takeaways
+
+1. **Scoped:** Blocks lives in ONE package (`recommendation-engine`)
+2. **Focused:** Used for business logic that changes frequently
+3. **Boundary:** Other packages use its public API, don't touch blocks.yml
+4. **Scale:** 7 modules controlled by 1 spec
+5. **Regenerable:** When rules change, update spec and regenerate
+6. **Composable:** Scorers → Aggregator → Explainer pipeline
+
+## When to Use This Pattern
+
+Use Blocks in a dedicated package when:
+- ✅ You have **business logic** that changes frequently
+- ✅ Logic is **composable** (multiple modules pipe together)
+- ✅ **Correctness** depends on staying aligned with domain rules
+- ✅ You want **AI to maintain** implementation code
+
+Don't use Blocks for:
+- ❌ UI components (use React/Vue/etc)
+- ❌ HTTP routing (use Express/Next.js/etc)
+- ❌ Database queries (use Prisma/TypeORM/etc)
+- ❌ Static utilities (use normal functions)
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Use Cases"
+    description="See other scenarios where Blocks excels"
+    href="/docs/use-cases"
+  />
+  <Card
+    title="Getting Started"
+    description="Set up Blocks in your project"
+    href="/docs/getting-started"
+  />
+  <Card
+    title="Configuration"
+    description="Complete blocks.yml reference"
+    href="/docs/getting-started/configuration"
+  />
+</Cards>

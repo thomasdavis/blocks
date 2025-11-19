@@ -394,6 +394,24 @@ Don't use Blocks when:
 - Consistency doesn't matter
 - You're building a one-off, not a system
 
+## Complete Example: HR Recommendation Engine
+
+For a **production-ready example** of Blocks in a real codebase, see the HR Recommendation Engine example:
+
+<Card
+  title="HR Recommendation Engine"
+  description="Complete Turborepo example showing ONE blocks.yml controlling 7 composable scoring modules in a focused package"
+  href="/docs/examples/hr-recommendation-engine"
+/>
+
+This example shows:
+- **Where Blocks lives** in a monorepo (one package, not scattered everywhere)
+- **ONE blocks.yml** controlling 7 related modules (5 scorers + 1 aggregator + 1 explainer)
+- **How AI generates** scorers, aggregators, and explainers from the spec
+- **Real business logic** (skills matching, compensation fit, culture scoring)
+- **The regeneration workflow** when business rules change weekly
+- **Clear boundaries** (where Blocks is used vs where it's not)
+
 ## Summary
 
 Blocks excels when you have **many similar functions** that need to be **consistently implemented** across your codebase. The `blocks.yml` file becomes the **single source of truth** that guides AI agents to generate code that follows your domain rules automatically.

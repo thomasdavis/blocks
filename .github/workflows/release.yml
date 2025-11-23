@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      skip_version_pr:
+        description: 'Skip version PR and publish immediately'
+        required: false
+        type: boolean
+        default: false
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -18,6 +25,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
         with:
@@ -42,7 +51,24 @@ jobs:
           publish: pnpm run release
           title: 'chore: version packages'
           commit: 'chore: version packages'
+          createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Auto-merge version PR
+        if: steps.changesets.outputs.pullRequestNumber != '' && github.event.inputs.skip_version_pr != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.changesets.outputs.pullRequestNumber }}
+        run: |
+          echo "Version PR created: #${PR_NUMBER}"
+          echo "Waiting 5 seconds for PR to be ready..."
+          sleep 5
+
+          # Enable auto-merge on the PR
+          gh pr merge ${PR_NUMBER} --auto --squash --delete-branch
+
+          echo "Auto-merge enabled for PR #${PR_NUMBER}"
+          echo "PR will merge automatically once checks pass"

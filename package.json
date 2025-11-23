@@ -13,8 +13,11 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "changeset": "changeset",
+    "changeset:add": "changeset add",
+    "changeset:status": "changeset status",
     "version-packages": "changeset version",
-    "release": "turbo run build --filter=./packages/* && changeset publish"
+    "release": "turbo run build --filter=./packages/* && changeset publish",
+    "publish:manual": "pnpm run build && pnpm run version-packages && pnpm run release"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.9",

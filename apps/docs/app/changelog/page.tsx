@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 
 export const metadata = {
@@ -14,10 +14,10 @@ interface Changeset {
   date?: string;
 }
 
-function parseChangeset(filename: string): Changeset | null {
+function parseChangeset(filename: string, changesetDir: string): Changeset | null {
   try {
     const content = readFileSync(
-      join(process.cwd(), '..', '..', '.changeset', filename),
+      join(changesetDir, filename),
       'utf-8'
     );
 
@@ -50,12 +50,31 @@ function parseChangeset(filename: string): Changeset | null {
 
 function getChangesets(): Changeset[] {
   try {
-    const changesetDir = join(process.cwd(), '..', '..', '.changeset');
+    // In monorepo: try multiple paths to find .changeset directory
+    const possiblePaths = [
+      join(process.cwd(), '.changeset'),              // repo root during build
+      join(process.cwd(), '..', '..', '.changeset'),  // when cwd is apps/docs
+      join(__dirname, '..', '..', '..', '..', '.changeset'), // relative to this file
+    ];
+
+    let changesetDir: string | null = null;
+    for (const path of possiblePaths) {
+      if (existsSync(path)) {
+        changesetDir = path;
+        break;
+      }
+    }
+
+    if (!changesetDir) {
+      console.error('Could not find .changeset directory');
+      return [];
+    }
+
     const files = readdirSync(changesetDir);
 
     const changesets = files
       .filter((f) => f.endsWith('.md') && f !== 'README.md')
-      .map((f) => parseChangeset(f))
+      .map((f) => parseChangeset(f, changesetDir!))
       .filter((c): c is Changeset => c !== null)
       .reverse(); // Most recent first
 

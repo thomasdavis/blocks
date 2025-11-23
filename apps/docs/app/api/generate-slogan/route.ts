@@ -1,7 +1,8 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+import { streamText, StreamData } from 'ai';
 
 export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
 
 const BLOCKS_CONTEXT = `
 # Blocks Framework - Complete Context
@@ -338,7 +339,7 @@ export async function POST() {
       );
     }
 
-    const result = streamText({
+    const result = await streamText({
       model: openai('gpt-4o', {
         apiKey: process.env.OPENAI_API_KEY,
       }),
@@ -376,7 +377,7 @@ Generate ONE unique elevator pitch now.`,
       temperature: 1.2, // Higher creativity
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error('[Slogan API] Generation error:', error);
     return new Response(

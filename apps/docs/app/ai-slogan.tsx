@@ -31,20 +31,7 @@ export function AISlogan() {
           if (done) break;
 
           const chunk = decoder.decode(value);
-          // Parse streaming chunks (Vercel AI SDK format)
-          const lines = chunk.split('\n');
-          for (const line of lines) {
-            if (line.startsWith('0:')) {
-              try {
-                const data = JSON.parse(line.slice(2));
-                if (data && typeof data === 'string') {
-                  fullText += data;
-                }
-              } catch (e) {
-                // Skip parsing errors
-              }
-            }
-          }
+          fullText += chunk;
         }
       }
 

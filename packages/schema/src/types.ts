@@ -133,6 +133,18 @@ export const ProjectSchema = z.object({
 });
 
 // ——————————————————————————————————————————
+// Blocks Collection (supports default domain_rules + block definitions)
+// ——————————————————————————————————————————
+
+export const BlocksSchema = z.record(
+  z.string(),
+  z.union([
+    z.array(DomainRuleSchema), // For the domain_rules key
+    BlockDefinitionSchema,      // For all other keys (block definitions)
+  ])
+);
+
+// ——————————————————————————————————————————
 // Root Blocks Configuration
 // ——————————————————————————————————————————
 
@@ -140,7 +152,7 @@ export const BlocksConfigSchema = z.object({
   project: ProjectSchema,
   philosophy: z.array(z.string()).optional(),
   domain: DomainSchema.optional(),
-  blocks: z.record(z.string(), BlockDefinitionSchema),
+  blocks: BlocksSchema,
   validators: ValidatorsSchema.optional(),
   pipeline: PipelineSchema.optional(),
   agent: AgentSchema.optional(),
@@ -161,6 +173,7 @@ export type BlockInput = z.infer<typeof BlockInputSchema>;
 export type BlockOutput = z.infer<typeof BlockOutputSchema>;
 export type DomainRule = z.infer<typeof DomainRuleSchema>;
 export type BlockDefinition = z.infer<typeof BlockDefinitionSchema>;
+export type Blocks = z.infer<typeof BlocksSchema>;
 
 export type Validator = z.infer<typeof ValidatorSchema>;
 export type Validators = z.infer<typeof ValidatorsSchema>;

@@ -91,7 +91,10 @@ export class DomainValidator implements Validator {
 
     // Use AI to validate semantic alignment with all block files
     try {
-      const domainRules = block.domain_rules?.map((r) => r.description) ?? [];
+      // Use block-specific rules if present, otherwise use defaults from blocks.domain_rules
+      const domainRules = block.domain_rules
+        ? block.domain_rules.map((r) => r.description)
+        : this.registry.getDefaultDomainRules();
       const philosophy = context.config.philosophy ?? [];
 
       const validation = await this.ai.validateDomainSemantics({

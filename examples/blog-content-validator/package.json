@@ -1,0 +1,36 @@
+{
+  "name": "@blocks-examples/blog-content-validator",
+  "version": "0.1.0",
+  "description": "Multi-validator system for blog content quality (humor, structure, SEO, markdown)",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "validate": "blocks run validator.comprehensive",
+    "validate:humor": "blocks run validator.humor_tone",
+    "validate:structure": "blocks run validator.content_structure",
+    "validate:seo": "blocks run validator.seo_compliance",
+    "validate:markdown": "blocks run validator.markdown_quality",
+    "validate:all": "blocks run --all",
+    "clean": "rm -rf dist blocks"
+  },
+  "keywords": [
+    "blocks",
+    "validation",
+    "content-quality",
+    "blog",
+    "markdown",
+    "seo",
+    "humor",
+    "domain-validation"
+  ],
+  "author": "Blocks Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -56,14 +56,22 @@ export class DomainRegistry {
    * Get a block definition by name
    */
   getBlock(name: string): BlockDefinition | undefined {
-    return this.config.blocks[name];
+    const block = this.config.blocks[name];
+    // Skip domain_rules (which is an array, not a BlockDefinition)
+    if (Array.isArray(block)) {
+      return undefined;
+    }
+    return block;
   }
 
   /**
-   * Get all block definitions
+   * Get all block definitions (excludes domain_rules)
    */
   getBlocks(): Map<string, BlockDefinition> {
-    return new Map(Object.entries(this.config.blocks));
+    const entries = Object.entries(this.config.blocks).filter(
+      ([key, value]) => key !== "domain_rules" && !Array.isArray(value)
+    ) as [string, BlockDefinition][];
+    return new Map(entries);
   }
 
   /**
@@ -99,5 +107,17 @@ export class DomainRegistry {
    */
   getPhilosophy(): string[] {
     return this.config.philosophy ?? [];
+  }
+
+  /**
+   * Get default domain rules that apply to all blocks
+   * These are defined at blocks.domain_rules
+   */
+  getDefaultDomainRules(): string[] {
+    const defaultRules = this.config.blocks.domain_rules;
+    if (!defaultRules || !Array.isArray(defaultRules)) {
+      return [];
+    }
+    return defaultRules.map((rule) => rule.description);
   }
 }

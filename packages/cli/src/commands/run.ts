@@ -41,7 +41,7 @@ export const runCommand = new Command("run")
 
     // Determine which blocks to validate
     const blocksToValidate = options.all
-      ? Object.keys(config.blocks)
+      ? Object.keys(config.blocks).filter(key => key !== 'domain_rules')
       : blockName
         ? [blockName]
         : [];

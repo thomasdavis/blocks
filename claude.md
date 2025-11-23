@@ -2,6 +2,25 @@
 
 This document explains how Claude Code (and other AI coding assistants) should work with Blocks.
 
+## 🔬 Discovery Phase Notice
+
+**IMPORTANT:** Blocks is currently in an exploratory discovery phase. We're building multiple example projects in different domains to understand what the specification should be.
+
+**What this means:**
+- The spec (blocks.yml schema) is evolving based on practical examples
+- Current examples: Resume themes (JSON Resume), Blog content validation (markdown)
+- We're discovering patterns through building, not enforcing a fixed API
+- Expect the schema and validator behavior to change as we learn
+- Focus on what feels powerful vs. what's documented
+
+**Current approach:**
+1. Build real examples in diverse domains
+2. Observe what works and what feels awkward
+3. Refine the specification based on discoveries
+4. Document learnings and architectural insights
+
+This is intentional experimentation to find the right abstractions.
+
 ## Overview
 
 Blocks provides a **negotiation layer** for human-AI collaboration by:
@@ -95,7 +114,36 @@ Example output:
 2. Re-run `blocks run get_weather_and_translate`
 3. Repeat until all checks pass
 
-### 5. Handle Domain Drift
+### 5. Use Default Domain Rules (DRY Principle)
+
+Define domain rules once for all blocks using `blocks.domain_rules`:
+
+```yaml
+blocks:
+  # Default rules apply to ALL blocks
+  domain_rules:
+    - id: semantic_html
+      description: "Must use semantic HTML tags (header, main, section, article)"
+    - id: accessibility
+      description: "Must include proper ARIA labels"
+
+  theme.modern:
+    description: "Modern theme"
+    # Inherits semantic_html + accessibility rules automatically
+
+  theme.creative:
+    description: "Creative theme"
+    domain_rules:
+      # Override: replace defaults completely
+      - id: creative_freedom
+        description: "Creative themes can break conventions"
+```
+
+**Inheritance behavior:**
+- If block omits `domain_rules`: inherits `blocks.domain_rules`
+- If block defines `domain_rules`: **overrides** defaults completely (explicit beats implicit)
+
+### 6. Handle Domain Drift
 
 When you introduce a new concept not in the spec:
 
@@ -236,6 +284,50 @@ blocks run get_weather_and_translate
            ↓
         (loop back to step 3)
 ```
+
+## Example Projects
+
+Blocks includes multiple example projects to explore different domain patterns:
+
+### 1. JSON Resume Themes (`examples/json-resume-themes/`)
+
+**Domain:** Template rendering with semantic HTML validation
+**Pattern:** Transformation blocks (data → HTML)
+**Key learnings:**
+- Template source validation (not output validation)
+- Accessibility and responsive design as domain constraints
+- Handlebars template analysis by AI
+
+### 2. Blog Content Validator (`examples/blog-content-validator/`)
+
+**Domain:** Content quality validation for markdown blog posts
+**Pattern:** Validation blocks (file analysis → compliance report)
+**Key learnings:**
+- File-based inputs (markdown files, not JSON objects)
+- Multi-validator composition (humor, structure, SEO, markdown quality)
+- Content quality as semantic constraints (not just syntax)
+
+**How it works:**
+```typescript
+// Validator reads markdown file and analyzes content
+export function validateHumorTone(post: BlogPost) {
+  const content = readMarkdownFile(post.path);
+  // Domain validator checks if humor is present
+  return { compliant: true, issues: [] };
+}
+```
+
+**Domain rules for blog content:**
+- Must include humor and maintain brand voice
+- Must have proper content structure (intro, body, conclusion, TL;DR)
+- Must meet SEO standards (meta descriptions, keyword density)
+- Must have valid markdown syntax, working links, image alt text
+
+This example explores:
+- Validating content quality (semantic), not just structure (syntactic)
+- Reading file sources directly (markdown files)
+- Multi-block composition (5 validators working together)
+- Domain constraints for creative content (humor, tone, voice)
 
 ## Multi-Block Projects
 

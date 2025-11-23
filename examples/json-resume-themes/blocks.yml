@@ -91,6 +91,17 @@ templates:
 # ——————————————————————————————————————————
 
 blocks:
+  # Default domain rules for ALL resume themes
+  domain_rules:
+    - id: semantic_html
+      description: "Must use semantic HTML tags (header, main, section, article)"
+    - id: accessibility
+      description: "Must include proper ARIA labels and semantic structure"
+    - id: responsive_design
+      description: "Must use CSS media queries for responsive layout"
+    - id: visual_hierarchy
+      description: "Must establish clear visual hierarchy with typography"
+
   theme.modern_professional:
     type: template
     description: "Clean, modern resume theme with professional styling"
@@ -117,15 +128,7 @@ blocks:
       - work
       - education
       - skills
-    domain_rules:
-      - id: semantic_html
-        description: "Must use semantic HTML tags (header, main, section, article)"
-      - id: accessibility
-        description: "Must include proper ARIA labels and semantic structure"
-      - id: responsive_design
-        description: "Must use CSS media queries for responsive layout"
-      - id: visual_hierarchy
-        description: "Must establish clear visual hierarchy with typography"
+    # Inherits blocks.domain_rules (semantic_html, accessibility, responsive_design, visual_hierarchy)
 
 # ——————————————————————————————————————————
 # VALIDATORS

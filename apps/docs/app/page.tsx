@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { CopyButton } from './copy-button';
+import { AISlogan } from './ai-slogan';
 
 export default function HomePage() {
   return (
@@ -24,11 +25,11 @@ export default function HomePage() {
             <br />
             with Guardrails
           </h1>
-          <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed max-w-3xl mx-auto">
-            A <strong>negotiation layer</strong> for human-AI collaboration.
-            Both humans and AI write code freely—Blocks validates the result and reports drift,
-            helping you decide whether to fix code or update the spec.
-          </p>
+
+          {/* AI-Generated Elevator Pitch */}
+          <div className="mb-8">
+            <AISlogan />
+          </div>
 
           {/* Quick Start */}
           <div className="bg-slate-900 dark:bg-slate-950 rounded-lg p-6 mb-8 max-w-2xl mx-auto border border-slate-800">

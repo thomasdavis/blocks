@@ -61,16 +61,20 @@ function getChangesets(): Changeset[] {
     for (const path of possiblePaths) {
       if (existsSync(path)) {
         changesetDir = path;
+        console.log('[Changelog] Found .changeset at:', path);
         break;
       }
     }
 
     if (!changesetDir) {
-      console.error('Could not find .changeset directory');
+      console.error('[Changelog] Could not find .changeset directory. Tried:', possiblePaths);
+      console.error('[Changelog] process.cwd():', process.cwd());
+      console.error('[Changelog] __dirname:', __dirname);
       return [];
     }
 
     const files = readdirSync(changesetDir);
+    console.log('[Changelog] Found files in .changeset:', files);
 
     const changesets = files
       .filter((f) => f.endsWith('.md') && f !== 'README.md')
@@ -78,9 +82,10 @@ function getChangesets(): Changeset[] {
       .filter((c): c is Changeset => c !== null)
       .reverse(); // Most recent first
 
+    console.log('[Changelog] Parsed changesets:', changesets.length);
     return changesets;
   } catch (error) {
-    console.error('Error reading changesets:', error);
+    console.error('[Changelog] Error reading changesets:', error);
     return [];
   }
 }

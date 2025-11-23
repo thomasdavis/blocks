@@ -79,6 +79,17 @@ export function AISlogan() {
     setDisplayedText('');
 
     let index = 0;
+
+    // Type first character immediately
+    setDisplayedText(currentSlogan[0]);
+    index = 1;
+
+    if (currentSlogan.length === 1) {
+      // Edge case: single character slogan
+      setIsTyping(false);
+      return;
+    }
+
     const typeInterval = setInterval(() => {
       if (index < currentSlogan.length) {
         setDisplayedText((prev) => prev + currentSlogan[index]);
@@ -126,8 +137,8 @@ export function AISlogan() {
   return (
     <div className="relative min-h-[80px] flex items-center justify-center">
       <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl mx-auto text-center">
-        {displayedText}
-        {isTyping && (
+        {displayedText || ''}
+        {isTyping && displayedText && (
           <span className="inline-block w-0.5 h-6 ml-1 bg-blue-600 dark:bg-blue-400 animate-pulse" />
         )}
       </p>

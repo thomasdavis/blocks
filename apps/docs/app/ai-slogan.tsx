@@ -43,7 +43,14 @@ export function AISlogan() {
       console.log('[AI Slogan] Generated text:', fullText.substring(0, 100) + '...');
 
       if (fullText.trim()) {
-        setCurrentSlogan(fullText.trim());
+        // Remove surrounding quotes if present
+        let cleanText = fullText.trim();
+        if ((cleanText.startsWith('"') && cleanText.endsWith('"')) ||
+            (cleanText.startsWith("'") && cleanText.endsWith("'"))) {
+          cleanText = cleanText.slice(1, -1);
+        }
+        console.log('[AI Slogan] Clean text:', cleanText.substring(0, 100) + '...');
+        setCurrentSlogan(cleanText);
       } else {
         // Fallback if no text generated
         setCurrentSlogan('A negotiation layer for human-AI collaboration with semantic guardrails.');
@@ -65,9 +72,9 @@ export function AISlogan() {
 
   // Type out the current slogan character by character
   useEffect(() => {
-    if (!currentSlogan || isTyping) return;
+    if (!currentSlogan) return;
 
-    console.log('[AI Slogan] Starting to type out slogan...');
+    console.log('[AI Slogan] Starting to type out slogan:', currentSlogan.substring(0, 50) + '...');
     setIsTyping(true);
     setDisplayedText('');
 
@@ -83,8 +90,11 @@ export function AISlogan() {
       }
     }, 40); // 40ms per character for smooth typing
 
-    return () => clearInterval(typeInterval);
-  }, [currentSlogan, isTyping]);
+    return () => {
+      console.log('[AI Slogan] Cleaning up typing interval');
+      clearInterval(typeInterval);
+    };
+  }, [currentSlogan]);
 
   // Generate new slogan after current one finishes typing + pause
   useEffect(() => {

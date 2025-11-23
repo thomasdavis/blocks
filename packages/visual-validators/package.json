@@ -1,0 +1,33 @@
+{
+  "name": "@blocksai/visual-validators",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Visual validation for Blocks using screenshots and AI vision analysis",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@blocksai/validators": "workspace:*",
+    "@blocksai/ai": "workspace:*",
+    "@blocksai/schema": "workspace:*",
+    "playwright": "^1.49.1",
+    "axe-core": "^4.10.2",
+    "axe-playwright": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

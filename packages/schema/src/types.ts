@@ -52,6 +52,18 @@ export const DomainRuleSchema = z.object({
   description: z.string(),
 });
 
+export const ViewportSchema = z.object({
+  width: z.number(),
+  height: z.number(),
+  name: z.string(),
+});
+
+export const VisualValidationSchema = z.object({
+  viewports: z.array(ViewportSchema).optional(),
+  rules: z.array(z.string()).optional(),
+  enabled: z.boolean().optional(),
+});
+
 export const BlockDefinitionSchema = z.object({
   description: z.string(),
   path: z.string().optional(), // Custom path to block implementation
@@ -60,6 +72,7 @@ export const BlockDefinitionSchema = z.object({
   domain_rules: z.array(DomainRuleSchema).optional(),
   test_data: z.string().optional(), // Path to test data file for validation
   test_samples: z.array(z.any()).optional(), // Inline test data samples
+  visual_validation: VisualValidationSchema.optional(), // Visual validation configuration
 });
 
 // ——————————————————————————————————————————
@@ -77,6 +90,7 @@ export const ValidatorsSchema = z.object({
   shape: z.array(ValidatorSchema).optional(),
   lint: z.array(ValidatorSchema).optional(),
   domain: z.array(ValidatorSchema).optional(),
+  visual: z.array(ValidatorSchema).optional(), // Visual validation (screenshots + AI)
   chain: z.array(ValidatorSchema).optional(),
   shadow: z.array(ValidatorSchema).optional(),
   scoring: z.array(ValidatorSchema).optional(),

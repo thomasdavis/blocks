@@ -15,7 +15,11 @@ export function AISlogan() {
         method: 'POST',
       });
 
-      if (!response.ok) throw new Error('Failed to generate slogan');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[AI Slogan] API error:', errorData);
+        throw new Error(errorData.details || 'Failed to generate slogan');
+      }
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
@@ -44,11 +48,23 @@ export function AISlogan() {
         }
       }
 
-      setCurrentSlogan(fullText.trim());
+      if (fullText.trim()) {
+        setCurrentSlogan(fullText.trim());
+      } else {
+        // Fallback if no text generated
+        setCurrentSlogan('A negotiation layer for human-AI collaboration with semantic guardrails.');
+      }
       setIsGenerating(false);
     } catch (error) {
-      console.error('Error generating slogan:', error);
-      setCurrentSlogan('A negotiation layer for human-AI collaboration with semantic guardrails.');
+      console.error('[AI Slogan] Error:', error);
+      // Use a nice fallback
+      const fallbacks = [
+        'A negotiation layer for human-AI collaboration with semantic guardrails.',
+        'Multi-layer validation catches everything from type errors to missing ARIA labels.',
+        'Both humans and AI write code freely—Blocks validates the result and reports drift.',
+        'Your spec evolves with your code through drift detection and multi-layer validation.',
+      ];
+      setCurrentSlogan(fallbacks[Math.floor(Math.random() * fallbacks.length)]);
       setIsGenerating(false);
     }
   }, []);

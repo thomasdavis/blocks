@@ -326,8 +326,22 @@ Blocks is a **negotiation layer** where humans and AI collaborate with guardrail
 
 export async function POST() {
   try {
+    // Check for API key
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('[Slogan API] Missing OPENAI_API_KEY');
+      return new Response(
+        JSON.stringify({ error: 'API key not configured' }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     const result = streamText({
-      model: openai('gpt-4o'),
+      model: openai('gpt-4o', {
+        apiKey: process.env.OPENAI_API_KEY,
+      }),
       system: `You are a creative copywriter crafting unique elevator pitches for Blocks - a framework for human-AI collaboration with semantic guardrails.
 
 Your task: Generate a ONE-SENTENCE elevator pitch that captures what Blocks does in a memorable, engaging way.
@@ -364,7 +378,16 @@ Generate ONE unique elevator pitch now.`,
 
     return result.toDataStreamResponse();
   } catch (error) {
-    console.error('Slogan generation error:', error);
-    return new Response('Error generating slogan', { status: 500 });
+    console.error('[Slogan API] Generation error:', error);
+    return new Response(
+      JSON.stringify({
+        error: 'Error generating slogan',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   }
 }

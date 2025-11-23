@@ -1,19 +1,24 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export function AISlogan() {
   const [currentSlogan, setCurrentSlogan] = useState('');
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const hasInitialized = useRef(false);
 
-  const generateSlogan = useCallback(async () => {
+  const generateSlogan = async () => {
+    console.log('[AI Slogan] Generating new slogan...');
     setIsGenerating(true);
+
     try {
       const response = await fetch('/api/generate-slogan', {
         method: 'POST',
       });
+
+      console.log('[AI Slogan] Response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -35,6 +40,8 @@ export function AISlogan() {
         }
       }
 
+      console.log('[AI Slogan] Generated text:', fullText.substring(0, 100) + '...');
+
       if (fullText.trim()) {
         setCurrentSlogan(fullText.trim());
       } else {
@@ -54,12 +61,13 @@ export function AISlogan() {
       setCurrentSlogan(fallbacks[Math.floor(Math.random() * fallbacks.length)]);
       setIsGenerating(false);
     }
-  }, []);
+  };
 
   // Type out the current slogan character by character
   useEffect(() => {
     if (!currentSlogan || isTyping) return;
 
+    console.log('[AI Slogan] Starting to type out slogan...');
     setIsTyping(true);
     setDisplayedText('');
 
@@ -69,6 +77,7 @@ export function AISlogan() {
         setDisplayedText((prev) => prev + currentSlogan[index]);
         index++;
       } else {
+        console.log('[AI Slogan] Finished typing');
         clearInterval(typeInterval);
         setIsTyping(false);
       }
@@ -80,19 +89,29 @@ export function AISlogan() {
   // Generate new slogan after current one finishes typing + pause
   useEffect(() => {
     if (!isTyping && currentSlogan && !isGenerating) {
+      console.log('[AI Slogan] Scheduling next generation in 8 seconds...');
       // Wait 8 seconds after typing completes, then generate next
       const timer = setTimeout(() => {
+        console.log('[AI Slogan] Triggering next generation');
         generateSlogan();
       }, 8000);
 
-      return () => clearTimeout(timer);
+      return () => {
+        console.log('[AI Slogan] Clearing timeout');
+        clearTimeout(timer);
+      };
     }
-  }, [isTyping, currentSlogan, isGenerating, generateSlogan]);
+  }, [isTyping, currentSlogan, isGenerating]);
 
   // Generate first slogan on mount
   useEffect(() => {
-    generateSlogan();
-  }, [generateSlogan]);
+    if (!hasInitialized.current) {
+      console.log('[AI Slogan] Initial mount - generating first slogan');
+      hasInitialized.current = true;
+      generateSlogan();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="relative min-h-[80px] flex items-center justify-center">

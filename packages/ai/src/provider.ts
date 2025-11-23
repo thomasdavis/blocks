@@ -1,25 +1,101 @@
 import { openai } from "@ai-sdk/openai";
-import { generateObject, generateText } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
+import { google } from "@ai-sdk/google";
+import { generateObject, generateText, type LanguageModel } from "ai";
 import { z } from "zod";
 
+export type ProviderName = "openai" | "anthropic" | "google";
+
 export interface AIProviderConfig {
-  apiKey?: string;
+  /**
+   * AI provider to use (default: "openai")
+   * Supported: openai, anthropic, google
+   */
+  provider?: ProviderName;
+
+  /**
+   * Model name to use (default depends on provider)
+   * OpenAI: "gpt-4o-mini", "gpt-4o", "gpt-4-turbo"
+   * Anthropic: "claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022"
+   * Google: "gemini-1.5-flash", "gemini-1.5-pro"
+   */
   model?: string;
+
+  /**
+   * API key (optional - will use env vars if not provided)
+   * Env vars: OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY
+   */
+  apiKey?: string;
 }
 
 /**
  * AI Provider wrapper for semantic validation tasks
- * Uses Vercel AI SDK v6 with OpenAI
+ * Uses Vercel AI SDK v6 with support for OpenAI, Anthropic, and Google
+ *
+ * @example
+ * // Use OpenAI (default)
+ * const ai = new AIProvider();
+ *
+ * @example
+ * // Use Anthropic Claude
+ * const ai = new AIProvider({
+ *   provider: "anthropic",
+ *   model: "claude-3-5-sonnet-20241022"
+ * });
+ *
+ * @example
+ * // Use Google Gemini
+ * const ai = new AIProvider({
+ *   provider: "google",
+ *   model: "gemini-1.5-flash"
+ * });
  */
 export class AIProvider {
-  private model: string;
+  private languageModel: LanguageModel;
+  private provider: ProviderName;
+  private modelName: string;
 
   constructor(config: AIProviderConfig = {}) {
-    this.model = config.model ?? "gpt-5.1-mini";
+    this.provider = config.provider ?? "openai";
 
-    // Configure OpenAI API key from config or environment
+    // Set default models per provider
+    const defaultModels: Record<ProviderName, string> = {
+      openai: "gpt-4o-mini",
+      anthropic: "claude-3-5-sonnet-20241022",
+      google: "gemini-1.5-flash",
+    };
+
+    this.modelName = config.model ?? defaultModels[this.provider];
+
+    // Configure API key if provided
     if (config.apiKey) {
-      process.env.OPENAI_API_KEY = config.apiKey;
+      const envVar = this.getApiKeyEnvVar(this.provider);
+      process.env[envVar] = config.apiKey;
+    }
+
+    // Initialize language model based on provider
+    this.languageModel = this.createLanguageModel(this.provider, this.modelName);
+  }
+
+  private getApiKeyEnvVar(provider: ProviderName): string {
+    const envVars: Record<ProviderName, string> = {
+      openai: "OPENAI_API_KEY",
+      anthropic: "ANTHROPIC_API_KEY",
+      google: "GOOGLE_GENERATIVE_AI_API_KEY",
+    };
+    return envVars[provider];
+  }
+
+  private createLanguageModel(provider: ProviderName, model: string): LanguageModel {
+    switch (provider) {
+      case "openai":
+        return openai(model);
+      case "anthropic":
+        return anthropic(model);
+      case "google":
+        return google(model);
+      default:
+        throw new Error(`Unsupported provider: ${provider}`);
     }
   }
 
@@ -32,7 +108,7 @@ export class AIProvider {
     system?: string;
   }): Promise<z.infer<T>> {
     const result = await generateObject({
-      model: openai(this.model),
+      model: this.languageModel,
       schema: params.schema,
       prompt: params.prompt,
       ...(params.system && { system: params.system }),
@@ -46,7 +122,7 @@ export class AIProvider {
    */
   async generateText(params: { prompt: string; system?: string }): Promise<string> {
     const result = await generateText({
-      model: openai(this.model),
+      model: this.languageModel,
       prompt: params.prompt,
       ...(params.system && { system: params.system }),
     });

@@ -133,6 +133,26 @@ export const ProjectSchema = z.object({
 });
 
 // ——————————————————————————————————————————
+// AI Configuration
+// ——————————————————————————————————————————
+
+export const AIConfigSchema = z.object({
+  /**
+   * AI provider to use (default: "openai")
+   * Supported: openai, anthropic, google
+   */
+  provider: z.enum(["openai", "anthropic", "google"]).optional(),
+
+  /**
+   * Model name to use (default depends on provider)
+   * OpenAI: "gpt-4o-mini", "gpt-4o", "gpt-4-turbo"
+   * Anthropic: "claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022"
+   * Google: "gemini-1.5-flash", "gemini-1.5-pro"
+   */
+  model: z.string().optional(),
+});
+
+// ——————————————————————————————————————————
 // Blocks Collection (supports default domain_rules + block definitions)
 // ——————————————————————————————————————————
 
@@ -157,6 +177,7 @@ export const BlocksConfigSchema = z.object({
   pipeline: PipelineSchema.optional(),
   agent: AgentSchema.optional(),
   targets: TargetsSchema.optional(),
+  ai: AIConfigSchema.optional(),
 });
 
 // ——————————————————————————————————————————
@@ -177,6 +198,8 @@ export type Blocks = z.infer<typeof BlocksSchema>;
 
 export type Validator = z.infer<typeof ValidatorSchema>;
 export type Validators = z.infer<typeof ValidatorsSchema>;
+
+export type AIConfig = z.infer<typeof AIConfigSchema>;
 
 export type PipelineStep = z.infer<typeof PipelineStepSchema>;
 export type Pipeline = z.infer<typeof PipelineSchema>;

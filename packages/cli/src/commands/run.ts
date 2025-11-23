@@ -51,8 +51,11 @@ export const runCommand = new Command("run")
       process.exit(1);
     }
 
-    // Initialize AI provider
-    const ai = new AIProvider();
+    // Initialize AI provider from config or defaults
+    const ai = new AIProvider({
+      provider: config.ai?.provider,
+      model: config.ai?.model,
+    });
 
     // Run validators for each block
     for (const name of blocksToValidate) {

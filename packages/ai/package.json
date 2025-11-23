@@ -25,6 +25,8 @@
     "@blocksai/schema": "workspace:*",
     "@blocksai/domain": "workspace:*",
     "@ai-sdk/openai": "latest",
+    "@ai-sdk/anthropic": "latest",
+    "@ai-sdk/google": "latest",
     "ai": "latest",
     "zod": "^3.24.1"
   },

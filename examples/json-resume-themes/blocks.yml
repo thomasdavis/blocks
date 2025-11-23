@@ -2,6 +2,12 @@ project:
   name: "JSON Resume Themes"
   domain: "jsonresume.themes"
 
+# AI Configuration (optional)
+# Defaults to OpenAI gpt-4o-mini if not specified
+ai:
+  provider: "openai"  # Options: openai, anthropic, google
+  model: "gpt-4o-mini"  # OpenAI: gpt-4o-mini, gpt-4o | Anthropic: claude-3-5-sonnet-20241022 | Google: gemini-1.5-flash
+
 philosophy:
   - "Resume themes must prioritize readability and professionalism."
   - "All themes must be responsive and accessible."

@@ -1,0 +1,219 @@
+---
+title: AI Configuration
+description: Configure AI providers and models for domain validation
+---
+
+# AI Configuration
+
+Blocks uses AI for semantic domain validation. The framework is built on **Vercel AI SDK v6** and supports multiple AI providers.
+
+## Supported Providers
+
+- **OpenAI** (default) - GPT-4o, GPT-4o-mini, GPT-4-turbo
+- **Anthropic** - Claude 3.5 Sonnet, Claude 3.5 Haiku
+- **Google** - Gemini 1.5 Flash, Gemini 1.5 Pro
+
+## Quick Start
+
+### 1. Set API Key
+
+Create a `.env` file in your project root:
+
+```bash
+# For OpenAI (default)
+OPENAI_API_KEY=sk-...
+
+# For Anthropic Claude
+# ANTHROPIC_API_KEY=sk-ant-...
+
+# For Google Gemini
+# GOOGLE_GENERATIVE_AI_API_KEY=...
+```
+
+### 2. Configure in blocks.yml
+
+Add an `ai` section to configure your provider and model:
+
+```yaml
+project:
+  name: "My Project"
+  domain: "myapp.domain"
+
+# AI Configuration (optional)
+ai:
+  provider: "openai"  # Options: openai, anthropic, google
+  model: "gpt-4o-mini"
+
+# ... rest of your config
+```
+
+## Provider Configuration
+
+### OpenAI (Default)
+
+```yaml
+ai:
+  provider: "openai"
+  model: "gpt-4o-mini"  # or "gpt-4o", "gpt-4-turbo"
+```
+
+Environment variable: `OPENAI_API_KEY`
+
+**Recommended models:**
+- `gpt-4o-mini` - Fast, cost-effective (default)
+- `gpt-4o` - Best quality, more expensive
+- `gpt-4-turbo` - Good balance
+
+### Anthropic Claude
+
+```yaml
+ai:
+  provider: "anthropic"
+  model: "claude-3-5-sonnet-20241022"
+```
+
+Environment variable: `ANTHROPIC_API_KEY`
+
+**Recommended models:**
+- `claude-3-5-sonnet-20241022` - Best for complex domain validation
+- `claude-3-5-haiku-20241022` - Faster, more cost-effective
+
+### Google Gemini
+
+```yaml
+ai:
+  provider: "google"
+  model: "gemini-1.5-flash"
+```
+
+Environment variable: `GOOGLE_GENERATIVE_AI_API_KEY`
+
+**Recommended models:**
+- `gemini-1.5-flash` - Fast, cost-effective
+- `gemini-1.5-pro` - Best quality
+
+## Default Behavior
+
+If you don't specify `ai` configuration, Blocks will use:
+- **Provider**: OpenAI
+- **Model**: gpt-4o-mini
+
+## Examples
+
+### Using Claude for Semantic Validation
+
+```yaml
+project:
+  name: "Blog Content Validator"
+  domain: "content.blog.validation"
+
+ai:
+  provider: "anthropic"
+  model: "claude-3-5-sonnet-20241022"
+
+philosophy:
+  - "Blog posts must include humor"
+  - "Content should be conversational"
+
+blocks:
+  domain_rules:
+    - id: humor_required
+      description: "Must include wit or light-hearted commentary"
+
+  validator.blog_post:
+    description: "Validates blog content"
+```
+
+### Using Gemini for Resume Themes
+
+```yaml
+project:
+  name: "JSON Resume Themes"
+  domain: "jsonresume.themes"
+
+ai:
+  provider: "google"
+  model: "gemini-1.5-flash"
+
+philosophy:
+  - "Resume themes must prioritize readability"
+```
+
+## Programmatic Usage
+
+You can also configure AI providers programmatically:
+
+```typescript
+import { AIProvider } from "@blocksai/ai";
+
+// Use OpenAI (default)
+const ai = new AIProvider();
+
+// Use Anthropic Claude
+const claude = new AIProvider({
+  provider: "anthropic",
+  model: "claude-3-5-sonnet-20241022"
+});
+
+// Use Google Gemini
+const gemini = new AIProvider({
+  provider: "google",
+  model: "gemini-1.5-flash"
+});
+
+// Use custom API key
+const custom = new AIProvider({
+  provider: "openai",
+  model: "gpt-4o",
+  apiKey: "sk-..."
+});
+```
+
+## How AI is Used
+
+Blocks uses AI for **semantic domain validation** in the domain validator:
+
+1. **Reads all block files** (templates, code, utilities)
+2. **Analyzes source code** against domain rules and philosophy
+3. **Checks semantic alignment** with domain concepts
+4. **Reports drift** when code doesn't match domain spec
+
+The AI doesn't execute code - it analyzes **source code** to ensure domain compliance.
+
+## Cost Considerations
+
+- **Development**: Use fast, cheap models (gpt-4o-mini, claude-haiku, gemini-flash)
+- **CI/CD**: Consider costs when running on every commit
+- **Production validation**: Use best models (gpt-4o, claude-sonnet, gemini-pro)
+
+## Troubleshooting
+
+### Missing API Key
+
+```
+Error: Missing API key for provider 'openai'
+```
+
+**Solution**: Set the appropriate environment variable in `.env`
+
+### Invalid Model
+
+```
+Error: The requested model 'gpt-5-mini' does not exist
+```
+
+**Solution**: Check the model name matches the provider's available models
+
+### Rate Limits
+
+If you hit rate limits, consider:
+- Using a different provider
+- Adding delays between validations
+- Upgrading your API tier
+- Using faster/cheaper models for development
+
+## Next Steps
+
+- [Configure validators](/docs/getting-started/configuration#validators)
+- [Understand domain validation](/docs/core-concepts)
+- [See examples](/docs/examples/hr-recommendation-engine)

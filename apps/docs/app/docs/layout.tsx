@@ -13,6 +13,17 @@ export default function Layout({ children }: { children: ReactNode }) {
             <span className="font-bold">Blocks</span>
           </div>
         ),
+        links: [
+          {
+            text: 'Changelog',
+            url: '/changelog',
+          },
+          {
+            text: 'GitHub',
+            url: 'https://github.com/anthropics/blocks',
+            external: true,
+          },
+        ],
       }}
       sidebar={{
         banner: (

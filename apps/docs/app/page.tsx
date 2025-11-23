@@ -93,7 +93,7 @@ blocks:
 
 validators:
   domain:
-    - run: "domain.validation.v1"  # AI-powered`}
+    - run: "domain.validation"  # AI-powered`}
               </code>
             </pre>
           </div>
@@ -216,6 +216,36 @@ validators:
               <p className="text-slate-600 dark:text-slate-400">
                 AI-powered semantic analysis that understands your domain concepts and validates against them.
               </p>
+            </div>
+          </div>
+
+          {/* Extensible Validators Note */}
+          <div className="mt-12 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Fully Extensible Validator System</h3>
+                <p className="text-slate-600 dark:text-slate-400 mb-3">
+                  <strong>schema</strong>, <strong>shape</strong>, and <strong>domain</strong> are just the built-in validators we recommend.
+                  You can add any number of custom validators, override the defaults, or build your own validation pipeline.
+                </p>
+                <div className="bg-slate-900 dark:bg-slate-950 rounded-lg p-4 mt-4">
+                  <code className="text-sm text-slate-300 font-mono">
+                    <div className="text-slate-500"># Add your own custom validators</div>
+                    <div className="mt-2">validators:</div>
+                    <div className="ml-4 text-blue-400">custom:</div>
+                    <div className="ml-8">- run: <span className="text-green-400">"my.custom.validator"</span></div>
+                    <div className="ml-4 text-purple-400">security:</div>
+                    <div className="ml-8">- run: <span className="text-green-400">"security.audit"</span></div>
+                    <div className="ml-4 text-cyan-400">performance:</div>
+                    <div className="ml-8">- run: <span className="text-green-400">"perf.benchmark"</span></div>
+                  </code>
+                </div>
+              </div>
             </div>
           </div>
         </div>

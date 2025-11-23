@@ -50,7 +50,7 @@ function readAllBlockFiles(blockPath: string): Record<string, string> {
  * Domain validator - validates semantic alignment with domain spec
  */
 export class DomainValidator implements Validator {
-  id = "domain.validation.v1";
+  id = "domain.validation";
 
   private ai: AIProvider;
   private registry: DomainRegistry;

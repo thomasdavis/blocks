@@ -5,7 +5,7 @@ import type { Validator, ValidatorContext, ValidationResult, ValidationIssue } f
  * Schema validator - validates input/output signatures
  */
 export class IOSchemaValidator implements Validator {
-  id = "schema.io.v1";
+  id = "schema.io";
 
   async validate(context: ValidatorContext): Promise<ValidationResult> {
     const issues: ValidationIssue[] = [];

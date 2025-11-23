@@ -6,7 +6,7 @@ import { join } from "path";
  * Shape validator - validates file structure and exports
  */
 export class ExportsShapeValidator implements Validator {
-  id = "shape.exports.v1";
+  id = "shape.exports";
 
   async validate(context: ValidatorContext): Promise<ValidationResult> {
     const issues: ValidationIssue[] = [];

@@ -77,26 +77,26 @@ blocks:
 validators:
   schema:
     - id: io_schema
-      run: "schema.io.v1"
+      run: "schema.io"
 
   shape:
     - id: export_shape
-      run: "shape.exports.v1"
+      run: "shape.exports"
 
   domain:
     - id: domain_alignment
-      run: "domain.validation.v1"
+      run: "domain.validation"
 
 # Validation pipeline
 pipeline:
   name: "blog_content_validation"
   steps:
     - id: schema
-      run: "schema.io.v1"
+      run: "schema.io"
     - id: shape
-      run: "shape.exports.v1"
+      run: "shape.exports"
     - id: domain
-      run: "domain.validation.v1"
+      run: "domain.validation"
 
 # Discovery configuration
 targets:

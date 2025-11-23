@@ -265,8 +265,8 @@ validators:
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Resume Themes Example */}
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* JSON Resume Themes Example */}
               <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow">
                 <div className="p-8">
                   <div className="flex items-center gap-3 mb-4">
@@ -276,16 +276,15 @@ validators:
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold">JSON Resume Themes</h3>
+                      <h3 className="text-xl font-semibold">Resume Themes</h3>
                       <p className="text-sm text-slate-500 dark:text-slate-400">Template Rendering</p>
                     </div>
                   </div>
                   <p className="text-slate-600 dark:text-slate-400 mb-4">
-                    Validates resume themes for semantic HTML, accessibility, and responsive design. Shows how domain rules eliminate duplication across themes.
+                    Validates resume themes for semantic HTML, accessibility, and responsive design using DRY domain rules.
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
                     <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs">Handlebars</span>
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs">Semantic HTML</span>
                     <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs">WCAG</span>
                   </div>
                   <Link
@@ -300,7 +299,7 @@ validators:
                 </div>
               </div>
 
-              {/* Blog Validator Example */}
+              {/* Blog Content Validator Example */}
               <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow">
                 <div className="p-8">
                   <div className="flex items-center gap-3 mb-4">
@@ -310,16 +309,15 @@ validators:
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold">Blog Content Validator</h3>
+                      <h3 className="text-xl font-semibold">Blog Validator</h3>
                       <p className="text-sm text-slate-500 dark:text-slate-400">Content Quality</p>
                     </div>
                   </div>
                   <p className="text-slate-600 dark:text-slate-400 mb-4">
-                    Validates markdown blog posts for humor and conversational tone. Demonstrates file-based inputs and domain constraints for subjective quality.
+                    Validates markdown posts for humor and conversational tone using AI-powered semantic analysis.
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
                     <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs">Markdown</span>
-                    <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs">Humor Detection</span>
                     <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs">Tone Analysis</span>
                   </div>
                   <Link
@@ -333,11 +331,44 @@ validators:
                   </Link>
                 </div>
               </div>
+
+              {/* HR Recommendation Engine Example */}
+              <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow">
+                <div className="p-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold">HR Engine</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Production-Ready</p>
+                    </div>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-400 mb-4">
+                    Complete recommendation system with scoring, ranking, and filtering. Shows multi-block composition.
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs">Scoring</span>
+                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs">Ranking</span>
+                  </div>
+                  <Link
+                    href="/docs/examples/hr-recommendation-engine"
+                    className="inline-flex items-center gap-2 text-green-600 dark:text-green-400 hover:underline font-medium"
+                  >
+                    View Example
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
             </div>
 
             <div className="mt-8 text-center">
               <p className="text-slate-600 dark:text-slate-400 mb-4">
-                Both examples helped shape the Blocks specification through practical discovery.
+                Each example helped shape the Blocks specification through practical discovery.
               </p>
               <Link
                 href="/docs/examples"

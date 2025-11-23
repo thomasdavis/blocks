@@ -76,34 +76,39 @@ export function AISlogan() {
 
     console.log('[AI Slogan] Starting to type out slogan:', currentSlogan.substring(0, 50) + '...');
     setIsTyping(true);
-    setDisplayedText('');
 
     let index = 0;
 
-    // Type first character immediately
-    setDisplayedText(currentSlogan[0]);
-    index = 1;
+    // Start with empty string
+    setDisplayedText('');
 
     if (currentSlogan.length === 1) {
       // Edge case: single character slogan
+      setDisplayedText(currentSlogan);
       setIsTyping(false);
       return;
     }
 
-    const typeInterval = setInterval(() => {
-      if (index < currentSlogan.length) {
-        setDisplayedText((prev) => prev + currentSlogan[index]);
-        index++;
-      } else {
-        console.log('[AI Slogan] Finished typing');
-        clearInterval(typeInterval);
-        setIsTyping(false);
-      }
-    }, 40); // 40ms per character for smooth typing
+    // Use a slight delay to ensure state updates properly
+    const startTimeout = setTimeout(() => {
+      const typeInterval = setInterval(() => {
+        setDisplayedText((prev) => {
+          const nextIndex = prev.length;
+          if (nextIndex < currentSlogan.length) {
+            return currentSlogan.substring(0, nextIndex + 1);
+          } else {
+            console.log('[AI Slogan] Finished typing');
+            clearInterval(typeInterval);
+            setIsTyping(false);
+            return prev;
+          }
+        });
+      }, 40); // 40ms per character for smooth typing
+    }, 10);
 
     return () => {
       console.log('[AI Slogan] Cleaning up typing interval');
-      clearInterval(typeInterval);
+      clearTimeout(startTimeout);
     };
   }, [currentSlogan]);
 
@@ -136,14 +141,8 @@ export function AISlogan() {
 
   return (
     <div className="relative min-h-[80px] flex items-center justify-center">
-      <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl mx-auto text-center">
-        {displayedText || ''}
-        {isTyping && displayedText && (
-          <span className="inline-block w-0.5 h-6 ml-1 bg-blue-600 dark:bg-blue-400 animate-pulse" />
-        )}
-      </p>
-      {isGenerating && !isTyping && (
-        <div className="absolute -top-8 right-0 flex items-center gap-2 text-xs text-slate-400">
+      {isGenerating && !isTyping ? (
+        <div className="flex items-center gap-2 text-sm text-slate-400">
           <div className="flex gap-1">
             <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
             <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -151,6 +150,13 @@ export function AISlogan() {
           </div>
           <span>Generating next pitch...</span>
         </div>
+      ) : (
+        <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl mx-auto text-center">
+          {displayedText}
+          {isTyping && displayedText.length > 0 && (
+            <span className="inline-block w-0.5 h-6 ml-1 bg-blue-600 dark:bg-blue-400 animate-pulse" />
+          )}
+        </p>
       )}
     </div>
   );

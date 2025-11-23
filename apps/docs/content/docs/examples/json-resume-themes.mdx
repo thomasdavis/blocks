@@ -1,0 +1,390 @@
+---
+title: JSON Resume Themes
+description: Template rendering with semantic HTML, accessibility, and responsive design validation
+---
+
+# JSON Resume Themes
+
+A practical example showing how Blocks validates resume themes for semantic HTML, accessibility (WCAG), and responsive design. This example demonstrates how domain rules eliminate duplication across multiple themes.
+
+## Overview
+
+This example implements a system for rendering professional resume themes using Handlebars templates, with multi-layer validation ensuring:
+
+- **Semantic HTML** - Proper use of header, main, section, article tags
+- **Accessibility** - ARIA labels, semantic structure, keyboard navigation
+- **Responsive Design** - Mobile-first approach with media queries
+- **Visual Hierarchy** - Clear typography and spacing
+
+## Domain Model
+
+### Entities
+
+```yaml
+domain:
+  entities:
+    resume:
+      fields:
+        - basics      # Name, email, phone, summary
+        - work        # Work experience history
+        - education   # Educational background
+        - skills      # Technical and soft skills
+        - projects    # Personal/professional projects
+        - languages   # Language proficiency
+```
+
+### Philosophy
+
+```yaml
+philosophy:
+  - "Resume themes must prioritize readability and professionalism"
+  - "All themes must be responsive and accessible"
+  - "Semantic HTML and proper structure are required"
+  - "Visual hierarchy guides the reader through content"
+```
+
+## Domain Rules (DRY)
+
+Instead of repeating validation rules for each theme, define them once:
+
+```yaml
+blocks:
+  domain_rules:
+    - id: semantic_html
+      description: "Must use semantic HTML tags (header, main, section, article)"
+    - id: accessibility
+      description: "Must include proper ARIA labels and semantic structure"
+    - id: responsive_design
+      description: "Must include responsive meta tags and mobile-first CSS"
+    - id: visual_hierarchy
+      description: "Must have clear typography scale and spacing rhythm"
+```
+
+All theme blocks inherit these rules automatically.
+
+## Example Blocks
+
+### Modern Professional Theme
+
+```yaml
+blocks:
+  theme.modern_professional:
+    description: "Clean, modern resume theme with professional styling"
+    inputs:
+      - name: resume
+        type: entity.resume
+    outputs:
+      - name: html
+        type: string
+        measures: [valid_html]
+```
+
+**Implementation** (`blocks/modern-professional/block.ts`):
+
+```typescript
+import Handlebars from 'handlebars';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+export interface Resume {
+  basics: {
+    name: string;
+    label: string;
+    email: string;
+    phone?: string;
+    summary?: string;
+    location?: {
+      city: string;
+      countryCode: string;
+    };
+  };
+  work?: Array<{
+    company: string;
+    position: string;
+    startDate: string;
+    endDate?: string;
+    summary?: string;
+    highlights?: string[];
+  }>;
+  education?: Array<{
+    institution: string;
+    area: string;
+    studyType: string;
+    startDate: string;
+    endDate?: string;
+  }>;
+  skills?: Array<{
+    name: string;
+    level?: string;
+    keywords?: string[];
+  }>;
+}
+
+const templateSource = readFileSync(
+  join(__dirname, 'template.hbs'),
+  'utf-8'
+);
+const template = Handlebars.compile(templateSource);
+
+export function modernProfessionalTheme(resume: Resume) {
+  // Input validation only - domain rules validated at dev time
+  if (!resume.basics?.name || !resume.basics?.label) {
+    throw new Error("Resume must include basics.name and basics.label");
+  }
+
+  return { html: template(resume) };
+}
+```
+
+**Template** (`blocks/modern-professional/template.hbs`):
+
+```handlebars
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{basics.name}} - {{basics.label}}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #2563eb;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      color: #1e3a8a;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin: 2rem 0 1rem;
+      color: #2563eb;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    section { margin-bottom: 2rem; }
+
+    @media (max-width: 640px) {
+      body { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      h2 { font-size: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <header role="banner">
+    <h1>{{basics.name}}</h1>
+    <p class="subtitle" aria-label="Professional title">{{basics.label}}</p>
+    {{#if basics.email}}
+      <p><a href="mailto:{{basics.email}}" aria-label="Email contact">{{basics.email}}</a></p>
+    {{/if}}
+  </header>
+
+  <main role="main">
+    {{#if basics.summary}}
+      <section aria-labelledby="summary-heading">
+        <h2 id="summary-heading">Summary</h2>
+        <p>{{basics.summary}}</p>
+      </section>
+    {{/if}}
+
+    {{#if work}}
+      <section aria-labelledby="experience-heading">
+        <h2 id="experience-heading">Experience</h2>
+        {{#each work}}
+          <article class="work-item">
+            <h3>{{position}} at {{company}}</h3>
+            <p class="dates">{{startDate}} - {{#if endDate}}{{endDate}}{{else}}Present{{/if}}</p>
+            {{#if summary}}<p>{{summary}}</p>{{/if}}
+            {{#if highlights}}
+              <ul aria-label="Key achievements">
+                {{#each highlights}}<li>{{this}}</li>{{/each}}
+              </ul>
+            {{/if}}
+          </article>
+        {{/each}}
+      </section>
+    {{/if}}
+
+    {{#if education}}
+      <section aria-labelledby="education-heading">
+        <h2 id="education-heading">Education</h2>
+        {{#each education}}
+          <article class="education-item">
+            <h3>{{studyType}} in {{area}}</h3>
+            <p>{{institution}}</p>
+            <p class="dates">{{startDate}} - {{endDate}}</p>
+          </article>
+        {{/each}}
+      </section>
+    {{/if}}
+
+    {{#if skills}}
+      <section aria-labelledby="skills-heading">
+        <h2 id="skills-heading">Skills</h2>
+        <ul aria-label="Technical skills">
+          {{#each skills}}
+            <li><strong>{{name}}</strong>{{#if level}} ({{level}}){{/if}}</li>
+          {{/each}}
+        </ul>
+      </section>
+    {{/if}}
+  </main>
+</body>
+</html>
+```
+
+## Validation
+
+Run validation during development:
+
+```bash
+blocks run theme.modern_professional
+```
+
+### Multi-Layer Feedback
+
+**Schema Validator** (deterministic):
+- ✓ Input type matches `entity.resume`
+- ✓ Output type matches `string`
+
+**Shape Validator** (deterministic):
+- ✓ `index.ts` exports theme
+- ✓ `block.ts` exists
+- ✓ Template file present
+
+**Domain Validator** (AI-powered):
+- ✓ Template uses semantic HTML (header, main, section, article)
+- ✓ ARIA labels present for all sections
+- ✓ Responsive meta tag included
+- ✓ Media queries for mobile devices
+- ✓ Clear visual hierarchy with typography scale
+
+## Benefits of This Approach
+
+### 1. DRY Domain Rules
+
+All themes inherit the same semantic requirements:
+
+```yaml
+blocks:
+  domain_rules:
+    - id: semantic_html
+    - id: accessibility
+    - id: responsive_design
+
+  theme.modern_professional: {}  # Inherits all domain_rules
+  theme.creative: {}              # Inherits all domain_rules
+  theme.minimal: {}               # Inherits all domain_rules
+```
+
+### 2. Development-Time Validation
+
+The domain validator reads **template SOURCE** during development:
+
+- Analyzes `template.hbs` for semantic HTML
+- Checks CSS for responsive patterns
+- Validates ARIA structure
+- No runtime HTML parsing needed
+
+### 3. Simple Block Implementation
+
+Blocks stay focused (20-30 lines):
+
+```typescript
+export function theme(resume: Resume) {
+  // Input validation only
+  if (!resume.basics?.name) {
+    throw new Error("Resume must include name");
+  }
+
+  // Render and return
+  return { html: template(resume) };
+}
+```
+
+Domain compliance is enforced by validators, not runtime code.
+
+### 4. Consistent Quality
+
+All themes must pass the same standards:
+
+- Semantic HTML
+- WCAG accessibility
+- Mobile-responsive
+- Clear hierarchy
+
+## Adding Custom Theme Rules
+
+Override domain rules for specific themes:
+
+```yaml
+blocks:
+  domain_rules:
+    - id: semantic_html
+    - id: accessibility
+
+  theme.creative:
+    domain_rules:
+      # Override: creative theme has different requirements
+      - id: semantic_html
+      - id: accessibility
+      - id: bold_typography
+        description: "Must use large, bold headings for visual impact"
+      - id: color_contrast
+        description: "Must maintain WCAG AAA contrast ratios"
+```
+
+## Real-World Usage
+
+```typescript
+import { modernProfessionalTheme } from './blocks/modern-professional';
+
+const resume = {
+  basics: {
+    name: "Jane Smith",
+    label: "Senior Software Engineer",
+    email: "jane@example.com",
+    summary: "Full-stack engineer with 8 years of experience..."
+  },
+  work: [
+    {
+      company: "Tech Corp",
+      position: "Senior Engineer",
+      startDate: "2020-01",
+      highlights: [
+        "Led team of 5 engineers",
+        "Reduced API latency by 40%"
+      ]
+    }
+  ],
+  skills: [
+    { name: "TypeScript", level: "Expert" },
+    { name: "React", level: "Advanced" }
+  ]
+};
+
+const { html } = modernProfessionalTheme(resume);
+// Serve or save HTML
+```
+
+## Next Steps
+
+- [Configure AI providers](/docs/getting-started/ai-configuration) for domain validation
+- [Understand validation architecture](/docs/core-concepts)
+- [Explore HR Recommendation Engine](/docs/examples/hr-recommendation-engine) for multi-block composition

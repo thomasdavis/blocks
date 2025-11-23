@@ -1,0 +1,535 @@
+---
+title: Blog Content Validator
+description: Validate markdown blog posts for humor, conversational tone, and content quality
+---
+
+# Blog Content Validator
+
+A practical example demonstrating how Blocks validates subjective content quality using AI-powered semantic validation. This example shows how to enforce tone, humor, and engagement in markdown blog posts.
+
+## Overview
+
+This example implements content validation for blog posts, ensuring they meet quality standards:
+
+- **Humor Detection** - Posts must include wit or light-hearted commentary
+- **Conversational Tone** - Use of "you" and "I" to connect with readers
+- **Engagement** - Questions, anecdotes, or relatable scenarios
+- **Structural Quality** - Proper headings, formatting, and flow
+
+Unlike deterministic validation (type checking, schema validation), this example uses **AI-powered semantic validation** to assess subjective qualities.
+
+## Domain Model
+
+### Entities
+
+```yaml
+domain:
+  entities:
+    blog_post:
+      fields:
+        - title
+        - content      # Markdown content
+        - author
+        - tags
+        - published_date
+```
+
+### Philosophy
+
+```yaml
+philosophy:
+  - "Blog posts must include humor and wit to engage readers"
+  - "Content should be conversational, using 'you' and 'I'"
+  - "Posts should connect through anecdotes or relatable scenarios"
+  - "Technical accuracy is required, but tone matters equally"
+```
+
+## Domain Rules
+
+```yaml
+blocks:
+  domain_rules:
+    - id: humor_required
+      description: "Must include wit, light-hearted commentary, or humor"
+    - id: conversational_tone
+      description: "Must use 'you' and 'I' to create connection with reader"
+    - id: engagement
+      description: "Must include questions, anecdotes, or relatable scenarios"
+    - id: proper_structure
+      description: "Must have clear headings, formatting, and logical flow"
+```
+
+## Example Block
+
+### Blog Post Validator
+
+```yaml
+blocks:
+  validator.blog_post:
+    description: "Validates blog post content for quality and tone"
+    inputs:
+      - name: markdown_file
+        type: string
+        constraints:
+          - "Must be valid markdown"
+          - "Must be at least 500 words"
+    outputs:
+      - name: validation_result
+        type: object
+        constraints:
+          - "Must include humor_score, tone_score, engagement_score"
+          - "Must provide specific feedback on improvements"
+```
+
+**Implementation** (`blocks/blog-validator/block.ts`):
+
+```typescript
+import { readFileSync } from 'fs';
+import { marked } from 'marked';
+
+export interface BlogPost {
+  content: string;
+  wordCount: number;
+  hasHeadings: boolean;
+  hasLists: boolean;
+  hasCodeBlocks: boolean;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  scores: {
+    humor: number;        // 0-1
+    tone: number;         // 0-1
+    engagement: number;   // 0-1
+    structure: number;    // 0-1
+  };
+  feedback: string[];
+  suggestions: string[];
+}
+
+export function validateBlogPost(markdownFile: string): ValidationResult {
+  // Read markdown content
+  const content = readFileSync(markdownFile, 'utf-8');
+
+  // Parse markdown structure
+  const blogPost = parseMarkdown(content);
+
+  // Input validation
+  if (blogPost.wordCount < 500) {
+    return {
+      valid: false,
+      scores: { humor: 0, tone: 0, engagement: 0, structure: 0 },
+      feedback: ["Post is too short (minimum 500 words)"],
+      suggestions: ["Expand content with examples or anecdotes"]
+    };
+  }
+
+  // Basic structure checks (deterministic)
+  const structureScore = calculateStructureScore(blogPost);
+
+  // Note: Domain validator (AI-powered) will analyze content for:
+  // - Humor detection
+  // - Conversational tone
+  // - Engagement patterns
+  // This is checked at development time by reading block source files
+
+  return {
+    valid: structureScore > 0.7,
+    scores: {
+      humor: 0,        // Scored by domain validator
+      tone: 0,         // Scored by domain validator
+      engagement: 0,   // Scored by domain validator
+      structure: structureScore
+    },
+    feedback: [],
+    suggestions: []
+  };
+}
+
+function parseMarkdown(content: string): BlogPost {
+  const tokens = marked.lexer(content);
+
+  const wordCount = content.split(/\s+/).length;
+  const hasHeadings = tokens.some(t => t.type === 'heading');
+  const hasLists = tokens.some(t => t.type === 'list');
+  const hasCodeBlocks = tokens.some(t => t.type === 'code');
+
+  return {
+    content,
+    wordCount,
+    hasHeadings,
+    hasLists,
+    hasCodeBlocks
+  };
+}
+
+function calculateStructureScore(post: BlogPost): number {
+  let score = 0.5; // Base score
+
+  if (post.hasHeadings) score += 0.2;
+  if (post.hasLists || post.hasCodeBlocks) score += 0.15;
+  if (post.wordCount > 800) score += 0.15;
+
+  return Math.min(score, 1.0);
+}
+```
+
+## How Domain Validation Works
+
+The **domain validator** reads the markdown content and analyzes it with AI:
+
+### 1. Reads All Files
+
+```
+blocks/blog-validator/
+├── block.ts           # Implementation
+├── index.ts           # Exports
+└── examples/          # Example blog posts
+    ├── good.md
+    └── needs-work.md
+```
+
+The domain validator reads **all files** including examples.
+
+### 2. AI Analysis Prompt
+
+The AI receives:
+
+```
+Philosophy:
+- Blog posts must include humor and wit
+- Content should be conversational
+- Posts should connect through anecdotes
+
+Domain Rules:
+- humor_required: Must include wit or light-hearted commentary
+- conversational_tone: Must use 'you' and 'I'
+- engagement: Must include questions or anecdotes
+
+Files:
+--- block.ts ---
+[implementation source]
+
+--- examples/good.md ---
+# Why TypeScript Makes Me Happy (and Sometimes Sad)
+
+Let me tell you about my relationship with TypeScript. It's complicated.
+
+You know that feeling when you refactor code and TypeScript catches 47
+potential bugs before you even run it? That's the good part. But then
+there's the 30-minute struggle with a generic type that should "just work."
+
+I've learned to embrace both...
+
+--- examples/needs-work.md ---
+# TypeScript Overview
+
+TypeScript is a superset of JavaScript that adds static typing.
+
+Benefits:
+- Type safety
+- Better IDE support
+- Fewer runtime errors
+
+Configuration requires a tsconfig.json file...
+
+Task: Analyze whether this block's example content demonstrates:
+1. Humor and wit
+2. Conversational tone
+3. Reader engagement
+4. Structural quality
+```
+
+### 3. AI Validation Result
+
+```
+✓ examples/good.md demonstrates humor ("complicated relationship")
+✓ Uses conversational tone ("Let me tell you", "You know that feeling")
+✓ Engages with relatable scenario (refactoring experience)
+✓ Clear structure with headings
+
+⚠ examples/needs-work.md lacks humor
+⚠ Tone is encyclopedic, not conversational
+⚠ No engagement - just lists facts
+✓ Structure is adequate
+
+Suggestion: Add personal anecdotes or humor to needs-work.md
+```
+
+## Example: Good Blog Post
+
+```markdown
+# Why I Finally Learned to Stop Worrying and Love the YAML
+
+I used to hate YAML. I mean, really hate it.
+
+You've probably been there. You're happily writing JSON, everything's fine,
+and then someone says, "Hey, let's use YAML instead!" And suddenly you're
+debugging invisible whitespace at 2 AM.
+
+But here's the thing—I was wrong.
+
+## The Moment It Clicked
+
+It happened during a code review. I was looking at a 200-line JSON config
+file, and my eyes glazed over. Then I saw the YAML version:
+
+```yaml
+database:
+  host: localhost
+  port: 5432
+  credentials:
+    user: admin
+    password: ${DB_PASSWORD}
+```
+
+Wait. I could actually *read* this?
+
+## What I Learned
+
+YAML isn't the enemy. Bad tooling is. Once I set up:
+
+- Proper syntax highlighting
+- A linter that actually works
+- VS Code extension for validation
+
+...it became delightful. The indentation that once terrified me now makes
+complex config files scannable.
+
+## The Twist
+
+Now I write YAML configs for fun. Don't tell anyone.
+
+But seriously—if you're struggling with YAML, it's not you. It's probably
+your editor. Fix that first, then give it another shot.
+
+You might surprise yourself.
+```
+
+**Why This Passes:**
+
+✅ **Humor**: "learned to stop worrying", "Don't tell anyone"
+✅ **Conversational**: Uses "you", "I", direct address
+✅ **Engagement**: Relatable scenario (debugging at 2 AM), personal story
+✅ **Structure**: Clear headings, code examples, logical flow
+
+## Example: Post That Needs Work
+
+```markdown
+# YAML Configuration Guide
+
+YAML (YAML Ain't Markup Language) is a data serialization format.
+
+## Features
+
+- Human-readable syntax
+- Supports complex data structures
+- No closing tags required
+- Whitespace-significant
+
+## Basic Syntax
+
+Keys and values are separated by colons:
+
+```yaml
+key: value
+```
+
+Arrays use hyphens:
+
+```yaml
+items:
+  - item1
+  - item2
+```
+
+## Conclusion
+
+YAML is useful for configuration files.
+```
+
+**Why This Fails:**
+
+❌ **No Humor**: Purely informational
+❌ **Not Conversational**: Encyclopedia tone
+❌ **No Engagement**: Lists facts without connection
+⚠️ **Structure OK**: Has headings and examples, but lifeless
+
+**AI Feedback:**
+
+```
+⚠ [domain] Missing humor or wit
+→ Suggestion: Add personal anecdote or light-hearted observation
+
+⚠ [domain] Tone is encyclopedic, not conversational
+→ Suggestion: Use "you" and "I", ask questions, share experience
+
+⚠ [domain] No reader engagement
+→ Suggestion: Include relatable scenario or ask rhetorical questions
+```
+
+## Validation Workflow
+
+### 1. Write Blog Post
+
+Create `content/my-post.md`:
+
+```markdown
+# Your Amazing Blog Post
+
+Content here...
+```
+
+### 2. Run Validation
+
+```bash
+blocks run validator.blog_post --input content/my-post.md
+```
+
+### 3. Get Semantic Feedback
+
+```
+📦 Validating: validator.blog_post
+
+  ✓ schema ok
+  ✓ shape ok
+
+  ⚠ [domain] Content lacks humor
+  → Suggestion: Add wit or light-hearted commentary
+
+  ⚠ [domain] Tone is formal, not conversational
+  → Suggestion: Use "you" and "I" to connect with reader
+
+  ✓ [domain] Structure is clear
+  ✓ [domain] Word count adequate
+
+  ❌ Block "validator.blog_post" has warnings
+```
+
+### 4. Improve Content
+
+Add humor and conversational elements:
+
+```markdown
+# Why I Love TypeScript (Most Days)
+
+Let me tell you about my relationship with TypeScript...
+
+You know that feeling when you refactor 1000 lines and TypeScript
+catches every edge case? That's why I keep coming back.
+```
+
+### 5. Re-validate
+
+```bash
+blocks run validator.blog_post --input content/my-post.md
+```
+
+```
+✓ schema ok
+✓ shape ok
+✓ domain ok
+
+✅ Block "validator.blog_post" passed all validations
+```
+
+## Benefits of This Approach
+
+### 1. Subjective Quality Becomes Measurable
+
+AI validation converts "sounds good" into specific feedback:
+
+- "Lacks humor" → Add specific type of wit
+- "Too formal" → Use personal pronouns
+- "Not engaging" → Include questions or anecdotes
+
+### 2. Consistent Voice Across Writers
+
+All posts pass the same tone standards:
+
+- Multiple authors maintain consistent voice
+- New writers get actionable feedback
+- Quality bar is explicit, not implicit
+
+### 3. Evolving Style Guide
+
+Update philosophy and domain rules as your voice evolves:
+
+```yaml
+philosophy:
+  - "Blog posts must include humor and wit"  # Updated emphasis
+  - "Use technical accuracy with accessible explanations"  # New requirement
+```
+
+All existing posts get re-validated against new standards.
+
+### 4. Learning Tool for Writers
+
+Domain validator teaches writing patterns:
+
+```
+⚠ Post lacks conversational tone
+→ Example: "You might be wondering..." vs "One might wonder..."
+```
+
+Writers learn through specific, actionable feedback.
+
+## Custom Scoring Validators
+
+For dashboard metrics, add custom scoring:
+
+```yaml
+validators:
+  custom:
+    - id: blog.humor_score
+      run: "custom.humor.v1"
+      mode: shadow  # Advisory only, doesn't block
+```
+
+Track humor scores over time without blocking publication.
+
+## Real-World Usage
+
+```typescript
+import { validateBlogPost } from './blocks/blog-validator';
+
+// Validate before publishing
+const result = validateBlogPost('./content/new-post.md');
+
+if (!result.valid) {
+  console.log('Content needs improvement:');
+  result.feedback.forEach(f => console.log(`  - ${f}`));
+  result.suggestions.forEach(s => console.log(`  → ${s}`));
+  process.exit(1);
+}
+
+console.log('✅ Post ready for publication');
+console.log(`Scores: Humor ${result.scores.humor}, Tone ${result.scores.tone}`);
+```
+
+## CI/CD Integration
+
+Add to GitHub Actions:
+
+```yaml
+name: Validate Blog Content
+
+on: [pull_request]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm install
+      - run: blocks run validator.blog_post --input content/**/*.md
+```
+
+All new posts must pass tone and humor validation before merge.
+
+## Next Steps
+
+- [Configure AI models](/docs/getting-started/ai-configuration) for semantic validation
+- [Understand domain validation](/docs/core-concepts)
+- [Explore HR example](/docs/examples/hr-recommendation-engine) for scoring patterns

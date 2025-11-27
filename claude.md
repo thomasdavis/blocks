@@ -1,509 +1,65 @@
-# Claude Code Integration Guide
+# Blocks Internal Development Guide
 
-This document explains how Claude Code (and other AI coding assistants) should work with Blocks.
+This document is for developers working on the Blocks framework itself (core packages, validators, CLI).
 
-## 🔬 Discovery Phase Notice
+## Project Architecture
 
-**IMPORTANT:** Blocks is currently in an exploratory discovery phase. We're building multiple example projects in different domains to understand what the specification should be.
-
-**What this means:**
-- The spec (blocks.yml schema) is evolving based on practical examples
-- Current examples: Resume themes (JSON Resume), Blog content validation (markdown)
-- We're discovering patterns through building, not enforcing a fixed API
-- Expect the schema and validator behavior to change as we learn
-- Focus on what feels powerful vs. what's documented
-
-**Current approach:**
-1. Build real examples in diverse domains
-2. Observe what works and what feels awkward
-3. Refine the specification based on discoveries
-4. Document learnings and architectural insights
-
-This is intentional experimentation to find the right abstractions.
-
-## Overview
-
-Blocks provides a **negotiation layer** for human-AI collaboration by:
-
-- Explicit domain semantics
-- Multi-layer validation feedback
-- Drift detection and resolution
-- Spec evolution
-
-Both humans and AI agents write code freely. Blocks validates the result and reports drift, helping you decide whether to fix code or update the spec.
-
-## Core Philosophy: Humans and Agents Both Write Code
-
-**CRITICAL:** Blocks does NOT restrict who can edit module code.
-
-- ✅ Humans can write and modify any block
-- ✅ AI agents can write and modify any block
-- ✅ Blocks detects when either introduces drift
-- ✅ You decide: fix code or update spec
-
-**Not a restriction** - a recovery mechanism for consistency.
-**Not enforcing rules** - helping you reason about drift.
-**Not locking down code** - giving you a semantic compass.
-
-## Core Workflow
-
-### 1. Always Read blocks.yml First
-
-Before creating or modifying any block, read `blocks.yml` to understand:
-
-- Domain entities, signals, and measures
-- Block definitions (inputs, outputs, constraints)
-- Domain rules
-- Philosophy statements
-- Validation pipeline
-
-```typescript
-// Example: Reading blocks.yml in Claude Code workflow
-const config = await readFile("blocks.yml");
-// Parse and understand the domain...
-```
-
-### 2. Write Code According to Spec
-
-When implementing a block:
-
-- Use the defined inputs/outputs
-- Reference domain entities via `entity.<name>`
-- Return outputs that match measure constraints
-- Follow domain rules
-- Express domain intent clearly in code
-
-### 3. Run Validation After Changes
-
-**ALWAYS** run the Blocks CLI after making changes:
-
-```bash
-blocks run <block-name>
-```
-
-Or for all blocks:
-
-```bash
-blocks run --all
-```
-
-### 4. Interpret Validator Output as Instructions
-
-Validator output is **not just feedback** — it's **instructions for what to fix**.
-
-Example output:
+### Monorepo Structure
 
 ```
-📦 Validating: get_weather_and_translate
-
-  ✓ schema ok
-  ✓ shape ok
-
-  ⚠ [domain] Missing mention of condition in output
-  → Suggestion: Ensure description_es includes weather condition
-
-  ⚠ [domain] Output too short for natural Spanish description
-  → Suggestion: Expand the description to be more natural
-
-  ❌ Block "get_weather_and_translate" has warnings
+blocks/
+├── packages/
+│   ├── cli/                # @blocksai/cli - CLI interface
+│   ├── schema/             # @blocksai/schema - blocks.yml parser
+│   ├── domain/             # @blocksai/domain - Domain modeling
+│   ├── validators/         # @blocksai/validators - Core validators
+│   ├── ai/                 # @blocksai/ai - AI provider abstraction
+│   └── visual-validators/  # @blocksai/visual-validators - Screenshot + vision
+├── apps/
+│   └── docs/               # Documentation site (Fumadocs + Next.js)
+├── examples/               # Example projects for testing patterns
+│   ├── json-resume-themes/
+│   └── blog-content-validator/
+└── docs/                   # Static documentation
 ```
 
-**What to do:**
+### Build System
 
-1. Fix the domain issues (add condition mention, expand description)
-2. Re-run `blocks run get_weather_and_translate`
-3. Repeat until all checks pass
+- **Package Manager:** pnpm 9.15.0
+- **Build Tool:** Turborepo (monorepo orchestration)
+- **Compiler:** tsup (TypeScript bundler)
+- **Runtime:** Node.js >=20.0.0
 
-### 5. Use Default Domain Rules (DRY Principle)
+### Dependencies
 
-Define domain rules once for all blocks using `blocks.domain_rules`:
+All packages use Vercel AI SDK v6 for LLM abstraction:
+- `@ai-sdk/openai` - OpenAI provider
+- `@ai-sdk/anthropic` - Anthropic Claude
+- `@ai-sdk/google` - Google Gemini
+- `ai` - Vercel AI SDK core
 
-```yaml
-blocks:
-  # Default rules apply to ALL blocks
-  domain_rules:
-    - id: semantic_html
-      description: "Must use semantic HTML tags (header, main, section, article)"
-    - id: accessibility
-      description: "Must include proper ARIA labels"
+## Core Principle: Development-Time Validation
 
-  theme.modern:
-    description: "Modern theme"
-    # Inherits semantic_html + accessibility rules automatically
+**CRITICAL:** Blocks validates SOURCE CODE at development time, NOT runtime behavior.
 
-  theme.creative:
-    description: "Creative theme"
-    domain_rules:
-      # Override: replace defaults completely
-      - id: creative_freedom
-        description: "Creative themes can break conventions"
+### Why This Matters
+
+Templates are deterministic:
+```
+Same input → Same template → Same output
 ```
 
-**Inheritance behavior:**
-- If block omits `domain_rules`: inherits `blocks.domain_rules`
-- If block defines `domain_rules`: **overrides** defaults completely (explicit beats implicit)
+If `template.hbs` passes validation during development, it will ALWAYS produce correct output at runtime.
 
-### 6. Handle Domain Drift
+**Consequence:**
+- Block implementations stay simple (~20 lines)
+- All semantic validation happens at development time
+- Domain validator reads ALL source files, not just implementations
+- No runtime parsing of output to check domain rules
 
-When you introduce a new concept not in the spec:
+### Development-Time vs Runtime
 
-```typescript
-// You write this:
-return {
-  description_es: "...",
-  alerts_es: ["alert1", "alert2"]  // ← NEW concept
-}
-```
-
-Validator detects it:
-
-```
-⚠ [domain] Undocumented output field: alerts_es
-→ Suggestion: Add alerts_es to outputs in blocks.yml
-```
-
-**What to do:**
-
-1. Ask the user: "Should I add `alerts_es` to the spec?"
-2. If yes, update `blocks.yml`:
-
-```yaml
-outputs:
-  - name: alerts_es
-    type: string[]
-    measures: [spanish_quality]
-    constraints:
-      - "Must be Spanish"
-```
-
-3. Re-run validation
-4. Should now pass
-
-## Example: Full Weather Block Workflow
-
-### Step 1: Read blocks.yml
-
-```yaml
-blocks:
-  get_weather_and_translate:
-    description: "Fetch weather & output Spanish description."
-    inputs:
-      - name: location
-        type: entity.location
-    outputs:
-      - name: description_es
-        type: string
-        measures: [spanish_quality]
-        constraints:
-          - "Must mention temperature"
-          - "Must mention condition"
-          - "Must mention city"
-```
-
-### Step 2: Write Implementation
-
-```typescript
-// blocks/get_weather_and_translate/block.ts
-export async function getWeatherAndTranslate(location: { city: string; country_code: string }) {
-  const weather = await fetchWeather(location);
-
-  return {
-    description_es: `En ${location.city}: ${weather.temp_c}°C y ${weather.condition}.`
-  };
-}
-```
-
-### Step 3: Run Validation
-
-```bash
-blocks run get_weather_and_translate
-```
-
-### Step 4: See Output
-
-```
-⚠ [domain] description_es does not mention condition in all cases
-⚠ [translation] Spanish quality score: 0.78 (below threshold)
-```
-
-### Step 5: Fix Issues
-
-```typescript
-export async function getWeatherAndTranslate(location: { city: string; country_code: string }) {
-  const weather = await fetchWeather(location);
-
-  const condition = translateCondition(weather.condition);
-
-  return {
-    description_es: `En ${location.city}, la temperatura es de ${weather.temp_c}°C con ${condition}.`
-  };
-}
-```
-
-### Step 6: Re-run
-
-```bash
-blocks run get_weather_and_translate
-```
-
-```
-✓ schema ok
-✓ shape ok
-✓ domain ok
-✓ translation ok
-
-✅ Block "get_weather_and_translate" passed all validations
-```
-
-## Validation Loop Pattern
-
-```
-┌─────────────────────────────────────┐
-│ 1. Read blocks.yml                  │
-└──────────┬──────────────────────────┘
-           ↓
-┌─────────────────────────────────────┐
-│ 2. Write/modify code                │
-└──────────┬──────────────────────────┘
-           ↓
-┌─────────────────────────────────────┐
-│ 3. Run: blocks run <name>           │
-└──────────┬──────────────────────────┘
-           ↓
-┌─────────────────────────────────────┐
-│ 4. Check validation output          │
-└──────────┬──────────────────────────┘
-           ↓
-        Pass? ──Yes──→ ✅ Done
-           ↓
-          No
-           ↓
-┌─────────────────────────────────────┐
-│ 5. Fix issues from validator output │
-└──────────┬──────────────────────────┘
-           ↓
-        (loop back to step 3)
-```
-
-## Example Projects
-
-Blocks includes multiple example projects to explore different domain patterns:
-
-### 1. JSON Resume Themes (`examples/json-resume-themes/`)
-
-**Domain:** Template rendering with semantic HTML validation
-**Pattern:** Transformation blocks (data → HTML)
-**Key learnings:**
-- Template source validation (not output validation)
-- Accessibility and responsive design as domain constraints
-- Handlebars template analysis by AI
-
-### 2. Blog Content Validator (`examples/blog-content-validator/`)
-
-**Domain:** Content quality validation for markdown blog posts
-**Pattern:** Validation blocks (file analysis → compliance report)
-**Key learnings:**
-- File-based inputs (markdown files, not JSON objects)
-- Multi-validator composition (humor, structure, SEO, markdown quality)
-- Content quality as semantic constraints (not just syntax)
-
-**How it works:**
-```typescript
-// Validator reads markdown file and analyzes content
-export function validateHumorTone(post: BlogPost) {
-  const content = readMarkdownFile(post.path);
-  // Domain validator checks if humor is present
-  return { compliant: true, issues: [] };
-}
-```
-
-**Domain rules for blog content:**
-- Must include humor and maintain brand voice
-- Must have proper content structure (intro, body, conclusion, TL;DR)
-- Must meet SEO standards (meta descriptions, keyword density)
-- Must have valid markdown syntax, working links, image alt text
-
-This example explores:
-- Validating content quality (semantic), not just structure (syntactic)
-- Reading file sources directly (markdown files)
-- Multi-block composition (5 validators working together)
-- Domain constraints for creative content (humor, tone, voice)
-
-## Multi-Block Projects
-
-When working on projects with many blocks (e.g., 100+ utility blocks, 100+ templates):
-
-### Strategy 1: Generate in Batches
-
-```bash
-# Generate 10 blocks
-# Then validate all
-blocks run --all
-```
-
-### Strategy 2: Validate Incrementally
-
-```bash
-# After each block
-blocks run <block-name>
-```
-
-### Strategy 3: Use Domain Rules
-
-Define domain rules to catch common mistakes:
-
-```yaml
-blocks:
-  civic_mindedness:
-    domain_rules:
-      - id: must_use_values
-        description: "Civic score must reference candidate values or volunteerism."
-```
-
-Domain validator will check these rules.
-
-## Understanding Validator Types
-
-1. **Schema** - Fast, deterministic (I/O types)
-2. **Shape** - Fast, deterministic (file structure)
-3. **Domain** - Slow, AI-powered (semantic alignment)
-4. **Lint** - Medium, deterministic (code quality) [coming soon]
-5. **Chain** - Multi-step pipelines [coming soon]
-6. **Shadow** - Advisory only (doesn't block) [coming soon]
-7. **Scoring** - Metrics for dashboards [coming soon]
-
-## AI Provider Configuration
-
-Blocks uses Vercel AI SDK v6 with OpenAI for semantic validation.
-
-Set your API key:
-
-```bash
-export OPENAI_API_KEY="sk-..."
-```
-
-Or configure in code (for library usage):
-
-```typescript
-import { AIProvider } from "@blocks/ai";
-
-const ai = new AIProvider({
-  apiKey: "sk-...",
-  model: "gpt-4o-mini"  // or gpt-4o
-});
-```
-
-## Best Practices
-
-### DO:
-
-- ✅ Always read `blocks.yml` before coding
-- ✅ Run validators after every change
-- ✅ Treat validator output as instructions
-- ✅ Ask user before modifying spec
-- ✅ Express domain intent clearly in code
-
-### DON'T:
-
-- ❌ Skip validation steps
-- ❌ Ignore warnings
-- ❌ Modify spec without user approval
-- ❌ Introduce concepts without documenting them
-- ❌ Write code that "tricks" validators
-
-## Philosophy Alignment
-
-Blocks philosophy (from `blocks.yml`):
-
-1. "Blocks must be small, composable, deterministic."
-2. "Blocks must express domain intent clearly in code."
-3. "All blocks must validate through multi-layer checks."
-4. "Spec and implementation must evolve together."
-
-Your code should embody these principles.
-
-## Troubleshooting
-
-### Validation fails with "AI validation failed"
-
-- Check that `OPENAI_API_KEY` is set
-- Check API quota/rate limits
-- Try again (AI validation can be flaky)
-
-### Domain validator says "undocumented concept"
-
-- This is **drift detection**
-- Ask user if concept should be added to spec
-- If yes, update `blocks.yml`
-- Re-run validation
-
-### Shape validator fails
-
-- Check that `index.ts` and `block.ts` exist
-- Check that exports are present
-- Follow file structure conventions
-
-## Integration with Claude Code
-
-When using this repo with Claude Code:
-
-1. Claude reads this file (`claude.md`)
-2. Claude reads `blocks.yml`
-3. Claude implements blocks
-4. Claude runs `blocks run <name>`
-5. Claude interprets output
-6. Claude fixes issues
-7. Claude proposes spec updates (if needed)
-
-This creates a **semantic feedback loop** where the agent learns domain constraints through validation.
-
-## Advanced: Custom Validators
-
-You can create custom validators:
-
-```typescript
-import { Validator, ValidatorContext, ValidationResult } from "@blocks/validators";
-
-export class CustomValidator implements Validator {
-  id = "custom.my_validator.v1";
-
-  async validate(context: ValidatorContext): Promise<ValidationResult> {
-    // Your validation logic
-    return {
-      valid: true,
-      issues: []
-    };
-  }
-}
-```
-
-Add to pipeline:
-
-```yaml
-validators:
-  custom:
-    - id: my_custom
-      run: "custom.my_validator.v1"
-
-pipeline:
-  steps:
-    - id: custom
-      run: "custom.my_validator.v1"
-```
-
----
-
-## Development Philosophy: How to Build Blocks
-
-This section documents critical architectural decisions and development patterns learned while building Blocks.
-
-### Core Principle: Development-Time vs Runtime Validation
-
-**CRITICAL:** Blocks is fundamentally a **development-time validator**, not a runtime validator.
-
-#### What This Means
-
-**Development-Time (Where Blocks Lives):**
+**Development-Time (Blocks' Domain):**
 - Validate SOURCE CODE during development
 - AI analyzes template files, implementation files, all block files
 - Provide semantic feedback to guide iterative improvement
@@ -515,382 +71,401 @@ This section documents critical architectural decisions and development patterns
 - NO parsing of output to check domain rules
 - Trust that validated source code produces correct output
 
-#### Why This Matters
+## Package Details
 
-Templates are **deterministic**:
-```
-Same input → Same template → Same output
-```
+### @blocksai/schema
 
-If `template.hbs` source passes validation during development, it will ALWAYS produce compliant HTML at runtime. No need to validate the output every time.
+**Purpose:** Parse and validate blocks.yml configuration
 
-**Wrong Approach (Runtime Validation):**
+**Key Files:**
+- `types.ts` (229 lines) - Zod schemas for entire blocks.yml structure
+- `parser.ts` (26 lines) - YAML parsing functions
+
+**Schema Structure:**
 ```typescript
-export function theme(resume: Resume) {
-  const html = template(resume);
-
-  // ❌ DON'T parse output at runtime
-  if (!html.includes('<header>')) throw new Error(...);
-  if (!html.includes('aria-label')) throw new Error(...);
-  // ... 170 lines of HTML parsing every render
-
-  return { html };
-}
-```
-
-**Correct Approach (Development-Time Validation):**
-```typescript
-// Block implementation (~20 lines)
-export function theme(resume: Resume) {
-  // ✓ Validate input data only
-  if (!resume.basics?.name) {
-    throw new Error("Resume must include name");
+BlocksConfigSchema = {
+  project: { name, domain }
+  philosophy?: string[]
+  domain?: {
+    entities: Record<string, { fields: string[] }>
+    signals: Record<string, { description, extraction_hint? }>
+    measures: Record<string, { constraints: string[] }>
   }
+  blocks: Record<string, BlockDefinition>
+  validators?: ValidatorConfig
+  pipeline?: Pipeline
+  agent?: Agent
+  targets?: Targets
+}
+```
 
-  // ✓ Render and trust template (validated at dev time)
-  return { html: template(resume) };
+**Exports:**
+```typescript
+parseBlocksConfig(yamlContent: string): BlocksConfig
+validateBlocksConfig(config: unknown): BlocksConfig
+isValidBlocksConfig(config: unknown): boolean
+```
+
+### @blocksai/domain
+
+**Purpose:** Domain semantics modeling and static analysis
+
+**Key Files:**
+- `registry.ts` (123 lines) - Central domain configuration registry
+- `analyzer.ts` (127 lines) - Static domain compliance checking
+
+**DomainRegistry Methods:**
+```typescript
+getEntities(): Record<string, Entity>
+getSignals(): Record<string, Signal>
+getMeasures(): Record<string, Measure>
+getBlock(name: string): BlockDefinition | undefined
+getDomainRules(blockName?: string): DomainRule[]
+getPhilosophy(): string[]
+```
+
+**DomainAnalyzer Methods:**
+```typescript
+analyzeBlock(blockName: string): AnalysisResult
+detectDrift(): DriftReport
+```
+
+**Architecture Note:** This package provides deterministic validation without AI - fast checks before slow AI validation.
+
+### @blocksai/ai
+
+**Purpose:** Multi-provider AI abstraction for semantic validation
+
+**Key File:** `provider.ts` (~300 lines)
+
+**Supported Providers:**
+- OpenAI (gpt-4o-mini, gpt-4o)
+- Anthropic (claude-3-5-sonnet, claude-3-5-haiku)
+- Google (gemini-1.5-flash, gemini-1.5-pro)
+
+**Key Methods:**
+```typescript
+generateStructured<T>(prompt: string, schema: ZodSchema<T>): Promise<T>
+generateText(prompt: string): Promise<string>
+validateDomainSemantics(context: DomainContext): Promise<ValidationResult>
+detectLanguage(text: string): Promise<string>
+scoreQuality(text: string, criteria: string): Promise<number>
+validateVisualSemantics(screenshots: Screenshot[], config: VisualConfig): Promise<VisualIssue[]>
+```
+
+**Configuration:**
+- Reads API keys from environment variables automatically
+- Falls back to config object if provided
+- Uses Vercel AI SDK v6 for universal provider interface
+
+### @blocksai/validators
+
+**Purpose:** Core validation implementations
+
+**Three Validator Types:**
+
+#### 1. Schema Validator (`schema/io-validator.ts`)
+- Validates input/output signatures match blocks.yml
+- Fast, deterministic
+- Checks: all inputs/outputs have name and type
+- Error codes: `INVALID_INPUT_SCHEMA`, `INVALID_OUTPUT_SCHEMA`
+
+#### 2. Shape Validator (`shape/exports-validator.ts`)
+- Validates file structure
+- Fast, filesystem-based
+- Checks: `index.ts` and `block.ts` exist, exports present
+- Error codes: `MISSING_FILE`, `NO_EXPORTS`
+
+#### 3. Domain Validator (`domain/domain-validator.ts`)
+- AI-powered semantic validation
+- Reads ALL files in block directory recursively
+- Excludes: node_modules, dist, build, .git, .turbo, coverage
+- Performs static analysis first (uses @blocksai/domain)
+- Falls back to AI for semantic checks
+- Falls back to warning on AI failures
+- Error codes: `DOMAIN_SEMANTIC_ISSUE`, `AI_VALIDATION_FAILED`
+
+**Common Interface:**
+```typescript
+interface Validator {
+  id: string;
+  validate(context: ValidatorContext): Promise<ValidationResult>;
 }
 
-// Validation happens when you run: blocks run theme.modern_professional
-// Domain validator reads template.hbs SOURCE and analyzes it with AI
+interface ValidatorContext {
+  blockName: string;
+  blockPath: string;
+  config: BlocksConfig;
+}
+
+interface ValidationResult {
+  valid: boolean;
+  issues: ValidationIssue[];
+}
 ```
+
+### @blocksai/visual-validators
+
+**Purpose:** Visual validation using screenshots and AI vision
+
+**Components:**
+
+#### ScreenshotCapture (`screenshot/capture.ts`)
+- Uses Playwright to capture HTML screenshots
+- Supports multiple viewports simultaneously
+- Browser initialization, capture, cleanup
+
+#### AxeValidator (`axe/axe-validator.ts`)
+- Deterministic WCAG accessibility checking
+- Uses axe-core library
+- Fast, precise A11y compliance
+
+#### VisionValidator (`vision/vision-validator.ts`)
+- AI-powered visual analysis with GPT-4o
+- Analyzes screenshots for:
+  - Color contrast and readability
+  - Visual hierarchy and flow
+  - Layout integrity across viewports
+  - Element visibility and spacing
+- Complements AxeValidator (AI + deterministic)
+
+**Types:**
+```typescript
+interface Viewport {
+  width: number;
+  height: number;
+  name: string;
+}
+
+interface Screenshot {
+  buffer: Buffer;
+  viewport: Viewport;
+}
+
+interface VisualIssue {
+  type: 'error' | 'warning';
+  code: string;
+  message: string;
+  suggestion?: string;
+  viewport?: string;
+}
+```
+
+### @blocksai/cli
+
+**Purpose:** Command-line interface
+
+**Commands:**
+- `blocks init` - Initialize blocks.yml
+- `blocks run [block-name]` - Validate single block
+- `blocks run --all` - Validate all blocks
+
+**Key Implementation Details:**
+- Loads .env file for API keys
+- Determines block path: `block.path` → `targets.discover.root` → "blocks"
+- Creates context object: `{ blockName, blockPath, config }`
+- Runs validators in sequence: schema → shape → domain
+- Colored output with Chalk, spinners with Ora
+- Exits with error code if validation fails
+
+**run.ts Flow:**
+```typescript
+1. Load blocks.yml (parseBlocksConfig)
+2. Initialize AI provider from config
+3. For each block:
+   a. Determine block path (custom or default)
+   b. Create validator context
+   c. Run schema validator
+   d. Run shape validator
+   e. Run domain validator (with spinner)
+   f. Aggregate issues
+   g. Print colored output
+4. Exit with error code if any errors
+```
+
+## Key Architectural Decisions
 
 ### Domain Validator Reads ALL Files
 
-The domain validator doesn't just read `block.ts` - it reads **every file in the block directory**.
+The domain validator reads **every file in the block directory** recursively.
 
-#### How It Works
+**Why:**
+- AI needs complete context (templates, styles, utilities, everything)
+- Works with any project organization
+- AI understands how files relate holistically
+- Future-proof for blocks with multiple components
 
-1. Recursively read all files in block path
-2. Exclude build artifacts (node_modules, dist, .git)
-3. Pass ALL files to AI with full context
-4. AI analyzes everything together
-
-#### Why This Is Better
-
-- **Complete context** - AI sees templates, styles, utilities, everything
-- **Flexible structure** - Works with any project organization
-- **Holistic validation** - AI understands how files relate
-- **Future-proof** - Handles blocks with multiple components
-
-#### Example
-
-```
-themes/modern-professional/
-├── block.ts          # Implementation
-├── template.hbs      # Handlebars template
-├── index.ts          # Exports
-└── utils.ts          # Helper functions
-
-Domain validator reads ALL 4 files and passes to AI:
-
-"Here are ALL the files for theme.modern_professional:
-
---- block.ts ---
+**Implementation:**
 ```typescript
-export function modernProfessionalTheme(resume: Resume) {
-  // implementation
+function readAllBlockFiles(blockPath: string): Record<string, string> {
+  // Recursively read all files
+  // Exclude: node_modules, dist, build, .git, .turbo, coverage
+  // Return: { "path/file.ts": "content", "template.hbs": "content" }
 }
 ```
 
---- template.hbs ---
-```handlebars
-<header role="banner">
-  <h1>{{basics.name}}</h1>
-```
+### Block Path Resolution (Flexible)
 
---- index.ts ---
-```typescript
-export { modernProfessionalTheme } from './block.js';
-```
+**Priority:**
+1. `block.path` in blocks.yml - Custom path
+2. `targets.discover.root` + blockName - Configured root
+3. Default "blocks" directory
 
-Analyze ALL files together for domain compliance..."
-```
+**Why:** Users can organize projects however they want. Respect their structure.
 
-### Keep Block Implementations Simple
+### Default Domain Rules (DRY)
 
-**Target: 20-50 lines** for most blocks.
-
-#### What Belongs in Block Implementations
-
-✅ **DO include:**
-- Input data validation (required fields exist)
-- Business logic
-- Template rendering / computation
-- Output generation
-- Error handling
-
-❌ **DON'T include:**
-- Validation of template compliance
-- Parsing output to check domain rules
-- Runtime enforcement of semantic HTML
-- Checking for ARIA labels in rendered HTML
-- Any logic that duplicates what validators do
-
-#### Before vs After Example
-
-**Before (250 lines):**
-```typescript
-export function modernProfessionalTheme(resume: Resume) {
-  // 40 lines of input validation
-  if (!resume.basics) throw new Error(...);
-  if (!resume.work) throw new Error(...);
-  if (!resume.education) throw new Error(...);
-  if (!resume.skills) throw new Error(...);
-
-  const html = template(resume);
-
-  // 170 lines of runtime HTML validation
-  validateSemanticHTML(html);
-  validateAccessibility(html);
-  validateResponsiveDesign(html);
-  validateVisualHierarchy(html);
-
-  return { html };
-}
-
-function validateSemanticHTML(html: string) {
-  // 30 lines parsing HTML...
-}
-
-function validateAccessibility(html: string) {
-  // 40 lines checking ARIA...
-}
-
-function validateResponsiveDesign(html: string) {
-  // 50 lines checking media queries...
-}
-
-function validateVisualHierarchy(html: string) {
-  // 50 lines checking typography...
-}
-```
-
-**After (20 lines):**
-```typescript
-/**
- * Domain compliance enforced at development time by Blocks validator.
- * Validator analyzes template.hbs source for semantic HTML, ARIA, responsiveness.
- */
-export function modernProfessionalTheme(resume: Resume, config?: ThemeConfig) {
-  // Input validation only
-  if (!resume.basics?.name || !resume.basics?.label) {
-    throw new Error("Resume must include basics.name and basics.label");
-  }
-
-  // Render and return
-  const html = template(resume);
-  return { html };
-}
-```
-
-### Project Structure Flexibility
-
-Users can organize their projects however they want using the `path` field in blocks.yml.
-
-#### Default Structure (If No Path)
-
+**Schema Support:**
 ```yaml
 blocks:
-  my_block:
-    description: "My block description"
-    # No path specified
+  domain_rules:  # Inherited by all blocks
+    - id: semantic_html
+      description: "..."
+
+  theme.modern:
+    description: "..."
+    # Inherits defaults
+
+  theme.creative:
+    domain_rules:  # Overrides defaults completely
+      - id: creative_freedom
+        description: "..."
 ```
 
-Blocks looks in: `blocks/my_block/` (or whatever `targets.discover.root` is set to)
-
-#### Custom Structure (With Path)
-
-```yaml
-blocks:
-  theme.modern_professional:
-    description: "Modern professional resume theme"
-    path: "themes/modern-professional"  # Custom location!
-```
-
-Blocks looks in: `themes/modern-professional/` directly
-
-#### Why This Matters
-
-Users aren't forced into a specific folder structure. They can:
-- Put templates in `themes/`
-- Put utilities in `lib/`
-- Put validators in `validators/`
-- Organize by feature, not by "blocks"
-
-The `path` field respects user's project organization.
-
-### Test Data Configuration
-
-Blocks supports flexible test data for validation.
-
-#### Option 1: External File (Recommended)
-
-```yaml
-blocks:
-  theme.modern_professional:
-    test_data: "test-data/sample-resume.json"
-```
-
-Good for: Large, realistic datasets
-
-#### Option 2: Inline Samples
-
-```yaml
-blocks:
-  calculate_score:
-    test_samples:
-      - { user: { id: 1, name: "Alice" } }
-      - { user: { id: 2, name: "Bob" } }
-```
-
-Good for: Simple data, quick tests
-
-#### Option 3: Both
-
-```yaml
-blocks:
-  theme.modern_professional:
-    test_data: "test-data/sample-resume.json"  # Main dataset
-    test_samples:  # Edge cases
-      - { basics: { name: "Minimal" } }
-```
-
-**Note:** In current version, test_data is defined in schema but not yet used by validators. Future feature for output validators.
+**Inheritance Logic:**
+- If block omits `domain_rules`: inherits `blocks.domain_rules`
+- If block defines `domain_rules`: overrides completely (explicit beats implicit)
 
 ### AI Validation Context
 
-The AI receives comprehensive context about Blocks philosophy and domain concepts.
+When domain validator calls AI, it passes:
 
-#### What AI Knows
+1. **Project Philosophy** - from `philosophy` field
+2. **Domain Concepts** - entities, signals, measures
+3. **ALL Block Files** - complete source code
+4. **Domain Rules** - default + block-specific
+5. **Validation Instructions** - what to check
 
-When validating, the AI prompt includes:
+**Prompt Structure:**
+```
+Project Philosophy:
+- "Blocks must be small, composable, deterministic."
+- "Express domain intent clearly in code."
 
-1. **Blocks Philosophy** (from blocks.yml):
-   ```
-   - "Resume themes must prioritize readability and professionalism."
-   - "All themes must be responsive and accessible."
-   ```
+Domain Concepts:
+- Entities: resume, user, theme_config
+- Signals: readability, engagement
+- Measures: valid_html, score_0_1
 
-2. **Domain Concepts**:
-   ```
-   - Entities: Core data types (e.g., resume, user)
-   - Signals: Domain concepts to extract (e.g., readability)
-   - Measures: Constraints on outputs (e.g., valid_html)
-   ```
+Domain Rules:
+- Must use semantic HTML tags
+- Must include ARIA labels
 
-3. **ALL Block Files**:
-   ```
-   --- block.ts ---
-   [full source code]
+ALL Block Files:
+--- block.ts ---
+[full source]
 
-   --- template.hbs ---
-   [full template source]
+--- template.hbs ---
+[full template]
 
-   --- index.ts ---
-   [exports]
-   ```
+--- index.ts ---
+[exports]
 
-4. **Domain Rules**:
-   ```
-   - Must use semantic HTML tags (header, main, section, article)
-   - Must include proper ARIA labels and semantic structure
-   ```
+Instructions:
+Analyze ALL files together. Check if:
+1. Expresses domain intent clearly
+2. Uses specified inputs/outputs correctly
+3. Adheres to all domain rules
+4. For templates: Check SOURCE for semantic HTML
+5. Does NOT introduce undocumented concepts
 
-5. **Validation Instructions**:
-   ```
-   Analyze ALL files together to determine if this block:
-   1. Expresses domain intent clearly in source code
-   2. Uses specified inputs/outputs correctly
-   3. Adheres to all domain rules
-   4. For templates: Check template SOURCE for semantic HTML
-   5. Does NOT introduce undocumented concepts
-   ```
+Return specific, actionable issues.
+```
 
-This comprehensive context helps AI provide intelligent, domain-aware feedback.
+## Development Workflow
 
-### Separation of Concerns
+### Building Locally
 
-Clear boundaries between what blocks do vs what validators do.
+```bash
+# Install dependencies
+pnpm install
 
-#### Block Responsibility
+# Build all packages
+pnpm build
 
-- Implement business logic
-- Validate input data
-- Render output
-- Handle errors
-- ~20-50 lines typical
+# Run CLI locally
+cd packages/cli
+pnpm build
+node dist/index.js init
+```
 
-#### Validator Responsibility
+### Testing Changes
 
-- Analyze source code
-- Check domain compliance
-- Verify semantic alignment
-- Detect drift
-- Provide feedback
+```bash
+# Test on example projects
+cd examples/json-resume-themes
+blocks run theme.modern_professional
 
-**Key Rule:** Blocks implement, validators validate. No overlap.
+cd examples/blog-content-validator
+blocks run post.good
+```
 
-### Development Workflow
+### Adding a New Validator
 
-When building features for Blocks:
+1. Create validator class in `packages/validators/src/<type>/`
+2. Implement `Validator` interface
+3. Export from package
+4. Add to CLI's validator pipeline in `packages/cli/src/commands/run.ts`
 
-#### 1. Start with Architecture
+**Example:**
+```typescript
+// packages/validators/src/lint/eslint-validator.ts
+import { Validator, ValidatorContext, ValidationResult } from '../types';
 
-Before coding, ask:
-- Is this development-time or runtime?
-- Does this validate source or output?
-- Should this be in the block or a validator?
-- Are we trusting validated code?
+export class ESLintValidator implements Validator {
+  id = "lint.eslint.v1";
 
-#### 2. Keep Validators Separate
+  async validate(context: ValidatorContext): Promise<ValidationResult> {
+    // Your validation logic
+    return {
+      valid: true,
+      issues: []
+    };
+  }
+}
+```
 
-Validators are in `packages/validators/`, not in block implementations.
+### Publishing
 
-#### 3. Test Both Layers
+Uses Changesets for versioning:
 
-- **Development validation:** Run `blocks run <name>` with test data
-- **Runtime behavior:** Unit tests for block logic
-- **Integration:** End-to-end with real data
+```bash
+# Create changeset
+pnpm changeset
 
-#### 4. Document Decisions
+# Version packages
+pnpm changeset version
 
-When making architectural choices, document them:
-- In code comments
-- In CLAUDE.md (this file)
-- In docs/validators-architecture.md
-- In commit messages
+# Publish to npm
+pnpm changeset publish
+```
 
-### Common Mistakes to Avoid
+## Common Mistakes to Avoid
 
-#### ❌ Runtime Validation of Template Compliance
+### ❌ Runtime Validation in Block Implementations
 
 ```typescript
-// DON'T do this
+// DON'T do this in blocks
 export function theme(resume: Resume) {
   const html = template(resume);
-  if (!html.includes('<header>')) {
-    throw new Error("Missing header tag");
-  }
+  if (!html.includes('<header>')) throw new Error(...);
   return { html };
 }
 ```
 
-**Why wrong:** Template is deterministic. If it passes dev-time validation, it's correct.
+**Why wrong:** Template is deterministic. If it passes dev-time validation, it's correct. This is what validators do, not blocks.
 
-#### ❌ Parsing Output for Domain Rules
-
-```typescript
-// DON'T do this
-const hasAriaLabels = html.match(/aria-label/g)?.length >= 3;
-if (!hasAriaLabels) {
-  throw new Error("Need more ARIA labels");
-}
-```
-
-**Why wrong:** This is what the domain validator does by analyzing SOURCE, not output.
-
-#### ❌ Validating Only block.ts
+### ❌ Validating Only block.ts
 
 ```typescript
 // In domain validator - DON'T do this
@@ -898,46 +473,41 @@ const code = readFileSync(join(blockPath, 'block.ts'), 'utf-8');
 await ai.validate({ code });  // ❌ Missing template!
 ```
 
-**Why wrong:** Need to read ALL files to give AI complete context.
+**Why wrong:** Need ALL files for complete context.
 
-#### ❌ Forcing Specific Folder Structure
+### ❌ Hardcoding Folder Structure
 
 ```typescript
 // DON'T do this
-const blockPath = join('blocks', blockName);  // ❌ Hardcoded!
+const blockPath = join('blocks', blockName);  // ❌ Ignores path field
 ```
 
-**Why wrong:** Users can organize projects however they want. Respect the `path` field.
+**Why wrong:** Users can customize with `path` field in blocks.yml.
 
-### Success Patterns
-
-#### ✅ Simple Block Implementation
+### ❌ Not Handling AI Failures Gracefully
 
 ```typescript
-export function theme(resume: Resume) {
-  if (!resume.basics?.name) {
-    throw new Error("Resume must include name");
-  }
-  return { html: template(resume) };
-}
+// DON'T do this
+const result = await ai.validateDomainSemantics(context);
+// Crash if AI fails
 ```
 
-**Why right:** Simple, focused, trusts validated template.
+**Why wrong:** AI can be flaky (rate limits, timeouts). Fall back to warnings, not errors.
 
-#### ✅ Read All Files in Validator
+## Success Patterns
+
+### ✅ Read All Files in Validator
 
 ```typescript
 const blockFiles = readAllBlockFiles(context.blockPath);
 await ai.validateDomainSemantics({
-  files: blockFiles,  // ✓ All files!
+  files: blockFiles,  // ✓ All files
   philosophy: context.config.philosophy,
   domainRules,
 });
 ```
 
-**Why right:** Complete context for AI analysis.
-
-#### ✅ Respect Custom Paths
+### ✅ Respect Custom Paths
 
 ```typescript
 const blockPath = block.path
@@ -945,9 +515,7 @@ const blockPath = block.path
   : join(process.cwd(), discoverRoot, blockName);
 ```
 
-**Why right:** Flexible, respects user's project structure.
-
-#### ✅ Validate Source, Not Output
+### ✅ Validate Source, Not Output
 
 ```typescript
 // In AI prompt
@@ -955,59 +523,94 @@ const blockPath = block.path
 Do NOT execute or render - analyze the SOURCE CODE."
 ```
 
-**Why right:** Source is deterministic, that's what matters.
+### ✅ Handle AI Failures Gracefully
 
-### Future Directions
-
-As Blocks evolves:
-
-#### Output Validators (Coming Soon)
-
-Will render with test data and validate output:
-```yaml
-validators:
-  output:
-    - id: html_structure
-      run: "output.html.v1"
+```typescript
+try {
+  const result = await ai.validateDomainSemantics(context);
+  return result;
+} catch (error) {
+  return {
+    valid: true,  // Don't block on AI failure
+    issues: [{
+      type: 'warning',
+      code: 'AI_VALIDATION_FAILED',
+      message: `AI validation failed: ${error.message}`
+    }]
+  };
+}
 ```
 
-Use case: Checking generated output structure, link validation, etc.
+## Testing Strategy
 
-#### Visual Validators (Future)
+### Unit Tests
 
-Screenshot-based validation with vision models:
-```yaml
-validators:
-  visual:
-    - id: contrast_check
-      run: "visual.contrast.v1"
+Test individual validators in isolation:
+
+```typescript
+describe('SchemaValidator', () => {
+  it('should validate input types', async () => {
+    const validator = new SchemaValidator();
+    const context = createMockContext();
+    const result = await validator.validate(context);
+    expect(result.valid).toBe(true);
+  });
+});
 ```
 
-Use case: WCAG color contrast, visual hierarchy, responsive layout testing.
+### Integration Tests
 
-#### Progressive Validation
+Test full validation pipeline:
 
-Validate incrementally as you code, not just on save.
+```bash
+# Run validation on example projects
+blocks run --all
+```
 
-#### Auto-Healing
+### Example Projects as Test Cases
 
-AI proposes fixes for validation failures, not just feedback.
+The `examples/` directory serves as integration tests:
+- `json-resume-themes/` - Template rendering pattern
+- `blog-content-validator/` - Content validation pattern
 
-### Key Takeaways for Development
+Keep these examples working as reference implementations.
+
+## Future Development
+
+### Planned Features
+
+- **Lint Validators** - ESLint, Prettier integration
+- **Chain Validators** - Multi-step validation pipelines
+- **Shadow Validators** - Advisory-only (doesn't block)
+- **Scoring Validators** - Metrics for dashboards
+- **Output Validators** - Render with test data, validate output
+- **Auto-Healing** - AI proposes fixes, not just feedback
+
+### Visual Validators (Already Implemented!)
+
+Screenshot-based validation is already in `@blocksai/visual-validators`:
+- ScreenshotCapture (Playwright)
+- AxeValidator (WCAG compliance)
+- VisionValidator (AI vision with GPT-4o)
+
+**Next Steps:**
+- Integrate into CLI pipeline
+- Add to example projects
+- Document usage patterns
+
+## Key Takeaways
 
 When building Blocks features:
 
 1. **Think layers** - Development-time vs runtime, source vs output
-2. **Keep blocks simple** - Aim for 20-50 lines
-3. **Validators validate** - Don't put validation logic in blocks
-4. **Read all files** - Domain validator needs complete context
-5. **Respect flexibility** - Users organize projects their way
-6. **Trust validated code** - If source passes dev validation, trust it
-7. **Document decisions** - Architecture choices are critical
+2. **Validators validate** - Don't put validation logic in block implementations
+3. **Read all files** - Domain validator needs complete context
+4. **Respect flexibility** - Users organize projects their way
+5. **Trust validated code** - If source passes dev validation, trust it at runtime
+6. **Handle AI failures** - Fall back gracefully, don't crash
+7. **Document decisions** - Architecture choices matter
 8. **Test both layers** - Dev-time validation AND runtime behavior
 
 ---
 
-**Remember:** Blocks is a framework for **agentic coding with guardrails**. The spec is your guide, validators are your feedback, and evolution is your goal.
-
-**Critical:** Validate SOURCE CODE at development time. Trust validated code at runtime.
+**Remember:** Blocks validates SOURCE CODE at development time. Trust validated code at runtime.

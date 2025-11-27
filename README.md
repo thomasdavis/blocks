@@ -1,53 +1,173 @@
-# 🧱 Blocks
+# Blocks
 
-**Domain-driven validation and orchestration for agentic coding workflows**
+**AI-assisted coding with semantic guardrails**
 
-Blocks is a negotiation layer and semantic compass for human-AI collaboration, detecting drift between code and spec to help you maintain consistency through explicit domain semantics, multi-layer validation, and evolutionary design.
+Blocks is a development-time validator that lets AI agents write code freely while maintaining consistency through domain semantics and multi-layer validation. Think of it as a type system for your domain logic—except it uses LLMs to check semantic alignment, not just syntax.
 
-## Why Blocks?
+## The Problem
 
-Modern AI coding tools (Claude Code, Cursor, GPT engineers) generate code fast — but without a **design system**, output becomes inconsistent and unmaintainable.
+You're using Claude Code, Cursor, or another AI coding tool. The agent generates code fast, but:
+
+- **No shared understanding** - The AI doesn't know your domain concepts (what's a "Resume"? what makes HTML "semantic"?)
+- **Inconsistent output** - Each generation drifts from your design patterns
+- **No feedback loop** - The AI can't learn from mistakes without manual correction
+- **Runtime surprises** - Bugs emerge when generated code violates implicit rules
+
+You need a way to **teach the AI your domain** and **validate before runtime**.
+
+## The Solution
 
 Blocks provides:
 
-- **Domain modeling** (entities, signals, measures — like Cube.dev/Malloy for code)
-- **Multi-validator pipelines** (schema, shape, lint, domain, chain, shadow, scoring)
-- **Human-AI collaboration** (anyone reads spec, writes code freely, validates, learns from feedback)
-- **Drift detection** (detect when code diverges from spec, decide: fix code or update spec)
+1. **Domain specification in `blocks.yml`** - Define entities, signals, measures, and rules once
+2. **Multi-layer validation** - Schema (fast) → Shape (fast) → Domain (AI-powered)
+3. **Semantic feedback loop** - AI writes code → Blocks validates → AI learns from feedback
+4. **Drift detection** - Spots when code diverges from spec, you decide: fix code or update spec
 
-## The Workflow
+Not a framework. Not a runtime library. A **development-time validator** that keeps AI-generated code aligned with your domain.
 
-Blocks is not a restriction — it's a recovery mechanism for consistency:
+## How It Works
 
-1. **Define domain** in `blocks.yml` (your source of truth)
-2. **Write code freely** - humans and AI agents both contribute without restrictions
-3. **Run validation** - Blocks detects semantic drift using LLM reasoning
-4. **Review drift report** - See new fields, missing outputs, constraint violations, naming inconsistencies
-5. **Decide what to fix** - Update code to match spec OR update spec to match code
-6. **Return to consistency** - System validates the alignment
+### 1. Define Your Domain (`blocks.yml`)
 
-Not enforcing rules — helping you reason about drift.
-Not locking down code — giving you a semantic compass.
+```yaml
+project:
+  name: "Resume Themes"
 
-## Quick Start
+philosophy:
+  - "Themes must use semantic HTML and be accessible"
+  - "All layouts must be responsive"
+
+domain:
+  entities:
+    resume:
+      fields: [basics, work, education, skills]
+
+  signals:
+    readability:
+      description: "How easy is the resume to scan?"
+
+  measures:
+    valid_html:
+      constraints:
+        - "Must use semantic tags (header, main, section)"
+        - "Must include ARIA labels"
+
+blocks:
+  domain_rules:  # Apply to ALL blocks by default
+    - id: semantic_html
+      description: "Use semantic HTML5 tags"
+    - id: accessibility
+      description: "Include proper ARIA labels"
+
+  theme.modern_professional:
+    description: "Modern professional resume theme"
+    inputs:
+      - name: resume
+        type: entity.resume
+    outputs:
+      - name: html
+        type: string
+        measures: [valid_html]
+```
+
+### 2. AI Writes Implementation
+
+```typescript
+// themes/modern-professional/block.ts
+export function modernProfessionalTheme(resume: Resume) {
+  if (!resume.basics?.name) {
+    throw new Error("Resume must include name");
+  }
+  return { html: template(resume) };
+}
+```
+
+```handlebars
+<!-- themes/modern-professional/template.hbs -->
+<header role="banner">
+  <h1>{{basics.name}}</h1>
+  <p>{{basics.label}}</p>
+</header>
+
+<main>
+  <section aria-label="Work Experience">
+    <h2>Experience</h2>
+    {{#each work}}
+      <article>
+        <h3>{{position}} at {{company}}</h3>
+        <p>{{summary}}</p>
+      </article>
+    {{/each}}
+  </section>
+</main>
+```
+
+### 3. Blocks Validates (Multi-Layer)
+
+```bash
+$ blocks run theme.modern_professional
+```
+
+**Output:**
+```
+📦 Validating: theme.modern_professional
+
+  ✓ schema ok (inputs/outputs match spec)
+  ✓ shape ok (files exist, exports present)
+  ✓ domain ok (semantic HTML found in template source)
+  ✓ domain ok (ARIA labels present)
+
+✅ Block "theme.modern_professional" passed all validations
+```
+
+### 4. AI Learns from Feedback
+
+If validation fails, Blocks provides **actionable feedback**:
+
+```
+📦 Validating: theme.modern_professional
+
+  ✓ schema ok
+  ✓ shape ok
+
+  ⚠ [domain] Template missing semantic HTML tags
+    → Suggestion: Replace <div class="header"> with <header role="banner">
+
+  ⚠ [domain] No ARIA labels found in work experience section
+    → Suggestion: Add aria-label="Work Experience" to section
+
+❌ Block "theme.modern_professional" has warnings
+```
+
+The AI reads this output, updates the code, and re-runs validation until it passes.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js ≥20.0.0
+- pnpm (recommended) or npm
+- OpenAI API key (for AI-powered domain validation)
 
 ### Installation
 
 ```bash
-pnpm add -D @blocks/cli
+# Install CLI globally
+npm install -g @blocksai/cli
+
+# Or use in project
+npm install --save-dev @blocksai/cli
 ```
 
 ### Initialize
 
 ```bash
-pnpm blocks init
+# Create blocks.yml
+blocks init
 ```
 
-This creates a `blocks.yml` configuration file.
-
-### Define Your Domain
-
-Edit `blocks.yml`:
+This generates a minimal `blocks.yml`:
 
 ```yaml
 project:
@@ -62,371 +182,728 @@ domain:
     user:
       fields: [id, name, email]
 
-  signals:
-    engagement:
-      description: "How engaged is the user?"
-
-  measures:
-    score_0_1:
-      constraints:
-        - "Value must be between 0 and 1."
-
 blocks:
-  user_engagement_score:
-    description: "Calculate user engagement score"
+  user_greeting:
+    description: "Generate personalized greeting"
     inputs:
       - name: user
         type: entity.user
     outputs:
-      - name: score
-        type: measure.score_0_1
+      - name: greeting
+        type: string
 ```
 
-### Create a Block
+### Set API Key
+
+Domain validation uses OpenAI by default. Set your API key:
 
 ```bash
-mkdir -p blocks/user_engagement_score
+export OPENAI_API_KEY="sk-..."
 ```
 
-`blocks/user_engagement_score/block.ts`:
+Or create `.env`:
 
+```
+OPENAI_API_KEY=sk-...
+```
+
+Get a key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+
+### Create Your First Block
+
+```bash
+mkdir -p blocks/user_greeting
+```
+
+**blocks/user_greeting/block.ts:**
 ```typescript
-export async function userEngagementScore(user: any) {
-  // Implementation
-  return { score: 0.85 };
+export function userGreeting(user: { name: string }) {
+  return {
+    greeting: `Hello, ${user.name}!`
+  };
 }
 ```
 
-`blocks/user_engagement_score/index.ts`:
-
+**blocks/user_greeting/index.ts:**
 ```typescript
-export { userEngagementScore } from "./block.js";
+export { userGreeting } from "./block.js";
 ```
 
 ### Validate
 
 ```bash
-pnpm blocks run user_engagement_score
+blocks run user_greeting
 ```
 
-Output:
-
+**Output:**
 ```
-🧱 Blocks Validator
-
-📦 Validating: user_engagement_score
+📦 Validating: user_greeting
   ✓ schema ok
   ✓ shape ok
   ✓ domain ok
 
-  ✅ Block "user_engagement_score" passed all validations
+✅ Block "user_greeting" passed all validations
 ```
 
-## Features
+## Using with Claude Code
 
-### 🎯 Domain Modeling
+This is where Blocks shines. Here's a simulated session showing how Claude Code + Blocks work together:
 
-Define your domain semantics in `blocks.yml`:
+### Session: Building a Weather Dashboard
 
-- **Entities** - the "things" in your system
-- **Signals** - domain concepts to extract
-- **Measures** - constraints on outputs
-- **Philosophy** - design principles
+**User:**
+> Build a weather dashboard block that takes a city and returns HTML with current weather
 
-### 🔍 Multi-Layer Validation
+**Claude Code:**
+> I'll help you build that. Let me first read `blocks.yml` to understand your domain.
 
-**Blocks is a development-time validator** that analyzes source code, not runtime behavior.
-
-Four validator types:
-
-1. **Schema** - Fast, structural validation of I/O signatures
-2. **Shape** - Fast, file-based validation of structure
-3. **Domain** - AI-powered semantic validation of ALL source files
-4. **Output** - User-defined validators that render and check output (future)
-
-**How Domain Validation Works:**
-
-1. Reads **all files** in block directory (block.ts, template.hbs, etc.)
-2. Passes complete source code to AI with Blocks philosophy context
-3. AI analyzes source for semantic compliance (not runtime behavior)
-4. For templates: checks template source for semantic HTML, ARIA labels, media queries
-5. Returns specific, actionable feedback
-
-**Example:**
-```
-📦 Validating: theme.modern_professional
-- Reading all files from: themes/modern-professional/
-  Found: block.ts, template.hbs, index.ts
-
-✓ domain ok - Template uses semantic HTML tags
-✓ domain ok - ARIA labels present in template source
-✓ domain ok - CSS media queries found @media (max-width: 768px)
+```bash
+$ cat blocks.yml
 ```
 
-**Key Principle:** Validate source code at development time, trust validated code at runtime.
+**Claude Code:**
+> I see your project defines entities and domain rules. I'll create a new block called `weather_dashboard`. Let me add it to the spec first:
 
-See [Validators Architecture](./docs/validators-architecture.md) for complete details.
-
-### 🤖 Human-AI Collaboration
-
-Works seamlessly with both human developers and AI coding tools (Claude Code, Cursor, etc.):
-
-1. Anyone reads `blocks.yml` to understand the domain
-2. Anyone writes code (humans or AI agents)
-3. Run `blocks run <name>` for validation
-4. Review drift report with specific, actionable feedback
-5. Decide: fix code to match spec OR update spec to match code
-6. Re-run validation until consistent
-
-**CRITICAL:** No restrictions on who can edit code. Both humans and AI can freely write and modify any block. Blocks detects drift regardless of authorship.
-
-### 🔄 Drift Detection & Spec Evolution
-
-Blocks detects when code diverges from spec and helps you decide how to resolve it:
-
-**Drift scenarios detected:**
-- New fields not defined in spec
-- Missing outputs that should be there
-- Constraint violations
-- Inconsistent naming patterns
-- Blocks in code but not in spec
-- Blocks in spec but not in code
-
-**Example validation output:**
-```
-⚠ [domain] Undocumented output field: alerts_es
-→ Suggestion: Add alerts_es to outputs in blocks.yml
-
-⚠ [domain] Block "user_profile_enricher" exists in code but not in spec
-→ Suggestion: Add to blocks.yml or remove implementation
-
-⚠ [domain] Output "score" violates measure constraint (value: 1.5, expected: 0-1)
-→ Suggestion: Fix calculation to return value between 0 and 1
+```yaml
+# Claude edits blocks.yml
+blocks:
+  weather_dashboard:
+    description: "Weather dashboard with current conditions"
+    inputs:
+      - name: city
+        type: string
+    outputs:
+      - name: html
+        type: string
+        measures: [valid_html]
 ```
 
-**You decide:** Fix code to match spec OR update spec to match code. Anyone (human or AI) can propose spec updates → Human approves → Spec evolves with code.
+**Claude Code:**
+> Now I'll implement the block:
 
-**Not enforcement — negotiation.** Blocks doesn't prevent drift, it helps you reason about it and resolve it intentionally.
+```typescript
+// blocks/weather_dashboard/block.ts
+export async function weatherDashboard(city: string) {
+  const weather = await fetchWeather(city);
+
+  return {
+    html: `
+      <div class="weather">
+        <h1>${city}</h1>
+        <p>${weather.temp}°F</p>
+        <p>${weather.condition}</p>
+      </div>
+    `
+  };
+}
+```
+
+```typescript
+// blocks/weather_dashboard/index.ts
+export { weatherDashboard } from "./block.js";
+```
+
+**Claude Code:**
+> Let me validate this:
+
+```bash
+$ blocks run weather_dashboard
+```
+
+**Output:**
+```
+📦 Validating: weather_dashboard
+
+  ✓ schema ok
+  ✓ shape ok
+
+  ⚠ [domain] HTML output uses non-semantic tags
+    → Suggestion: Replace <div class="weather"> with semantic tags like <article> or <section>
+
+  ⚠ [domain] Missing ARIA labels for accessibility
+    → Suggestion: Add role and aria-label attributes
+
+❌ Block "weather_dashboard" has warnings
+```
+
+**Claude Code:**
+> I see the validation issues. The HTML isn't using semantic tags. Let me fix that:
+
+```typescript
+// blocks/weather_dashboard/block.ts (updated)
+export async function weatherDashboard(city: string) {
+  const weather = await fetchWeather(city);
+
+  return {
+    html: `
+      <article role="region" aria-label="Weather Dashboard">
+        <header>
+          <h1>${city} Weather</h1>
+        </header>
+        <section aria-label="Current Conditions">
+          <p><strong>Temperature:</strong> ${weather.temp}°F</p>
+          <p><strong>Conditions:</strong> ${weather.condition}</p>
+        </section>
+      </article>
+    `
+  };
+}
+```
+
+**Claude Code:**
+> Running validation again:
+
+```bash
+$ blocks run weather_dashboard
+```
+
+**Output:**
+```
+📦 Validating: weather_dashboard
+  ✓ schema ok
+  ✓ shape ok
+  ✓ domain ok
+
+✅ Block "weather_dashboard" passed all validations
+```
+
+**Claude Code:**
+> Perfect! The block now passes all validations. It uses semantic HTML (`<article>`, `<header>`, `<section>`) and includes proper ARIA labels for accessibility.
+
+---
+
+**This is the feedback loop:**
+1. AI writes code based on domain spec
+2. Blocks validates and provides specific feedback
+3. AI reads validation output and fixes issues
+4. Repeat until validation passes
+
+The AI **learns your domain semantics** through validation feedback.
+
+## Multi-Block Projects with Claude Code
+
+Let's see a more complex scenario: building 5 resume themes at once.
+
+**User:**
+> Build 5 resume themes: modern, creative, minimal, professional, and tech. They should all follow our domain rules.
+
+**Claude Code:**
+> I'll create 5 themes. Since they share domain rules, I'll define them once in `blocks.yml`:
+
+```yaml
+blocks:
+  domain_rules:  # Inherited by ALL themes
+    - id: semantic_html
+      description: "Use semantic HTML5 tags (header, main, section, article)"
+    - id: accessibility
+      description: "Include ARIA labels and roles"
+    - id: responsive
+      description: "Include media queries for mobile"
+
+  theme.modern:
+    description: "Modern theme with bold typography"
+    path: "themes/modern"
+    # Inherits domain_rules automatically
+
+  theme.creative:
+    description: "Creative theme with artistic layout"
+    path: "themes/creative"
+
+  theme.minimal:
+    description: "Minimal theme with clean design"
+    path: "themes/minimal"
+
+  theme.professional:
+    description: "Traditional professional theme"
+    path: "themes/professional"
+
+  theme.tech:
+    description: "Tech-focused theme with code aesthetics"
+    path: "themes/tech"
+```
+
+**Claude Code:**
+> Now I'll implement all 5 themes. Each will have `block.ts`, `template.hbs`, and `index.ts`.
+
+```bash
+# Claude creates directory structure
+mkdir -p themes/{modern,creative,minimal,professional,tech}
+```
+
+**Claude Code:**
+> Creating theme.modern:
+
+```typescript
+// themes/modern/block.ts
+export function modernTheme(resume: Resume) {
+  if (!resume.basics?.name) throw new Error("Name required");
+  return { html: template(resume) };
+}
+```
+
+```handlebars
+<!-- themes/modern/template.hbs -->
+<article role="document" aria-label="Resume for {{basics.name}}">
+  <header role="banner" class="hero">
+    <h1>{{basics.name}}</h1>
+    <p class="tagline">{{basics.label}}</p>
+  </header>
+
+  <main>
+    <section aria-label="Work Experience">
+      <h2>Experience</h2>
+      {{#each work}}
+        <article class="job">
+          <h3>{{position}}</h3>
+          <p>{{company}} • {{startDate}} - {{endDate}}</p>
+        </article>
+      {{/each}}
+    </section>
+  </main>
+</article>
+
+<style>
+  @media (max-width: 768px) {
+    .hero { padding: 1rem; }
+  }
+</style>
+```
+
+**Claude Code:**
+> I'll create the other 4 themes similarly... (creates all implementations)
+>
+> Now let me validate all themes at once:
+
+```bash
+$ blocks run --all
+```
+
+**Output:**
+```
+📦 Validating: theme.modern
+  ✓ schema ok
+  ✓ shape ok
+  ✓ domain ok
+
+📦 Validating: theme.creative
+  ✓ schema ok
+  ✓ shape ok
+  ⚠ [domain] Missing responsive media queries
+    → Suggestion: Add @media queries for mobile viewports
+
+📦 Validating: theme.minimal
+  ✓ schema ok
+  ✓ shape ok
+  ✓ domain ok
+
+📦 Validating: theme.professional
+  ✓ schema ok
+  ✓ shape ok
+  ✓ domain ok
+
+📦 Validating: theme.tech
+  ✓ schema ok
+  ✓ shape ok
+  ⚠ [domain] Section missing ARIA label
+    → Suggestion: Add aria-label to <section> for skills
+
+❌ 2 blocks have warnings
+```
+
+**Claude Code:**
+> I see 2 themes need fixes. Let me update them:
+
+```handlebars
+<!-- themes/creative/template.hbs - adding media queries -->
+<style>
+  /* ... existing styles ... */
+
+  @media (max-width: 768px) {
+    .creative-layout { flex-direction: column; }
+  }
+</style>
+```
+
+```handlebars
+<!-- themes/tech/template.hbs - adding ARIA label -->
+<section aria-label="Technical Skills">
+  <h2>Skills</h2>
+  {{#each skills}}...{{/each}}
+</section>
+```
+
+**Claude Code:**
+> Running validation again:
+
+```bash
+$ blocks run --all
+```
+
+**Output:**
+```
+📦 Validating all blocks...
+  ✓ theme.modern - passed
+  ✓ theme.creative - passed
+  ✓ theme.minimal - passed
+  ✓ theme.professional - passed
+  ✓ theme.tech - passed
+
+✅ All 5 blocks passed validation
+```
+
+**Claude Code:**
+> All themes now pass validation! They all follow the domain rules (semantic HTML, accessibility, responsiveness) that were defined once in `blocks.yml`.
+
+---
+
+**Key advantages:**
+- **DRY domain rules** - Define once, inherit everywhere
+- **Batch validation** - Check all blocks with `--all`
+- **Consistent quality** - AI follows same rules across all implementations
+- **Fast iteration** - Validation catches issues before runtime
+
+## How Validation Works
+
+Blocks uses a **three-layer validation pipeline**:
+
+### Layer 1: Schema (Fast, Deterministic)
+
+Validates that inputs/outputs match `blocks.yml` specification.
+
+```
+✓ Block has all required inputs
+✓ Output types match spec
+```
+
+### Layer 2: Shape (Fast, Deterministic)
+
+Validates file structure and exports.
+
+```
+✓ index.ts exists and exports block function
+✓ block.ts exists
+✓ All required files present
+```
+
+### Layer 3: Domain (Slow, AI-Powered)
+
+**This is the magic.** The domain validator:
+
+1. **Reads ALL files** in the block directory (block.ts, template.hbs, styles, etc.)
+2. **Passes complete source to AI** with context:
+   - Project philosophy statements
+   - Domain entities, signals, measures
+   - Domain rules
+   - Block specification
+3. **AI analyzes source code** (not output!) for semantic compliance
+4. **Returns actionable feedback**
+
+**Example AI prompt:**
+```
+Project Philosophy:
+- "Themes must use semantic HTML and be accessible"
+
+Domain Rules:
+- semantic_html: "Use semantic HTML5 tags (header, main, section)"
+- accessibility: "Include ARIA labels and roles"
+
+Block Files:
+--- block.ts ---
+export function modernTheme(resume: Resume) { ... }
+
+--- template.hbs ---
+<header role="banner">
+  <h1>{{basics.name}}</h1>
+</header>
+
+Analyze these files. Does the template.hbs use semantic HTML tags?
+Does it include ARIA labels? Return specific issues if not.
+```
+
+**Why validate source, not output?**
+
+Templates are deterministic. If `template.hbs` passes validation once, it will ALWAYS generate correct HTML. No need to parse output at runtime.
 
 ## Architecture
 
-### Monorepo Structure
+### Development-Time vs Runtime
+
+**CRITICAL:** Blocks validates **SOURCE CODE** at development time, NOT runtime behavior.
 
 ```
-blocks/
-├── packages/
-│   ├── cli/           # @blocks/cli - Main CLI
-│   ├── schema/        # @blocks/schema - blocks.yml parser
-│   ├── domain/        # @blocks/domain - Domain modeling
-│   ├── validators/    # @blocks/validators - Validator implementations
-│   └── ai/            # @blocks/ai - AI-powered validation (Vercel AI SDK v6)
-├── apps/
-│   └── docs/          # Documentation site (coming soon)
-└── docs/              # Technical documentation
+Development Time (Blocks):           Runtime (Your App):
+┌─────────────────────┐             ┌──────────────────┐
+│ Read source files   │             │ Validate input   │
+│ (block.ts, .hbs)    │             │ data only        │
+├─────────────────────┤             ├──────────────────┤
+│ AI analyzes source  │             │ Execute function │
+│ for semantics       │             │                  │
+├─────────────────────┤             ├──────────────────┤
+│ Report issues       │             │ Return output    │
+│                     │             │                  │
+└─────────────────────┘             └──────────────────┘
+      ↑                                    ↑
+      │                                    │
+   Trust validated                    Trust code
+   source is correct                  was validated
 ```
+
+**Consequence:** Block implementations stay simple (~20 lines). All semantic validation happens at development time.
 
 ### Packages
 
-- **@blocks/cli** - Command-line interface (`blocks` command)
-- **@blocks/schema** - Zod schemas and YAML parser
-- **@blocks/domain** - Domain registry and analyzer
-- **@blocks/validators** - Validator implementations
-- **@blocks/ai** - Vercel AI SDK v6 integration (OpenAI)
+Blocks is a monorepo with focused packages:
 
-## Commands
+- **@blocksai/cli** - Command-line interface
+- **@blocksai/schema** - blocks.yml parser (Zod schemas)
+- **@blocksai/domain** - Domain modeling and static analysis
+- **@blocksai/validators** - Validator implementations
+- **@blocksai/ai** - Multi-provider AI abstraction (OpenAI, Anthropic, Google)
+- **@blocksai/visual-validators** - Screenshot + vision analysis
 
-### `blocks init`
+## Real-World Examples
 
-Create a new `blocks.yml` configuration file.
+### Example 1: JSON Resume Themes
 
-```bash
-blocks init
-blocks init --force  # overwrite existing
-```
+**Problem:** Need to generate multiple resume themes that are all semantic, accessible, and responsive.
 
-### `blocks run <name>`
+**Solution:** Define domain rules once, let AI generate themes, validate with Blocks.
 
-Validate a specific block.
+See: [`examples/json-resume-themes/`](./examples/json-resume-themes/)
 
-```bash
-blocks run user_engagement_score
-```
+**Domain:**
+- Entity: `resume` (JSON Resume schema)
+- Measure: `valid_html` (semantic tags, ARIA labels, responsive)
+- Rules: semantic_html, accessibility, responsive_design
 
-### `blocks run --all`
+**Validation:** Blocks reads Handlebars template source, AI checks for semantic HTML patterns.
 
-Validate all blocks.
+### Example 2: Blog Content Validator
 
-```bash
-blocks run --all
-```
+**Problem:** Blog posts should have humor, conversational tone, and proper structure.
 
-## API Key Configuration
+**Solution:** Define content quality as domain constraints, validate markdown files.
 
-Blocks uses OpenAI for AI-powered domain validation. To enable full validation features, you need to configure your OpenAI API key.
+See: [`examples/blog-content-validator/`](./examples/blog-content-validator/)
 
-### Option 1: Environment Variable (Recommended)
+**Domain:**
+- Signals: `humor_presence`, `conversational_tone`, `biology_reference`
+- Rules: humor_required, no_corporate_speak
 
-Set the `OPENAI_API_KEY` environment variable in your shell:
+**Validation:** Blocks reads markdown file, AI analyzes content for domain signals.
 
-```bash
-export OPENAI_API_KEY="sk-your-key-here"
-```
+## Configuration Reference
 
-To make this permanent, add it to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.).
-
-### Option 2: .env File
-
-Create a `.env` file in your project directory:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and add your API key:
-
-```
-OPENAI_API_KEY=sk-your-key-here
-```
-
-The CLI will automatically load environment variables from `.env` when running validations.
-
-### Getting an API Key
-
-1. Go to [OpenAI Platform](https://platform.openai.com/api-keys)
-2. Sign in or create an account
-3. Click "Create new secret key"
-4. Copy the key and save it securely
-
-### What Happens Without an API Key?
-
-Without an API key, domain validation will be skipped:
-
-```
-📦 Validating: my_block
-  ✓ schema ok
-  ✓ shape ok
-  ⚠ [domain] AI validation failed: OpenAI API key is missing
-```
-
-Schema and shape validation will still work, but you won't get AI-powered semantic feedback.
-
-## Configuration
-
-`blocks.yml` structure:
+### `blocks.yml` Structure
 
 ```yaml
 project:
-  name: string
-  domain: string
+  name: string                 # Project name
+  domain: string               # Domain identifier
 
-philosophy: string[]
+philosophy:
+  - string                     # Design principles (used in AI prompts)
 
 domain:
-  entities: { [name]: { fields: string[] } }
-  signals: { [name]: { description, extraction_hint? } }
-  measures: { [name]: { constraints: string[] } }
+  entities:
+    [name]:
+      fields: string[]         # Entity fields
+
+  signals:
+    [name]:
+      description: string      # What to extract
+      extraction_hint?: string # How to extract
+
+  measures:
+    [name]:
+      constraints: string[]    # Validation rules
 
 blocks:
+  domain_rules:                # Default rules for ALL blocks
+    - id: string
+      description: string
+
   [name]:
     description: string
-    inputs?: Array<{ name, type, optional? }>
-    outputs?: Array<{ name, type, measures?, constraints? }>
-    domain_rules?: Array<{ id, description }>
-    path?: string  # custom path to block folder
+    path?: string              # Custom directory (default: blocks/[name])
+    inputs?:
+      - name: string
+        type: string           # Can reference: entity.*, string, number, etc.
+        optional?: boolean
+    outputs?:
+      - name: string
+        type: string
+        measures?: string[]    # Reference to domain.measures
+        constraints?: string[]
+    domain_rules?:             # Override defaults for this block
+      - id: string
+        description: string
 
-validators:
-  schema?: Validator[]
-  shape?: Validator[]
-  lint?: Validator[]
-  domain?: Validator[]
-  chain?: Validator[]
-  shadow?: Validator[]
-  scoring?: Validator[]
-
-pipeline:
-  name: string
-  steps: Array<{ id, run?, run_chain? }>
-
-agent:
-  mode: string
-  rules: string[]
-  cli: { single, all }
+ai:
+  provider: openai | anthropic | google
+  model: string                # e.g., gpt-4o-mini
+  apiKey?: string              # Or use env var
 
 targets:
-  kind: string
-  discover: { root: string }
+  kind: blocks | functions
+  discover:
+    root: string               # Default directory for blocks (default: "blocks")
 ```
 
-## Documentation
-
-- [Architecture](./docs/architecture.md) - System design and data flow
-- [Validators](./docs/validators.md) - Detailed validator documentation
-- [Domain Modeling](./docs/domain-modeling.md) - Domain semantics guide
-
-## Development
-
-### Setup
+### Environment Variables
 
 ```bash
-git clone <repo>
-cd blocks
-pnpm install
-pnpm build
+# AI Provider API Keys
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=...
 ```
 
-### Running locally
+## Frequently Asked Questions
+
+### How is this different from TypeScript?
+
+TypeScript validates **syntax and types**. Blocks validates **domain semantics**.
+
+Example:
+- TypeScript: "This function returns a string" ✓
+- Blocks: "This HTML string uses semantic tags and includes ARIA labels" ✓
+
+Blocks operates at a higher level of abstraction.
+
+### Does Blocks run at runtime?
+
+**No.** Blocks is a development-time validator. Run it during development, not in production.
+
+Your application just imports and executes the validated functions. No Blocks runtime overhead.
+
+### What if I don't have an API key?
+
+Schema and shape validation still work (fast, deterministic checks). You'll miss domain validation (AI-powered semantic checks).
+
+### Can I use Anthropic/Google instead of OpenAI?
+
+Yes! Configure in `blocks.yml`:
+
+```yaml
+ai:
+  provider: anthropic
+  model: claude-3-5-sonnet-latest
+```
+
+Blocks uses Vercel AI SDK v6 internally, supporting OpenAI, Anthropic, and Google.
+
+### How much does validation cost?
+
+Domain validation uses AI, so there's a cost per validation:
+- ~2-5 cents per block with GPT-4o-mini (default)
+- ~0.5-1 cent per block with GPT-3.5-turbo
+
+For 100 blocks: ~$2-5 per full validation run.
+
+Use `--all` sparingly in large projects. Validate incrementally as you develop.
+
+### Can I skip domain validation for some blocks?
+
+Not yet, but planned. Future: `domain_rules: []` to opt out.
+
+For now, domain validation falls back to warnings on failure (doesn't block).
+
+### Does Blocks modify my code?
+
+**No.** Blocks only reads and validates. It never writes code.
+
+AI agents (like Claude Code) read Blocks' validation output and modify code based on feedback.
+
+### How do I integrate with CI/CD?
 
 ```bash
-cd packages/cli
-pnpm build
-node dist/index.js init
+# In CI pipeline
+npm install -g @blocksai/cli
+export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+blocks run --all
+
+# Exits with error code if validation fails
 ```
 
-### Testing
+Works with GitHub Actions, GitLab CI, etc.
 
-```bash
-pnpm test
+### What if validation is too slow?
+
+Domain validation uses AI (slow). Strategies:
+
+1. **Validate incrementally** - `blocks run <name>` after each change
+2. **Skip in CI** - Only validate on pre-merge, not every commit
+3. **Use faster models** - gpt-4o-mini instead of gpt-4o
+4. **Cache results** - Future: validation result caching (planned)
+
+### Can I write custom validators?
+
+Yes! Implement the `Validator` interface:
+
+```typescript
+import { Validator, ValidatorContext, ValidationResult } from '@blocksai/validators';
+
+export class MyValidator implements Validator {
+  id = "custom.my_validator.v1";
+
+  async validate(ctx: ValidatorContext): Promise<ValidationResult> {
+    // Your logic
+    return { valid: true, issues: [] };
+  }
+}
 ```
 
-### Contributing
-
-1. Create a changeset: `pnpm changeset`
-2. Commit your changes
-3. Open a PR
-
-## Publishing
-
-Managed via Changesets:
-
-1. Create changesets: `pnpm changeset`
-2. Merge to main
-3. Changesets bot creates version PR
-4. Merge version PR → auto-publish to npm
+Add to CLI pipeline. See [CLAUDE.md](./CLAUDE.md) for details.
 
 ## Roadmap
 
 - [x] Core schema and domain modeling
-- [x] Schema and shape validators
-- [x] AI-powered domain validation
-- [x] CLI with `run` and `init` commands
-- [ ] Lint validators
-- [ ] Chain validators
-- [ ] Shadow validators
-- [ ] Scoring validators
-- [ ] Documentation site (Fumadocs)
+- [x] Multi-layer validation (schema, shape, domain)
+- [x] AI-powered semantic validation
+- [x] Multi-provider support (OpenAI, Anthropic, Google)
+- [x] CLI with `init` and `run` commands
+- [x] Visual validators (screenshots + AI vision)
+- [ ] Validation result caching
+- [ ] Lint validators (ESLint, Prettier)
+- [ ] Chain validators (multi-step pipelines)
+- [ ] Output validators (render + validate)
+- [ ] Auto-healing (AI proposes fixes)
 - [ ] VSCode extension
-- [ ] Claude Code integration package
-- [ ] Example repositories
+- [ ] GitHub Action for CI
+
+## Contributing
+
+Contributions welcome! See [CLAUDE.md](./CLAUDE.md) for architecture details.
+
+```bash
+# Setup
+git clone https://github.com/yourusername/blocks
+cd blocks
+pnpm install
+pnpm build
+
+# Make changes
+cd packages/validators
+# ... edit code ...
+pnpm build
+
+# Test
+cd examples/json-resume-themes
+blocks run --all
+
+# Create changeset
+pnpm changeset
+```
 
 ## Inspiration
 
-Blocks draws inspiration from:
+Blocks draws from:
 
-- **Cube.dev** - Semantic data modeling
-- **Malloy** - Semantic SQL layer
-- **PDDL** - Planning domain definition
-- **JSON Schema** - Structure validation
-- **GraphQL** - API contracts
+- **Cube.dev** - Semantic data modeling for analytics
+- **Malloy** - Semantic layer for SQL
+- **PDDL** - Planning domain definition language
+- **Type systems** - But for domain semantics, not syntax
 
 ## License
 
@@ -434,10 +911,14 @@ MIT
 
 ## Links
 
-- [NPM Package](https://www.npmjs.com/package/@blocks/cli) (coming soon)
-- [Documentation](./docs) (work in progress)
-- [GitHub](https://github.com/yourusername/blocks) (update this)
+- [Documentation](./docs) - Architecture and guides
+- [Examples](./examples) - Real-world usage
+- [NPM Package](https://www.npmjs.com/package/@blocksai/cli) - Install the CLI
 
 ---
 
-**Made with ❤️ for agentic coding workflows**
+**Built for the age of agentic coding.**
+
+If you're using Claude Code, Cursor, or any AI coding tool, Blocks helps you maintain consistency and teach your AI agents domain semantics through validation feedback.
+
+Star if useful. Issues and PRs welcome.

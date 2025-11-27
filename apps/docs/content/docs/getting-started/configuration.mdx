@@ -159,9 +159,6 @@ blocks:
       - id: use_activity_data
         description: "Must calculate score from activity_days input"
     test_data: "test-data/engagement-samples.json"
-    test_samples:
-      - user: { id: "1", name: "Alice" }
-        activity_days: 30
 ```
 
 ### What Are Blocks?
@@ -175,8 +172,7 @@ Blocks are just functions. When you have many functions with the same input/outp
 - **inputs** (optional) - Array of input definitions
 - **outputs** (optional) - Array of output definitions
 - **domain_rules** (optional) - Custom domain validation rules
-- **test_data** (optional) - Path to external test data file
-- **test_samples** (optional) - Inline test data samples
+- **test_data** (optional) - Test data as file path (string) or inline object/array
 
 ### Input/Output Definition
 

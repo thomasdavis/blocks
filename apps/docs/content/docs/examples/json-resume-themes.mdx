@@ -78,15 +78,6 @@ blocks:
         type: string
         measures: [valid_html]
     test_data: "test-data/sample-resume.json"
-    visual_validation:
-      viewports:
-        - { width: 320, height: 568, name: "mobile" }
-        - { width: 768, height: 1024, name: "tablet" }
-        - { width: 1024, height: 768, name: "desktop" }
-      rules:
-        - "Text must be readable on all backgrounds"
-        - "WCAG AA contrast minimum (4.5:1)"
-        - "Clear visual hierarchy between headings"
 ```
 
 **Implementation** (`blocks/modern-professional/block.ts`):
@@ -284,40 +275,6 @@ blocks run theme.modern_professional
 - ✓ Responsive meta tag included
 - ✓ Media queries for mobile devices
 - ✓ Clear visual hierarchy with typography scale
-
-**Visual Validators** (optional, screenshot-based):
-
-*Deterministic (axe-core):*
-- ✓ Color contrast passes WCAG AA (4.8:1)
-- ✓ Heading hierarchy correct
-- ✓ ARIA attributes valid
-
-*AI Vision (GPT-4o):*
-- ✓ [mobile] Text readable on all backgrounds
-- ✓ [tablet] Visual hierarchy clear
-- ✓ [desktop] Professional appearance maintained
-- ⚠ [mobile] Section spacing could be more generous
-
-## Visual Validation (Optional)
-
-For enhanced visual quality checks, enable screenshot-based validation:
-
-```yaml
-validators:
-  visual:
-    - id: axe_accessibility
-      run: "visual.axe.v1"
-    - id: vision_analysis
-      run: "visual.vision.v1"
-```
-
-This validates:
-- **Color contrast ratios** (WCAG AA/AAA compliance)
-- **Visual hierarchy** across viewports
-- **Readability** and spacing
-- **Layout integrity** at different screen sizes
-
-See [Visual Validation guide](/docs/validators/visual-validation) for details.
 
 ## Benefits of This Approach
 

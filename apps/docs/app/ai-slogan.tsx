@@ -2,12 +2,40 @@
 
 import { useEffect, useState, useRef } from 'react';
 
+const STORAGE_KEY = 'blocks-ai-slogans';
+const MAX_SLOGANS = 3;
+
 export function AISlogan() {
   const [currentSlogan, setCurrentSlogan] = useState('');
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedSlogans, setGeneratedSlogans] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const hasInitialized = useRef(false);
+
+  // Load slogans from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          console.log('[AI Slogan] Loaded', parsed.length, 'slogans from storage');
+          setGeneratedSlogans(parsed);
+        }
+      } catch (e) {
+        console.error('[AI Slogan] Failed to parse stored slogans:', e);
+      }
+    }
+  }, []);
+
+  // Save slogans to localStorage when they change
+  useEffect(() => {
+    if (generatedSlogans.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(generatedSlogans));
+    }
+  }, [generatedSlogans]);
 
   const generateSlogan = async () => {
     console.log('[AI Slogan] Generating new slogan...');
@@ -50,10 +78,22 @@ export function AISlogan() {
           cleanText = cleanText.slice(1, -1);
         }
         console.log('[AI Slogan] Clean text:', cleanText.substring(0, 100) + '...');
+
+        // Add to generated slogans if we haven't reached max
+        setGeneratedSlogans(prev => {
+          if (prev.length < MAX_SLOGANS) {
+            console.log('[AI Slogan] Adding to collection. Now have:', prev.length + 1, 'of', MAX_SLOGANS);
+            return [...prev, cleanText];
+          }
+          return prev;
+        });
+
         setCurrentSlogan(cleanText);
       } else {
         // Fallback if no text generated
-        setCurrentSlogan('A negotiation layer for human-AI collaboration with semantic guardrails.');
+        const fallback = 'A negotiation layer for human-AI collaboration with semantic guardrails.';
+        setCurrentSlogan(fallback);
+        setGeneratedSlogans(prev => prev.length < MAX_SLOGANS ? [...prev, fallback] : prev);
       }
       setIsGenerating(false);
     } catch (error) {
@@ -65,9 +105,18 @@ export function AISlogan() {
         'Both humans and AI write code freely—Blocks validates the result and reports drift.',
         'Your spec evolves with your code through drift detection and multi-layer validation.',
       ];
-      setCurrentSlogan(fallbacks[Math.floor(Math.random() * fallbacks.length)]);
+      const fallback = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+      setCurrentSlogan(fallback);
+      setGeneratedSlogans(prev => prev.length < MAX_SLOGANS ? [...prev, fallback] : prev);
       setIsGenerating(false);
     }
+  };
+
+  const rotateToNextSlogan = () => {
+    console.log('[AI Slogan] Rotating to next slogan. Current index:', currentIndex);
+    const nextIndex = (currentIndex + 1) % generatedSlogans.length;
+    setCurrentIndex(nextIndex);
+    setCurrentSlogan(generatedSlogans[nextIndex]);
   };
 
   // Type out the current slogan character by character
@@ -112,14 +161,19 @@ export function AISlogan() {
     };
   }, [currentSlogan]);
 
-  // Generate new slogan after current one finishes typing + pause
+  // Generate new slogan or rotate after current one finishes typing + pause
   useEffect(() => {
     if (!isTyping && currentSlogan && !isGenerating) {
-      console.log('[AI Slogan] Scheduling next generation in 8 seconds...');
-      // Wait 8 seconds after typing completes, then generate next
+      console.log('[AI Slogan] Scheduling next action in 8 seconds...');
+      // Wait 8 seconds after typing completes, then generate or rotate
       const timer = setTimeout(() => {
-        console.log('[AI Slogan] Triggering next generation');
-        generateSlogan();
+        if (generatedSlogans.length < MAX_SLOGANS) {
+          console.log('[AI Slogan] Generating slogan', generatedSlogans.length + 1, 'of', MAX_SLOGANS);
+          generateSlogan();
+        } else {
+          console.log('[AI Slogan] Max slogans reached, rotating to next');
+          rotateToNextSlogan();
+        }
       }, 8000);
 
       return () => {
@@ -127,17 +181,24 @@ export function AISlogan() {
         clearTimeout(timer);
       };
     }
-  }, [isTyping, currentSlogan, isGenerating]);
+  }, [isTyping, currentSlogan, isGenerating, generatedSlogans.length]);
 
-  // Generate first slogan on mount
+  // Initialize on mount - load from storage or generate first slogan
   useEffect(() => {
     if (!hasInitialized.current) {
-      console.log('[AI Slogan] Initial mount - generating first slogan');
       hasInitialized.current = true;
-      generateSlogan();
+
+      // Check if we have stored slogans
+      if (generatedSlogans.length > 0) {
+        console.log('[AI Slogan] Loading first slogan from storage');
+        setCurrentSlogan(generatedSlogans[0]);
+      } else {
+        console.log('[AI Slogan] No stored slogans - generating first one');
+        generateSlogan();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [generatedSlogans]);
 
   return (
     <div className="relative min-h-[80px] flex items-center justify-center">

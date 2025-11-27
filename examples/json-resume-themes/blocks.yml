@@ -1,6 +1,5 @@
-project:
-  name: "JSON Resume Themes"
-  domain: "jsonresume.themes"
+name: "JSON Resume Themes"
+root: "themes"
 
 # AI Configuration (optional)
 # Defaults to OpenAI gpt-4o-mini if not specified
@@ -113,7 +112,7 @@ blocks:
     description: "Clean, modern resume theme with professional styling"
     path: "themes/modern-professional"  # Custom path to theme implementation
     template_engine: hbs
-    test_data: "test-data/sample-resume.json"  # Test data for validation
+    test_data: "test-data/sample-resume.json"  # Can be file path or inline data object
     inputs:
       - name: resume
         type: entity.resume
@@ -135,54 +134,3 @@ blocks:
       - education
       - skills
     # Inherits blocks.domain_rules (semantic_html, accessibility, responsive_design, visual_hierarchy)
-
-# ——————————————————————————————————————————
-# VALIDATORS
-# ——————————————————————————————————————————
-
-validators:
-  schema:
-    - id: io_schema
-      run: "schema.io"
-
-  shape:
-    - id: export_shape
-      run: "shape.exports"
-
-  domain:
-    - id: domain_alignment
-      run: "domain.validation"
-
-# ——————————————————————————————————————————
-# PIPELINE
-# ——————————————————————————————————————————
-
-pipeline:
-  name: "resume_theme_validation"
-  steps:
-    - id: schema
-      run: "schema.io"
-    - id: shape
-      run: "shape.exports"
-    - id: domain
-      run: "domain.validation"
-
-# ——————————————————————————————————————————
-# AGENT CONFIGURATION
-# ——————————————————————————————————————————
-
-agent:
-  mode: "theme_builder"
-  rules:
-    - "Always read blocks.yml before creating or modifying themes."
-    - "Always run blocks CLI after theme changes."
-    - "Ensure all required sections are rendered."
-    - "Test with sample resume data."
-  cli:
-    single: "blocks run {name}"
-    all: "blocks run --all"
-
-targets:
-  kind: "block"
-  discover:
-    root: "themes"

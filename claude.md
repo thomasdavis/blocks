@@ -13,8 +13,7 @@ blocks/
 │   ├── schema/             # @blocksai/schema - blocks.yml parser
 │   ├── domain/             # @blocksai/domain - Domain modeling
 │   ├── validators/         # @blocksai/validators - Core validators
-│   ├── ai/                 # @blocksai/ai - AI provider abstraction
-│   └── visual-validators/  # @blocksai/visual-validators - Screenshot + vision
+│   └── ai/                 # @blocksai/ai - AI provider abstraction
 ├── apps/
 │   └── docs/               # Documentation site (Fumadocs + Next.js)
 ├── examples/               # Example projects for testing patterns
@@ -84,7 +83,8 @@ If `template.hbs` passes validation during development, it will ALWAYS produce c
 **Schema Structure:**
 ```typescript
 BlocksConfigSchema = {
-  project: { name, domain }
+  name: string
+  root?: string
   philosophy?: string[]
   domain?: {
     entities: Record<string, { fields: string[] }>
@@ -92,12 +92,17 @@ BlocksConfigSchema = {
     measures: Record<string, { constraints: string[] }>
   }
   blocks: Record<string, BlockDefinition>
-  validators?: ValidatorConfig
-  pipeline?: Pipeline
-  agent?: Agent
-  targets?: Targets
+  validators?: Array<string | { name: string; run: string; config?: any }>
+  ai?: AIConfig
 }
 ```
+
+**Validator Configuration:**
+- Validators field is optional - defaults to `["domain"]` if omitted
+- Supports mixed string/object format:
+  - Strings for built-in validators: `"schema"`, `"shape.ts"`, `"domain"`
+  - Objects for custom validators: `{ name: "my_linter", run: "lint.custom", config: {...} }`
+- Array order defines execution order (validators array IS the pipeline)
 
 **Exports:**
 ```typescript
@@ -150,7 +155,6 @@ generateText(prompt: string): Promise<string>
 validateDomainSemantics(context: DomainContext): Promise<ValidationResult>
 detectLanguage(text: string): Promise<string>
 scoreQuality(text: string, criteria: string): Promise<number>
-validateVisualSemantics(screenshots: Screenshot[], config: VisualConfig): Promise<VisualIssue[]>
 ```
 
 **Configuration:**
@@ -204,53 +208,6 @@ interface ValidationResult {
 }
 ```
 
-### @blocksai/visual-validators
-
-**Purpose:** Visual validation using screenshots and AI vision
-
-**Components:**
-
-#### ScreenshotCapture (`screenshot/capture.ts`)
-- Uses Playwright to capture HTML screenshots
-- Supports multiple viewports simultaneously
-- Browser initialization, capture, cleanup
-
-#### AxeValidator (`axe/axe-validator.ts`)
-- Deterministic WCAG accessibility checking
-- Uses axe-core library
-- Fast, precise A11y compliance
-
-#### VisionValidator (`vision/vision-validator.ts`)
-- AI-powered visual analysis with GPT-4o
-- Analyzes screenshots for:
-  - Color contrast and readability
-  - Visual hierarchy and flow
-  - Layout integrity across viewports
-  - Element visibility and spacing
-- Complements AxeValidator (AI + deterministic)
-
-**Types:**
-```typescript
-interface Viewport {
-  width: number;
-  height: number;
-  name: string;
-}
-
-interface Screenshot {
-  buffer: Buffer;
-  viewport: Viewport;
-}
-
-interface VisualIssue {
-  type: 'error' | 'warning';
-  code: string;
-  message: string;
-  suggestion?: string;
-  viewport?: string;
-}
-```
-
 ### @blocksai/cli
 
 **Purpose:** Command-line interface
@@ -262,7 +219,7 @@ interface VisualIssue {
 
 **Key Implementation Details:**
 - Loads .env file for API keys
-- Determines block path: `block.path` → `targets.discover.root` → "blocks"
+- Determines block path: `block.path` → `config.root` → "blocks"
 - Creates context object: `{ blockName, blockPath, config }`
 - Runs validators in sequence: schema → shape → domain
 - Colored output with Chalk, spinners with Ora
@@ -275,13 +232,20 @@ interface VisualIssue {
 3. For each block:
    a. Determine block path (custom or default)
    b. Create validator context
-   c. Run schema validator
-   d. Run shape validator
-   e. Run domain validator (with spinner)
-   f. Aggregate issues
-   g. Print colored output
+   c. Create ValidatorRegistry (with config + AI)
+   d. Determine validators to run (config.validators || ["domain"])
+   e. For each validator in list:
+      - Get validator from registry (supports short names)
+      - Run validator (with spinner for slow ones)
+      - Collect issues
+   f. Print colored output
 4. Exit with error code if any errors
 ```
+
+**Validator Registry:**
+- Centralizes validator instantiation and short name mapping
+- Built-in mappings: `schema` → `schema.io`, `shape.ts` → `shape.exports.ts`, `domain` → `domain.validation`
+- Supports registering custom validators dynamically
 
 ## Key Architectural Decisions
 
@@ -308,7 +272,7 @@ function readAllBlockFiles(blockPath: string): Record<string, string> {
 
 **Priority:**
 1. `block.path` in blocks.yml - Custom path
-2. `targets.discover.root` + blockName - Configured root
+2. `config.root` + blockName - Configured root
 3. Default "blocks" directory
 
 **Why:** Users can organize projects however they want. Respect their structure.
@@ -415,7 +379,7 @@ blocks run post.good
 1. Create validator class in `packages/validators/src/<type>/`
 2. Implement `Validator` interface
 3. Export from package
-4. Add to CLI's validator pipeline in `packages/cli/src/commands/run.ts`
+4. Register in ValidatorRegistry (`packages/validators/src/registry.ts`)
 
 **Example:**
 ```typescript
@@ -423,7 +387,7 @@ blocks run post.good
 import { Validator, ValidatorContext, ValidationResult } from '../types';
 
 export class ESLintValidator implements Validator {
-  id = "lint.eslint.v1";
+  id = "lint.eslint";  // No version suffix
 
   async validate(context: ValidatorContext): Promise<ValidationResult> {
     // Your validation logic
@@ -585,18 +549,6 @@ Keep these examples working as reference implementations.
 - **Scoring Validators** - Metrics for dashboards
 - **Output Validators** - Render with test data, validate output
 - **Auto-Healing** - AI proposes fixes, not just feedback
-
-### Visual Validators (Already Implemented!)
-
-Screenshot-based validation is already in `@blocksai/visual-validators`:
-- ScreenshotCapture (Playwright)
-- AxeValidator (WCAG compliance)
-- VisionValidator (AI vision with GPT-4o)
-
-**Next Steps:**
-- Integrate into CLI pipeline
-- Add to example projects
-- Document usage patterns
 
 ## Key Takeaways
 

@@ -1,6 +1,6 @@
 {
   "name": "@blocksai/domain",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Domain modeling and semantic validation engine for Blocks",
   "type": "module",
   "main": "./dist/index.js",

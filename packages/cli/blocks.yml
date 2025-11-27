@@ -1,6 +1,5 @@
-project:
-  name: "My Blocks Project"
-  domain: "myproject.general"
+name: "My Blocks Project"
+root: "."
 
 philosophy:
   - "Blocks must be small, composable, deterministic."
@@ -31,38 +30,3 @@ blocks:
     outputs:
       - name: score
         type: measure.score_0_1
-
-validators:
-  schema:
-    - id: io_schema
-      run: "schema.io.v1"
-
-  shape:
-    - id: export_shape
-      run: "shape.exports.v1"
-
-  domain:
-    - id: domain_alignment
-      run: "domain.validation.v1"
-
-pipeline:
-  name: "default"
-  steps:
-    - id: schema
-      run: "schema.io.v1"
-    - id: shape
-      run: "shape.exports.v1"
-    - id: domain
-      run: "domain.validation.v1"
-
-agent:
-  mode: "block_builder"
-  rules:
-    - "Always read blocks.yml before creating or modifying code."
-    - "Always run blocks CLI after changes."
-    - "Always interpret validator output as instructions."
-
-targets:
-  kind: "block"
-  discover:
-    root: "."

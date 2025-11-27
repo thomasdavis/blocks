@@ -3,10 +3,10 @@ import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 
 /**
- * Shape validator - validates file structure and exports
+ * TypeScript shape validator - validates file structure and exports
  */
-export class ExportsShapeValidator implements Validator {
-  id = "shape.exports";
+export class TsExportsShapeValidator implements Validator {
+  id = "shape.exports.ts";
 
   async validate(context: ValidatorContext): Promise<ValidationResult> {
     const issues: ValidationIssue[] = [];

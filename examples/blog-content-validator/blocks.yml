@@ -1,9 +1,8 @@
 # Blocks Configuration: Blog Content Validator
 # Domain: Content quality validation for markdown blog posts
 
-project:
-  name: "Blog Content Validator"
-  domain: "content.blog.validation"
+name: "Blog Content Validator"
+root: "validators"
 
 # AI Configuration (optional)
 # Defaults to OpenAI gpt-4o-mini if not specified
@@ -78,45 +77,3 @@ blocks:
           - "Must detect engaging, conversational content"
           - "Must ensure humor is present"
     # Inherits blocks.domain_rules automatically
-
-# Validator configuration
-validators:
-  schema:
-    - id: io_schema
-      run: "schema.io"
-
-  shape:
-    - id: export_shape
-      run: "shape.exports"
-
-  domain:
-    - id: domain_alignment
-      run: "domain.validation"
-
-# Validation pipeline
-pipeline:
-  name: "blog_content_validation"
-  steps:
-    - id: schema
-      run: "schema.io"
-    - id: shape
-      run: "shape.exports"
-    - id: domain
-      run: "domain.validation"
-
-# Discovery configuration
-targets:
-  kind: "block"
-  discover:
-    root: "validators"
-
-# Agent configuration
-agent:
-  mode: "content_validator"
-  rules:
-    - "Always read blocks.yml before creating or modifying validators"
-    - "Always run blocks CLI after validator changes"
-    - "Domain validator checks for humor and tone in markdown source"
-  cli:
-    single: "blocks run {name}"
-    all: "blocks run --all"

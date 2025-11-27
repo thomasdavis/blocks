@@ -52,99 +52,41 @@ export const DomainRuleSchema = z.object({
   description: z.string(),
 });
 
-export const ViewportSchema = z.object({
-  width: z.number(),
-  height: z.number(),
-  name: z.string(),
-});
-
-export const VisualValidationSchema = z.object({
-  viewports: z.array(ViewportSchema).optional(),
-  rules: z.array(z.string()).optional(),
-  enabled: z.boolean().optional(),
-});
-
 export const BlockDefinitionSchema = z.object({
   description: z.string(),
   path: z.string().optional(), // Custom path to block implementation
   inputs: z.array(BlockInputSchema).optional(),
   outputs: z.array(BlockOutputSchema).optional(),
   domain_rules: z.array(DomainRuleSchema).optional(),
-  test_data: z.string().optional(), // Path to test data file for validation
-  test_samples: z.array(z.any()).optional(), // Inline test data samples
-  visual_validation: VisualValidationSchema.optional(), // Visual validation configuration
+  test_data: z.union([
+    z.string(),  // File path to test data
+    z.any()      // Inline test data object
+  ]).optional(),
 });
 
 // ——————————————————————————————————————————
 // Validators
 // ——————————————————————————————————————————
 
-export const ValidatorSchema = z.object({
-  id: z.string(),
-  run: z.union([z.string(), z.array(z.string())]),
-  weight: z.number().optional(),
-});
+/**
+ * Validator entry - union type supporting both short names and custom validators
+ *
+ * Examples:
+ *   - "schema" (short name)
+ *   - "shape.ts" (short name)
+ *   - "domain" (short name)
+ *   - { name: "my_linter", run: "lint.eslint", config: {...} } (custom)
+ */
+export const ValidatorEntrySchema = z.union([
+  z.string(),  // Short names for built-in validators
+  z.object({
+    name: z.string(),
+    run: z.string(),
+    config: z.any().optional(),
+  })
+]);
 
-export const ValidatorsSchema = z.object({
-  schema: z.array(ValidatorSchema).optional(),
-  shape: z.array(ValidatorSchema).optional(),
-  lint: z.array(ValidatorSchema).optional(),
-  domain: z.array(ValidatorSchema).optional(),
-  visual: z.array(ValidatorSchema).optional(), // Visual validation (screenshots + AI)
-  chain: z.array(ValidatorSchema).optional(),
-  shadow: z.array(ValidatorSchema).optional(),
-  scoring: z.array(ValidatorSchema).optional(),
-});
-
-// ——————————————————————————————————————————
-// Pipeline
-// ——————————————————————————————————————————
-
-export const PipelineStepSchema = z.object({
-  id: z.string(),
-  run: z.string().optional(),
-  run_chain: z.array(z.string()).optional(),
-});
-
-export const PipelineSchema = z.object({
-  name: z.string(),
-  steps: z.array(PipelineStepSchema),
-});
-
-// ——————————————————————————————————————————
-// Agent Configuration
-// ——————————————————————————————————————————
-
-export const AgentCliSchema = z.object({
-  single: z.string(),
-  all: z.string(),
-});
-
-export const AgentSchema = z.object({
-  mode: z.string(),
-  rules: z.array(z.string()),
-  cli: AgentCliSchema,
-});
-
-// ——————————————————————————————————————————
-// Targets
-// ——————————————————————————————————————————
-
-export const TargetsSchema = z.object({
-  kind: z.string(),
-  discover: z.object({
-    root: z.string(),
-  }),
-});
-
-// ——————————————————————————————————————————
-// Project & Philosophy
-// ——————————————————————————————————————————
-
-export const ProjectSchema = z.object({
-  name: z.string(),
-  domain: z.string(),
-});
+export const ValidatorsSchema = z.array(ValidatorEntrySchema).optional();
 
 // ——————————————————————————————————————————
 // AI Configuration
@@ -183,14 +125,12 @@ export const BlocksSchema = z.record(
 // ——————————————————————————————————————————
 
 export const BlocksConfigSchema = z.object({
-  project: ProjectSchema,
+  name: z.string(),
+  root: z.string().optional(),
   philosophy: z.array(z.string()).optional(),
   domain: DomainSchema.optional(),
   blocks: BlocksSchema,
   validators: ValidatorsSchema.optional(),
-  pipeline: PipelineSchema.optional(),
-  agent: AgentSchema.optional(),
-  targets: TargetsSchema.optional(),
   ai: AIConfigSchema.optional(),
 });
 
@@ -210,19 +150,9 @@ export type DomainRule = z.infer<typeof DomainRuleSchema>;
 export type BlockDefinition = z.infer<typeof BlockDefinitionSchema>;
 export type Blocks = z.infer<typeof BlocksSchema>;
 
-export type Validator = z.infer<typeof ValidatorSchema>;
+export type ValidatorEntry = z.infer<typeof ValidatorEntrySchema>;
 export type Validators = z.infer<typeof ValidatorsSchema>;
 
 export type AIConfig = z.infer<typeof AIConfigSchema>;
-
-export type PipelineStep = z.infer<typeof PipelineStepSchema>;
-export type Pipeline = z.infer<typeof PipelineSchema>;
-
-export type AgentCli = z.infer<typeof AgentCliSchema>;
-export type Agent = z.infer<typeof AgentSchema>;
-
-export type Targets = z.infer<typeof TargetsSchema>;
-
-export type Project = z.infer<typeof ProjectSchema>;
 
 export type BlocksConfig = z.infer<typeof BlocksConfigSchema>;

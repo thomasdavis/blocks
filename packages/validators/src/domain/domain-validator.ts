@@ -3,7 +3,7 @@ import { DomainAnalyzer, DomainRegistry } from "@blocksai/domain";
 import { AIProvider } from "@blocksai/ai";
 import type { Validator, ValidatorContext, ValidationResult, ValidationIssue } from "../types.js";
 import { readFileSync, existsSync, readdirSync, statSync } from "fs";
-import { join } from "path";
+import { join, basename } from "path";
 
 /**
  * Read all files from a block directory recursively
@@ -47,6 +47,38 @@ function readAllBlockFiles(blockPath: string): Record<string, string> {
 }
 
 /**
+ * Resolve block files - handles both single files and directories
+ * If path points to a file, returns just that file
+ * If path points to a directory, returns all files recursively
+ */
+function resolveBlockFiles(blockPath: string): Record<string, string> {
+  if (!existsSync(blockPath)) {
+    return {};
+  }
+
+  const stat = statSync(blockPath);
+
+  if (stat.isFile()) {
+    // Single file - use filename as key
+    const fileName = basename(blockPath);
+    try {
+      const content = readFileSync(blockPath, 'utf-8');
+      return { [fileName]: content };
+    } catch (error) {
+      console.warn(`Could not read file: ${blockPath}`);
+      return {};
+    }
+  }
+
+  if (stat.isDirectory()) {
+    // Directory - read all files recursively (existing behavior)
+    return readAllBlockFiles(blockPath);
+  }
+
+  return {};
+}
+
+/**
  * Domain validator - validates semantic alignment with domain spec
  */
 export class DomainValidator implements Validator {
@@ -77,8 +109,8 @@ export class DomainValidator implements Validator {
       });
     }
 
-    // Read all files in the block directory
-    const blockFiles = readAllBlockFiles(context.blockPath);
+    // Read block files (single file or directory)
+    const blockFiles = resolveBlockFiles(context.blockPath);
 
     if (Object.keys(blockFiles).length === 0) {
       issues.push({

@@ -92,45 +92,7 @@ validators:
 
 **Future implementation** - Not yet built in Blocks core
 
-### 3. Visual Validators (Screenshot-Based, Future)
-
-**Purpose:** Render to screenshot and validate visual appearance
-
-**How it works:**
-- Render block output
-- Open in headless browser
-- Take screenshots at different viewports
-- Pass screenshots to vision model
-- Validate visual aspects
-
-**What it validates:**
-- Color contrast (WCAG compliance)
-- Text readability
-- Layout integrity
-- Visual hierarchy
-- Responsive breakpoints actually working
-
-**Configuration:**
-```yaml
-validators:
-  visual:
-    - id: contrast_check
-      run: "visual.contrast.v1"
-      viewports: [320, 768, 1024]
-    - id: layout_check
-      run: "visual.layout.v1"
-```
-
-**Example feedback:**
-```
-✗ visual - Text contrast ratio 3.2:1 fails WCAG AA (need 4.5:1)
-✓ visual - Headings visually distinct at all breakpoints
-⚠ visual - Navigation menu overlaps content at 375px width
-```
-
-**Status:** Optional core package (@blocksai/visual-validators) - not yet implemented
-
-### 4. Runtime Validators (Production Monitoring, Optional)
+### 3. Runtime Validators (Production Monitoring, Optional)
 
 **Purpose:** Monitor block behavior in production
 
@@ -444,7 +406,6 @@ validators:
 ### Planned Features
 
 - **Output validators** - Built-in HTML, JSON, SQL validators
-- **Visual validators** - Screenshot-based validation (@blocksai/visual-validators)
 - **Lint validators** - Code complexity, security scanning
 - **Chain validators** - Multi-step validation pipelines
 - **Shadow validators** - Advisory only (don't block)
@@ -455,7 +416,6 @@ validators:
 - **Semantic drift detection** - Identify when code diverges from spec
 - **Auto-healing** - AI proposes fixes for validation failures
 - **Progressive validation** - Validate incrementally during coding
-- **Visual regression** - Detect unintended visual changes
 
 ## Summary
 
@@ -463,8 +423,7 @@ Blocks validators operate at **multiple layers** to ensure code quality:
 
 1. **Domain (AI, always active)** - Semantic analysis of ALL source files
 2. **Output (user-defined, optional)** - Execution-based validation
-3. **Visual (future)** - Screenshot validation with vision models
-4. **Runtime (optional)** - Production monitoring
+3. **Runtime (optional)** - Production monitoring
 
 **The key principle:** Validate source code at development time, trust validated code at runtime.
 

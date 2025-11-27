@@ -31,8 +31,12 @@ Not a framework. Not a runtime library. A **development-time validator** that ke
 ### 1. Define Your Domain (`blocks.yml`)
 
 ```yaml
-project:
-  name: "Resume Themes"
+name: "Resume Themes"
+
+# AI Configuration
+ai:
+  provider: "openai"
+  model: "gpt-4o-mini"
 
 philosophy:
   - "Themes must use semantic HTML and be accessible"
@@ -41,11 +45,13 @@ philosophy:
 domain:
   entities:
     resume:
+      description: "A resume document"
       fields: [basics, work, education, skills]
 
   signals:
     readability:
       description: "How easy is the resume to scan?"
+      extraction_hint: "Look for clear headings, whitespace, logical flow"
 
   measures:
     valid_html:
@@ -61,14 +67,27 @@ blocks:
       description: "Include proper ARIA labels"
 
   theme.modern_professional:
+    type: theme
     description: "Modern professional resume theme"
+    path: "themes/modern-professional"
     inputs:
       - name: resume
         type: entity.resume
+        description: "Resume data to render"
     outputs:
       - name: html
         type: string
         measures: [valid_html]
+        constraints:
+          - "Must produce valid semantic HTML"
+    # Inherits blocks.domain_rules automatically
+
+# Validators (optional - defaults to domain only)
+# Uncomment to run all validators:
+# validators:
+#   - schema     # Fast config structure checks
+#   - shape.ts   # File structure validation
+#   - domain     # AI-powered semantic validation
 ```
 
 ### 2. AI Writes Implementation
@@ -103,22 +122,29 @@ export function modernProfessionalTheme(resume: Resume) {
 </main>
 ```
 
-### 3. Blocks Validates (Multi-Layer)
+### 3. Blocks Validates
 
 ```bash
 $ blocks run theme.modern_professional
 ```
 
-**Output:**
+**Output (with all validators enabled):**
 ```
 📦 Validating: theme.modern_professional
 
   ✓ schema ok (inputs/outputs match spec)
-  ✓ shape ok (files exist, exports present)
+  ✓ shape.ts ok (files exist, exports present)
   ✓ domain ok (semantic HTML found in template source)
-  ✓ domain ok (ARIA labels present)
 
 ✅ Block "theme.modern_professional" passed all validations
+```
+
+**Note:** By default, only the `domain` validator runs. To run all validators, add:
+```yaml
+validators:
+  - schema
+  - shape.ts
+  - domain
 ```
 
 ### 4. AI Learns from Feedback
@@ -167,30 +193,71 @@ npm install --save-dev @blocksai/cli
 blocks init
 ```
 
-This generates a minimal `blocks.yml`:
+This generates a starter `blocks.yml`:
 
 ```yaml
-project:
-  name: "My Project"
-  domain: "myproject.general"
+# Blocks Configuration
+# Domain: Define your project's semantic domain model
 
+name: "My Blocks Project"
+root: "blocks"  # Default directory for blocks
+
+# AI Configuration (optional)
+# Defaults to OpenAI gpt-4o-mini if not specified
+ai:
+  provider: "openai"  # Options: openai, anthropic, google
+  model: "gpt-4o-mini"  # OpenAI: gpt-4o-mini, gpt-4o | Anthropic: claude-3-5-sonnet-20241022
+
+# Philosophy statements guide AI validation
 philosophy:
-  - "Blocks must be small, composable, deterministic."
+  - "Blocks must be small, composable, and deterministic"
+  - "Express domain intent clearly in code"
+  - "Validate at development time, trust at runtime"
 
+# Domain semantics
 domain:
   entities:
     user:
-      fields: [id, name, email]
+      description: "A user in the system"
+      fields:
+        - id
+        - name
+        - email
 
+  signals:
+    user_engagement:
+      description: "Measures how engaged a user is with the system"
+      extraction_hint: "Look for login frequency, feature usage, interaction patterns"
+
+  measures:
+    score_0_1:
+      constraints:
+        - "Value must be between 0 and 1"
+
+# Block definitions
 blocks:
-  user_greeting:
-    description: "Generate personalized greeting"
+  # Default domain rules for all blocks
+  domain_rules:
+    - id: clear_intent
+      description: "Block implementation must clearly express domain intent"
+
+  example_block:
+    type: function
+    description: "Example block that computes user engagement score"
+    path: "blocks/example-block"
     inputs:
       - name: user
         type: entity.user
     outputs:
-      - name: greeting
-        type: string
+      - name: result
+        type: entity.result
+        measures: [score_0_1]
+
+# Discovery configuration
+targets:
+  kind: "block"
+  discover:
+    root: "blocks"
 ```
 
 ### Set API Key
@@ -212,37 +279,54 @@ Get a key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys
 ### Create Your First Block
 
 ```bash
-mkdir -p blocks/user_greeting
+mkdir -p blocks/example-block
 ```
 
-**blocks/user_greeting/block.ts:**
+**blocks/example-block/block.ts:**
 ```typescript
-export function userGreeting(user: { name: string }) {
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface Result {
+  value: number;
+  score: number;
+}
+
+export function exampleBlock(user: User): { result: Result } {
+  // Calculate engagement score (0-1 range)
+  const score = user.email.includes("@") ? 0.8 : 0.3;
+
   return {
-    greeting: `Hello, ${user.name}!`
+    result: {
+      value: 1,
+      score
+    }
   };
 }
 ```
 
-**blocks/user_greeting/index.ts:**
+**blocks/example-block/index.ts:**
 ```typescript
-export { userGreeting } from "./block.js";
+export { exampleBlock } from "./block.js";
 ```
 
 ### Validate
 
 ```bash
-blocks run user_greeting
+blocks run example_block
 ```
 
 **Output:**
 ```
-📦 Validating: user_greeting
+📦 Validating: example_block
   ✓ schema ok
   ✓ shape ok
   ✓ domain ok
 
-✅ Block "user_greeting" passed all validations
+✅ Block "example_block" passed all validations
 ```
 
 ## Using with Claude Code
@@ -659,7 +743,6 @@ Blocks is a monorepo with focused packages:
 - **@blocksai/domain** - Domain modeling and static analysis
 - **@blocksai/validators** - Validator implementations
 - **@blocksai/ai** - Multi-provider AI abstraction (OpenAI, Anthropic, Google)
-- **@blocksai/visual-validators** - Screenshot + vision analysis
 
 ## Real-World Examples
 
@@ -697,57 +780,64 @@ See: [`examples/blog-content-validator/`](./examples/blog-content-validator/)
 ### `blocks.yml` Structure
 
 ```yaml
-project:
-  name: string                 # Project name
-  domain: string               # Domain identifier
+name: string                   # Project name
+root?: string                  # Default directory for blocks (optional, defaults to "blocks")
+
+# AI Configuration (optional - defaults to OpenAI gpt-4o-mini)
+ai:
+  provider: openai | anthropic | google
+  model: string                # OpenAI: gpt-4o-mini, gpt-4o
+                               # Anthropic: claude-3-5-sonnet-20241022, claude-3-5-haiku-20241022
+                               # Google: gemini-1.5-flash, gemini-1.5-pro
+  apiKey?: string              # Or use env var (OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY)
 
 philosophy:
-  - string                     # Design principles (used in AI prompts)
+  - string                     # Design principles (guide AI validation)
 
 domain:
   entities:
     [name]:
+      description: string      # What this entity represents
       fields: string[]         # Entity fields
 
   signals:
     [name]:
-      description: string      # What to extract
-      extraction_hint?: string # How to extract
+      description: string      # What to detect/extract
+      extraction_hint?: string # How to extract/detect it
 
   measures:
     [name]:
-      constraints: string[]    # Validation rules
+      constraints: string[]    # Validation constraints
 
 blocks:
-  domain_rules:                # Default rules for ALL blocks
+  domain_rules:                # Default rules inherited by ALL blocks
     - id: string
       description: string
 
   [name]:
-    description: string
+    type?: string              # Optional type hint (function, theme, validator, etc.)
+    description: string        # What this block does
     path?: string              # Custom directory (default: blocks/[name])
     inputs?:
       - name: string
         type: string           # Can reference: entity.*, string, number, etc.
+        description?: string   # Input description
         optional?: boolean
     outputs?:
       - name: string
         type: string
         measures?: string[]    # Reference to domain.measures
-        constraints?: string[]
-    domain_rules?:             # Override defaults for this block
+        constraints?: string[] # Additional constraints
+    domain_rules?:             # Override defaults completely for this block
       - id: string
         description: string
 
-ai:
-  provider: openai | anthropic | google
-  model: string                # e.g., gpt-4o-mini
-  apiKey?: string              # Or use env var
-
-targets:
-  kind: blocks | functions
-  discover:
-    root: string               # Default directory for blocks (default: "blocks")
+validators?:                   # Optional - defaults to ["domain"] if omitted
+  - string                     # Built-in validator short name (e.g., "schema", "shape.ts", "domain")
+  OR
+  - name: string               # Custom validator
+    run: string                # Validator ID to execute
+    config?: any               # Optional validator configuration
 ```
 
 ### Environment Variables
@@ -863,7 +953,6 @@ Add to CLI pipeline. See [CLAUDE.md](./CLAUDE.md) for details.
 - [x] AI-powered semantic validation
 - [x] Multi-provider support (OpenAI, Anthropic, Google)
 - [x] CLI with `init` and `run` commands
-- [x] Visual validators (screenshots + AI vision)
 - [ ] Validation result caching
 - [ ] Lint validators (ESLint, Prettier)
 - [ ] Chain validators (multi-step pipelines)

@@ -6,7 +6,7 @@ import { join } from "path";
 import { config as loadEnv } from "dotenv";
 import { parseBlocksConfig } from "@blocksai/schema";
 import { AIProvider } from "@blocksai/ai";
-import { IOSchemaValidator, ExportsShapeValidator, DomainValidator } from "@blocksai/validators";
+import { ValidatorRegistry } from "@blocksai/validators";
 
 // Load environment variables from .env file in current directory
 // Users can also set OPENAI_API_KEY in their shell environment
@@ -66,7 +66,7 @@ export const runCommand = new Command("run")
         continue;
       }
 
-      // Get block path - prioritize block.path, then targets.discover.root, then default to "blocks"
+      // Get block path - prioritize block.path, then config.root, then default to "blocks"
       const blockDef = config.blocks[name];
       let blockPath: string;
 
@@ -74,9 +74,9 @@ export const runCommand = new Command("run")
         // Use custom path from block definition
         blockPath = join(process.cwd(), blockDef.path);
       } else {
-        // Fall back to discover root + block name
-        const discoverRoot = config.targets?.discover?.root || "blocks";
-        blockPath = join(process.cwd(), discoverRoot, name);
+        // Fall back to root directory + block name
+        const blocksRoot = config.root || "blocks";
+        blockPath = join(process.cwd(), blocksRoot, name);
       }
 
       const context = {
@@ -88,62 +88,53 @@ export const runCommand = new Command("run")
       let hasErrors = false;
       let hasWarnings = false;
 
-      // Schema validation
-      const schemaValidator = new IOSchemaValidator();
-      const schemaResult = await schemaValidator.validate(context);
-      if (schemaResult.issues.length > 0) {
-        for (const issue of schemaResult.issues) {
-          const icon = issue.type === "error" ? "✗" : issue.type === "warning" ? "⚠" : "ℹ";
-          const color =
-            issue.type === "error" ? chalk.red : issue.type === "warning" ? chalk.yellow : chalk.blue;
-          console.log(color(`  ${icon} [schema] ${issue.message}`));
-          if (issue.suggestion) {
-            console.log(chalk.gray(`    → ${issue.suggestion}`));
-          }
-          if (issue.type === "error") hasErrors = true;
-          if (issue.type === "warning") hasWarnings = true;
-        }
-      } else {
-        console.log(chalk.green("  ✓ schema ok"));
-      }
+      // Create validator registry
+      const registry = new ValidatorRegistry(config, ai);
 
-      // Shape validation
-      const shapeValidator = new ExportsShapeValidator();
-      const shapeResult = await shapeValidator.validate(context);
-      if (shapeResult.issues.length > 0) {
-        for (const issue of shapeResult.issues) {
-          const icon = issue.type === "error" ? "✗" : issue.type === "warning" ? "⚠" : "ℹ";
-          const color =
-            issue.type === "error" ? chalk.red : issue.type === "warning" ? chalk.yellow : chalk.blue;
-          console.log(color(`  ${icon} [shape] ${issue.message}`));
-          if (issue.suggestion) {
-            console.log(chalk.gray(`    → ${issue.suggestion}`));
-          }
-          if (issue.type === "error") hasErrors = true;
-          if (issue.type === "warning") hasWarnings = true;
-        }
-      } else {
-        console.log(chalk.green("  ✓ shape ok"));
-      }
+      // Determine which validators to run (default to domain only)
+      const validatorsToRun = config.validators ?? ["domain"];
 
-      // Domain validation (only if files exist)
-      if (existsSync(blockPath)) {
-        const domainValidator = new DomainValidator(config, ai);
-        const domainSpinner = ora("  Running domain validation...").start();
+      // Execute validators in order
+      for (const validatorEntry of validatorsToRun) {
+        let validatorId: string;
+        let validatorLabel: string;
+
+        if (typeof validatorEntry === "string") {
+          // Built-in validator (short name)
+          validatorId = validatorEntry;
+          validatorLabel = validatorEntry;
+        } else {
+          // Custom validator (object with name + run)
+          validatorId = validatorEntry.run;
+          validatorLabel = validatorEntry.name;
+        }
+
+        const validator = registry.get(validatorId);
+        if (!validator) {
+          console.log(chalk.red(`  ✗ Unknown validator: ${validatorId}`));
+          hasErrors = true;
+          continue;
+        }
+
+        // Run validator (with spinner for slow ones)
+        const needsSpinner = validatorId === "domain" || validatorId === "domain.validation";
+        let spinner;
+
+        if (needsSpinner) {
+          spinner = ora(`  Running ${validatorLabel}...`).start();
+        }
+
         try {
-          const domainResult = await domainValidator.validate(context);
-          domainSpinner.stop();
+          const result = await validator.validate(context);
 
-          if (domainResult.issues.length > 0) {
-            for (const issue of domainResult.issues) {
+          if (spinner) spinner.stop();
+
+          if (result.issues.length > 0) {
+            for (const issue of result.issues) {
               const icon = issue.type === "error" ? "✗" : issue.type === "warning" ? "⚠" : "ℹ";
               const color =
-                issue.type === "error"
-                  ? chalk.red
-                  : issue.type === "warning"
-                    ? chalk.yellow
-                    : chalk.blue;
-              console.log(color(`  ${icon} [domain] ${issue.message}`));
+                issue.type === "error" ? chalk.red : issue.type === "warning" ? chalk.yellow : chalk.blue;
+              console.log(color(`  ${icon} [${validatorLabel}] ${issue.message}`));
               if (issue.suggestion) {
                 console.log(chalk.gray(`    → ${issue.suggestion}`));
               }
@@ -151,10 +142,10 @@ export const runCommand = new Command("run")
               if (issue.type === "warning") hasWarnings = true;
             }
           } else {
-            console.log(chalk.green("  ✓ domain ok"));
+            console.log(chalk.green(`  ✓ ${validatorLabel} ok`));
           }
         } catch (error) {
-          domainSpinner.fail("Domain validation failed");
+          if (spinner) spinner.fail(`${validatorLabel} failed`);
           console.error(
             chalk.red(`  Error: ${error instanceof Error ? error.message : "Unknown error"}`)
           );

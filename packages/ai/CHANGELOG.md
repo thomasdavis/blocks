@@ -1,5 +1,68 @@
 # @blocks/ai
 
+## 2.0.0
+
+### Major Changes
+
+- Remove visual validation functionality
+
+  Removed all visual validation functionality from Blocks, including the entire `@blocksai/visual-validators` package, schema fields, and AI methods. Visual validation was implemented but never integrated into the CLI or validation pipeline.
+
+  **Removed:**
+  - `@blocksai/visual-validators` package (entire package deleted)
+  - `visual_validation` field from BlockDefinitionSchema
+  - `test_samples` field from BlockDefinitionSchema
+  - `validateVisualSemantics()` method from AIProvider
+
+  **Enhanced:**
+  - `test_data` field now accepts `string | any` (file path OR inline data)
+
+  **Breaking Changes:**
+
+  ```yaml
+  # Before
+  blocks:
+    my_block:
+      test_data: "test-data/sample.json"
+      test_samples:  # REMOVED
+        - { id: 1 }
+      visual_validation:  # REMOVED (was never functional)
+        viewports: [...]
+
+  # After - Option 1: File path (unchanged)
+  blocks:
+    my_block:
+      test_data: "test-data/sample.json"
+
+  # After - Option 2: Inline data (new)
+  blocks:
+    my_block:
+      test_data: { id: 1, name: "Sample" }
+
+  # After - Option 3: Inline array (new)
+  blocks:
+    my_block:
+      test_data: [{ id: 1 }, { id: 2 }]
+  ```
+
+  **Migration:**
+  - Remove `visual_validation` fields from blocks.yml
+  - Replace `test_samples` with inline `test_data` if needed
+  - Remove `@blocksai/visual-validators` from dependencies if imported
+
+  **Benefits:**
+  - Removed ~600 lines of unused code
+  - Removed heavy dependencies (Playwright, axe-core)
+  - Faster builds (one less package)
+  - Clearer focus on development-time source code validation
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+  - @blocksai/schema@1.0.0
+  - @blocksai/domain@0.2.0
+
 ## 1.0.0
 
 ### Major Changes

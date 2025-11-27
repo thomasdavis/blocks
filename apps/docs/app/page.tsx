@@ -93,8 +93,9 @@ blocks:
     # Inherits domain_rules automatically
 
 validators:
-  domain:
-    - run: "domain.validation"  # AI-powered`}
+  - schema    # Fast structural checks
+  - shape.ts  # File structure validation
+  - domain    # AI-powered semantic analysis`}
               </code>
             </pre>
           </div>
@@ -236,14 +237,14 @@ validators:
                 </p>
                 <div className="bg-slate-900 dark:bg-slate-950 rounded-lg p-4 mt-4">
                   <code className="text-sm text-slate-300 font-mono">
-                    <div className="text-slate-500"># Add your own custom validators</div>
+                    <div className="text-slate-500"># Mix built-in and custom validators</div>
                     <div className="mt-2">validators:</div>
-                    <div className="ml-4 text-blue-400">custom:</div>
-                    <div className="ml-8">- run: <span className="text-green-400">"my.custom.validator"</span></div>
-                    <div className="ml-4 text-purple-400">security:</div>
-                    <div className="ml-8">- run: <span className="text-green-400">"security.audit"</span></div>
-                    <div className="ml-4 text-cyan-400">performance:</div>
-                    <div className="ml-8">- run: <span className="text-green-400">"perf.benchmark"</span></div>
+                    <div className="ml-4">- <span className="text-blue-400">schema</span></div>
+                    <div className="ml-4">- <span className="text-blue-400">domain</span></div>
+                    <div className="ml-4">- name: <span className="text-green-400">security_scan</span></div>
+                    <div className="ml-6">run: <span className="text-green-400">"security.audit"</span></div>
+                    <div className="ml-4">- name: <span className="text-purple-400">perf_check</span></div>
+                    <div className="ml-6">run: <span className="text-green-400">"perf.benchmark"</span></div>
                   </code>
                 </div>
               </div>

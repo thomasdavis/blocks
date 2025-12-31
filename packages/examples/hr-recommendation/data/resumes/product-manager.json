@@ -1,0 +1,72 @@
+{
+  "basics": {
+    "name": "Michael Torres",
+    "label": "Senior Product Manager",
+    "email": "m.torres@example.com",
+    "phone": "(555) 987-6543",
+    "summary": "Product leader with 6 years of experience driving B2B SaaS products from conception to launch. Focused on data-driven decision making and cross-functional collaboration.",
+    "location": {
+      "city": "Boston",
+      "region": "MA",
+      "countryCode": "US"
+    },
+    "profiles": [
+      { "network": "LinkedIn", "url": "https://linkedin.com/in/michaeltorres" }
+    ]
+  },
+  "work": [
+    {
+      "name": "CloudSoft Solutions",
+      "position": "Senior Product Manager",
+      "startDate": "2021-03-01",
+      "endDate": "present",
+      "summary": "Lead PM for enterprise analytics platform",
+      "highlights": [
+        "Launched enterprise analytics platform generating $5M ARR in first year",
+        "Led cross-functional team of 12 (engineering, design, marketing)",
+        "Increased user retention by 35% through feature improvements",
+        "Established product metrics framework and OKR process"
+      ]
+    },
+    {
+      "name": "DataFlow Inc",
+      "position": "Product Manager",
+      "startDate": "2018-01-01",
+      "endDate": "2021-02-28",
+      "summary": "PM for data integration product",
+      "highlights": [
+        "Managed roadmap for data integration tool with 200+ enterprise customers",
+        "Conducted 100+ customer interviews to inform product strategy",
+        "Increased NPS from 35 to 58 over 18 months"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "MIT Sloan School of Management",
+      "area": "Business Administration",
+      "studyType": "MBA",
+      "startDate": "2017-09-01",
+      "endDate": "2019-06-01"
+    },
+    {
+      "institution": "University of Michigan",
+      "area": "Industrial Engineering",
+      "studyType": "Bachelor of Science",
+      "startDate": "2011-09-01",
+      "endDate": "2015-06-01"
+    }
+  ],
+  "skills": [
+    { "name": "Product Strategy", "keywords": ["Roadmapping", "OKRs", "Market Analysis", "Competitive Research"] },
+    { "name": "Technical", "keywords": ["SQL", "Data Analysis", "Agile/Scrum", "JIRA", "Figma"] },
+    { "name": "Leadership", "keywords": ["Cross-functional Leadership", "Stakeholder Management", "Team Building"] }
+  ],
+  "certifications": [
+    {
+      "name": "Certified Scrum Product Owner (CSPO)",
+      "issuer": "Scrum Alliance",
+      "date": "2019-05-01"
+    }
+  ]
+}

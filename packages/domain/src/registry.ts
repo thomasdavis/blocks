@@ -120,4 +120,16 @@ export class DomainRegistry {
     }
     return defaultRules.map((rule) => rule.description);
   }
+
+  /**
+   * Get default domain rule IDs that apply to all blocks
+   * These are defined at blocks.domain_rules
+   */
+  getDefaultDomainRuleIds(): string[] {
+    const defaultRules = this.config.blocks.domain_rules;
+    if (!defaultRules || !Array.isArray(defaultRules)) {
+      return [];
+    }
+    return defaultRules.map((rule) => rule.id);
+  }
 }

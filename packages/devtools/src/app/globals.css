@@ -1,0 +1,35 @@
+@import "tailwindcss";
+@import "@blocksai/ui/styles.css";
+
+/* Devtools-specific styles */
+body {
+  font-family: var(--ui-font-sans);
+  background: var(--ui-background);
+  color: var(--ui-foreground);
+  min-height: 100vh;
+}
+
+/* Timeline connector */
+.timeline-connector {
+  position: absolute;
+  left: 1rem;
+  top: 2rem;
+  bottom: 0;
+  width: 2px;
+  background: var(--ui-border);
+}
+
+/* Status dot animation */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.status-dot-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}

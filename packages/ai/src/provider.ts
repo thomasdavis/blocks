@@ -131,7 +131,15 @@ export class AIProvider {
   }
 
   /**
+   * Rich response from AI validation with full context
+   */
+  public getProviderInfo(): { provider: string; model: string } {
+    return { provider: this.provider, model: this.modelName };
+  }
+
+  /**
    * Validate domain semantics using AI
+   * Returns rich response with full prompt, response, and token usage
    */
   async validateDomainSemantics(params: {
     blockName: string;
@@ -142,6 +150,15 @@ export class AIProvider {
   }): Promise<{
     isValid: boolean;
     issues: Array<{ message: string; severity: "error" | "warning"; file?: string }>;
+    summary?: string;
+    _meta: {
+      provider: string;
+      model: string;
+      prompt: string;
+      systemPrompt: string;
+      response: string;
+      tokensUsed?: { input: number; output: number };
+    };
   }> {
     const schema = z.object({
       isValid: z.boolean(),
@@ -152,6 +169,7 @@ export class AIProvider {
           file: z.string().optional(),
         })
       ),
+      summary: z.string().optional().describe("Brief summary of why the block passed or failed validation"),
     });
 
     const domainRulesText = params.domainRules?.length
@@ -173,9 +191,7 @@ ${content}
       )
       .join("\n");
 
-    const result = await this.generateStructured({
-      schema,
-      system: `You are validating a block in the Blocks framework - a domain-driven validation system for agentic coding.
+    const systemPrompt = `You are validating a block in the Blocks framework - a domain-driven validation system for agentic coding.
 
 Blocks is a development-time framework that guides AI agents to produce code that aligns with domain semantics. Your role is to analyze block source code (not runtime behavior) for domain compliance.
 
@@ -188,8 +204,9 @@ Your validation should focus on SOURCE CODE analysis:
 - For templates: Check template source for semantic HTML, ARIA labels, CSS media queries, etc.
 - For code: Check if logic expresses domain intent clearly
 - Do NOT focus on runtime behavior or test execution
-- Check if domain rules are reflected in the implementation`,
-      prompt: `Block Name: ${params.blockName}
+- Check if domain rules are reflected in the implementation`;
+
+    const prompt = `Block Name: ${params.blockName}
 ${philosophyText}
 
 Block Definition:
@@ -207,10 +224,31 @@ Analyze ALL files together to determine if this block:
 4. For templates: Check if template SOURCE contains semantic HTML, ARIA labels, media queries, heading hierarchy
 5. Does NOT introduce undocumented concepts
 
-Return validation issues with specific file references where possible.`,
+Return validation issues with specific file references where possible.
+Also provide a brief summary explaining why the block passed or failed validation.`;
+
+    const result = await generateObject({
+      model: this.languageModel,
+      schema,
+      prompt,
+      system: systemPrompt,
     });
 
-    return result;
+    return {
+      isValid: result.object.isValid,
+      issues: result.object.issues,
+      summary: result.object.summary,
+      _meta: {
+        provider: this.provider,
+        model: this.modelName,
+        prompt,
+        systemPrompt,
+        response: JSON.stringify(result.object, null, 2),
+        tokensUsed: result.usage
+          ? { input: (result.usage as any).promptTokens ?? 0, output: (result.usage as any).completionTokens ?? 0 }
+          : undefined,
+      },
+    };
   }
 
   /**

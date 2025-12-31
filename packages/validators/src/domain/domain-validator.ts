@@ -111,24 +111,34 @@ export class DomainValidator implements Validator {
 
     // Read block files (single file or directory)
     const blockFiles = resolveBlockFiles(context.blockPath);
+    const filesAnalyzed = Object.keys(blockFiles);
 
-    if (Object.keys(blockFiles).length === 0) {
+    if (filesAnalyzed.length === 0) {
       issues.push({
         type: "error",
         code: "MISSING_IMPLEMENTATION",
         message: "No implementation files found in block directory",
       });
-      return { valid: false, issues };
+      return {
+        valid: false,
+        issues,
+        context: { filesAnalyzed: [], rulesApplied: [], philosophy: [] },
+      };
     }
+
+    // Use block-specific rules if present, otherwise use defaults from blocks.domain_rules
+    const domainRules = block.domain_rules
+      ? block.domain_rules.map((r) => r.description)
+      : this.registry.getDefaultDomainRules();
+    const philosophy = context.config.philosophy ?? [];
+
+    // Capture rule IDs for context
+    const rulesApplied = block.domain_rules
+      ? block.domain_rules.map((r) => r.id)
+      : this.registry.getDefaultDomainRuleIds?.() ?? [];
 
     // Use AI to validate semantic alignment with all block files
     try {
-      // Use block-specific rules if present, otherwise use defaults from blocks.domain_rules
-      const domainRules = block.domain_rules
-        ? block.domain_rules.map((r) => r.description)
-        : this.registry.getDefaultDomainRules();
-      const philosophy = context.config.philosophy ?? [];
-
       const validation = await this.ai.validateDomainSemantics({
         blockName: context.blockName,
         blockDefinition: JSON.stringify(block, null, 2),
@@ -145,17 +155,42 @@ export class DomainValidator implements Validator {
           file: issue.file,
         });
       }
+
+      // Return result with full context and AI metadata
+      return {
+        valid: issues.filter((i) => i.type === "error").length === 0,
+        issues,
+        context: {
+          filesAnalyzed,
+          rulesApplied,
+          philosophy,
+          summary: validation.summary,
+        },
+        ai: {
+          provider: validation._meta.provider,
+          model: validation._meta.model,
+          prompt: validation._meta.prompt,
+          response: validation._meta.response,
+          tokensUsed: validation._meta.tokensUsed,
+        },
+      };
     } catch (error) {
       issues.push({
         type: "warning",
         code: "AI_VALIDATION_FAILED",
         message: `AI validation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       });
-    }
 
-    return {
-      valid: issues.filter((i) => i.type === "error").length === 0,
-      issues,
-    };
+      return {
+        valid: issues.filter((i) => i.type === "error").length === 0,
+        issues,
+        context: {
+          filesAnalyzed,
+          rulesApplied,
+          philosophy,
+          summary: `AI validation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        },
+      };
+    }
   }
 }

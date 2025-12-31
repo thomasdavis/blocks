@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "latest",
+    "@blocksai/ui": "workspace:*",
     "@vercel/analytics": "^1.6.1",
     "ai": "latest",
     "fumadocs-core": "16.0.14",

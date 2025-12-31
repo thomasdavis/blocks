@@ -1,10 +1,14 @@
 import Link from 'next/link';
 import { CopyButton } from './copy-button';
 import { AISlogan } from './ai-slogan';
+import { getButtonClassName } from '@blocksai/ui/button';
+import { Nav } from './components/nav';
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+      <Nav />
+      <main>
       {/* Discovery Phase Banner */}
       <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 dark:from-blue-500/5 dark:to-cyan-500/5 border-b border-blue-200 dark:border-blue-900">
         <div className="container mx-auto px-4 py-3">
@@ -46,19 +50,19 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/docs"
-              className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg shadow-blue-500/30"
+              className={getButtonClassName("primary", "lg", "shadow-lg shadow-blue-500/30")}
             >
               Get Started
             </Link>
             <Link
               href="#examples"
-              className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors"
+              className={getButtonClassName("outline", "lg")}
             >
               View Live Examples
             </Link>
             <Link
               href="/changelog"
-              className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors"
+              className={getButtonClassName("outline", "lg")}
             >
               Changelog
             </Link>
@@ -397,19 +401,20 @@ validators:
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/docs/getting-started/installation"
-              className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg shadow-blue-500/30"
+              className={getButtonClassName("primary", "lg", "shadow-lg shadow-blue-500/30")}
             >
               Get Started
             </Link>
             <Link
               href="https://github.com/anthropics/blocks"
-              className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors"
+              className={getButtonClassName("outline", "lg")}
             >
               View on GitHub
             </Link>
           </div>
         </div>
       </div>
-    </main>
+      </main>
+    </div>
   );
 }

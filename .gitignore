@@ -35,6 +35,8 @@ Thumbs.db
 .idea
 
 # Changesets
-.changeset/*.md
 !.changeset/README.md
 !.changeset/config.json
+
+# Blocks devtools run history
+.blocks/

@@ -1,0 +1,41 @@
+{
+  "title": "Senior Backend Engineer",
+  "department": "Engineering",
+  "location": "San Francisco, CA (Hybrid)",
+  "experience_requirements": {
+    "minimum_years": 5,
+    "preferred_years": 8,
+    "required_experience": [
+      "Building distributed systems at scale",
+      "Leading technical projects or small teams",
+      "Working with cloud infrastructure (AWS or GCP)",
+      "Designing and implementing RESTful APIs"
+    ]
+  },
+  "education_requirements": {
+    "minimum_degree": "Bachelor's",
+    "preferred_degree": "Master's",
+    "preferred_fields": ["Computer Science", "Software Engineering", "Related technical field"]
+  },
+  "required_skills": [
+    "Node.js or Python",
+    "PostgreSQL or similar RDBMS",
+    "AWS or GCP",
+    "Docker and Kubernetes",
+    "RESTful API design"
+  ],
+  "preferred_skills": [
+    "Go or Rust",
+    "Event-driven architecture (Kafka, RabbitMQ)",
+    "GraphQL",
+    "System design experience",
+    "CI/CD pipeline experience"
+  ],
+  "responsibilities": [
+    "Design and implement scalable backend services",
+    "Mentor junior engineers and conduct code reviews",
+    "Collaborate with product and frontend teams",
+    "Participate in on-call rotation for production systems",
+    "Contribute to technical architecture decisions"
+  ]
+}

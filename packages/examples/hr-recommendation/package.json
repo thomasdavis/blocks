@@ -1,0 +1,24 @@
+{
+  "name": "@blocks-examples/hr-recommendation",
+  "version": "0.1.0",
+  "description": "HR recommendation scoring adapters using AI",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "validate": "blocks run --all",
+    "validate:skills": "blocks run adapter.skills",
+    "validate:experience": "blocks run adapter.experience",
+    "validate:education": "blocks run adapter.education",
+    "validate:recommendation": "blocks run adapter.recommendation"
+  },
+  "dependencies": {
+    "@blocksai/ai": "workspace:*",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@blocksai/cli": "workspace:*",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

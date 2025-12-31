@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { LoadingDots } from '@blocksai/ui/loading-dots';
 
 const STORAGE_KEY = 'blocks-ai-slogans';
 const MAX_SLOGANS = 3;
@@ -203,14 +204,7 @@ export function AISlogan() {
   return (
     <div className="relative min-h-[80px] flex items-center justify-center">
       {isGenerating && !isTyping ? (
-        <div className="flex items-center gap-2 text-sm text-slate-400">
-          <div className="flex gap-1">
-            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-          </div>
-          <span>Generating next pitch...</span>
-        </div>
+        <LoadingDots size="md" color="primary" label="Generating next pitch..." />
       ) : (
         <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl mx-auto text-center">
           {displayedText}

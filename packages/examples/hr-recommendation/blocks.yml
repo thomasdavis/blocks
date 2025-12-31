@@ -1,0 +1,172 @@
+name: "HR Recommendation Engine"
+root: "adapters"
+
+ai:
+  provider: "openai"
+  model: "gpt-4.1-mini"
+
+philosophy:
+  - "Scoring adapters must provide objective, consistent evaluations"
+  - "Each adapter focuses on a single dimension of candidate fit"
+  - "Scores must include reasoning for transparency and auditability"
+  - "Adapters must handle missing or incomplete data gracefully"
+  - "All evaluations are calibrated for the American job market"
+  - "All adapters should use the Effect library https://effect.website/"
+
+domain:
+  entities:
+    resume:
+      fields:
+        - basics
+        - work
+        - education
+        - skills
+        - certifications
+        - projects
+
+    job_description:
+      fields:
+        - title
+        - required_skills
+        - preferred_skills
+        - experience_requirements
+        - education_requirements
+        - responsibilities
+
+    score_result:
+      fields:
+        - score
+        - reasoning
+        - matched_items
+        - gaps
+        - confidence
+
+    recommendation:
+      fields:
+        - overall_score
+        - skill_score
+        - experience_score
+        - education_score
+        - summary
+        - hire_decision
+        - key_strengths
+        - key_concerns
+
+  signals:
+    skill_alignment:
+      description: "How well candidate skills match job requirements"
+      extraction_hint: "Compare required/preferred skills against resume skills"
+
+    experience_depth:
+      description: "Relevance and depth of work experience"
+      extraction_hint: "Evaluate years, roles, industries, responsibilities"
+
+    education_fit:
+      description: "Educational background alignment with requirements"
+      extraction_hint: "Check degrees, fields of study, institutions"
+
+  measures:
+    score_0_1:
+      constraints:
+        - "Score must be between 0.0 and 1.0"
+        - "Score must have at most 2 decimal places"
+
+    reasoning_quality:
+      constraints:
+        - "Reasoning must be specific and actionable"
+        - "Must reference specific resume/job elements"
+        - "Must explain score justification"
+
+blocks:
+  domain_rules:
+    - id: objective_scoring
+      description: "Scores must be based on objective criteria from inputs, not assumptions"
+    - id: transparent_reasoning
+      description: "Must provide clear reasoning that references specific data points"
+    - id: graceful_degradation
+      description: "Must handle missing or incomplete data without failing"
+    - id: consistent_output
+      description: "Must always return the expected structured output type"
+    - id: american_market
+      description: "Evaluations must consider American market context including US degree equivalencies, work authorization (H-1B, green card, citizenship), EEOC compliance, and US industry standards"
+
+  adapter.skills:
+    description: "Scores candidate skills against job requirements"
+    path: "adapters/skills"
+    inputs:
+      - name: resume
+        type: entity.resume
+      - name: job
+        type: entity.job_description
+    outputs:
+      - name: result
+        type: entity.score_result
+        measures:
+          - score_0_1
+          - reasoning_quality
+        constraints:
+          - "Must compare required and preferred skills"
+          - "Must identify skill gaps"
+          - "Must weight required skills higher than preferred"
+
+  adapter.experience:
+    description: "Scores candidate experience against job requirements"
+    path: "adapters/experience"
+    inputs:
+      - name: resume
+        type: entity.resume
+      - name: job
+        type: entity.job_description
+    outputs:
+      - name: result
+        type: entity.score_result
+        measures:
+          - score_0_1
+          - reasoning_quality
+        constraints:
+          - "Must evaluate years of relevant experience"
+          - "Must consider role progression and seniority"
+          - "Must assess industry and domain alignment"
+
+  adapter.education:
+    description: "Scores candidate education against job requirements"
+    path: "adapters/education"
+    inputs:
+      - name: resume
+        type: entity.resume
+      - name: job
+        type: entity.job_description
+    outputs:
+      - name: result
+        type: entity.score_result
+        measures:
+          - score_0_1
+          - reasoning_quality
+        constraints:
+          - "Must check degree level against requirements"
+          - "Must evaluate field of study relevance"
+          - "Must consider certifications as supplementary"
+
+  adapter.recommendation:
+    description: "Aggregates all adapter scores into final hiring recommendation"
+    path: "adapters/recommendation"
+    inputs:
+      - name: resume
+        type: entity.resume
+      - name: job
+        type: entity.job_description
+    outputs:
+      - name: result
+        type: entity.recommendation
+        measures:
+          - score_0_1
+          - reasoning_quality
+        constraints:
+          - "Must synthesize skills, experience, and education scores"
+          - "Must provide clear hire/no-hire decision with reasoning"
+          - "Must identify key strengths and concerns"
+
+validators:
+  - "schema"
+  - "shape.ts"
+  - "domain"

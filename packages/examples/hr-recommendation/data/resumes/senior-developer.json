@@ -1,0 +1,83 @@
+{
+  "basics": {
+    "name": "Sarah Chen",
+    "label": "Senior Software Engineer",
+    "email": "sarah.chen@example.com",
+    "phone": "(555) 123-4567",
+    "summary": "Senior software engineer with 8 years of experience building scalable backend systems and leading engineering teams. Passionate about distributed systems, developer experience, and mentoring junior engineers.",
+    "location": {
+      "city": "San Francisco",
+      "region": "CA",
+      "countryCode": "US"
+    },
+    "profiles": [
+      { "network": "LinkedIn", "url": "https://linkedin.com/in/sarahchen" },
+      { "network": "GitHub", "url": "https://github.com/sarahchen" }
+    ]
+  },
+  "work": [
+    {
+      "name": "TechCorp Inc",
+      "position": "Senior Software Engineer",
+      "startDate": "2020-01-15",
+      "endDate": "present",
+      "summary": "Lead backend engineer for payment processing platform serving 50M+ users",
+      "highlights": [
+        "Designed microservices architecture handling 10M+ daily transactions",
+        "Led team of 5 engineers, mentored 3 junior developers",
+        "Reduced system latency by 40% through database optimization and caching",
+        "Implemented event-driven architecture using Kafka for real-time processing",
+        "Established code review practices and CI/CD pipelines"
+      ]
+    },
+    {
+      "name": "StartupXYZ",
+      "position": "Software Engineer",
+      "startDate": "2016-06-01",
+      "endDate": "2019-12-31",
+      "summary": "Full-stack developer on e-commerce platform",
+      "highlights": [
+        "Built real-time inventory management system processing 100K updates/hour",
+        "Implemented CI/CD pipeline reducing deployment time by 60%",
+        "Designed RESTful APIs consumed by mobile and web clients",
+        "Migrated monolith to microservices architecture"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Stanford University",
+      "area": "Computer Science",
+      "studyType": "Master of Science",
+      "startDate": "2014-09-01",
+      "endDate": "2016-06-01"
+    },
+    {
+      "institution": "UC Berkeley",
+      "area": "Computer Science",
+      "studyType": "Bachelor of Science",
+      "startDate": "2010-09-01",
+      "endDate": "2014-06-01",
+      "score": "3.8 GPA"
+    }
+  ],
+  "skills": [
+    { "name": "Backend Development", "keywords": ["Node.js", "Python", "Go", "Java"] },
+    { "name": "Databases", "keywords": ["PostgreSQL", "MongoDB", "Redis", "DynamoDB"] },
+    { "name": "Cloud Platforms", "keywords": ["AWS", "GCP", "Kubernetes", "Docker"] },
+    { "name": "System Design", "keywords": ["Microservices", "API Design", "Event-Driven Architecture"] },
+    { "name": "DevOps", "keywords": ["CI/CD", "Terraform", "GitHub Actions", "Monitoring"] }
+  ],
+  "certifications": [
+    {
+      "name": "AWS Solutions Architect - Professional",
+      "issuer": "Amazon Web Services",
+      "date": "2022-03-01"
+    },
+    {
+      "name": "Kubernetes Administrator (CKA)",
+      "issuer": "CNCF",
+      "date": "2021-08-01"
+    }
+  ]
+}

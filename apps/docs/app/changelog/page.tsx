@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
+import { Badge, type BadgeVariant } from '@blocksai/ui/badge';
+import { Nav } from '../components/nav';
 
 export const metadata = {
   title: 'Changelog',
@@ -90,16 +92,14 @@ function getChangesets(): Changeset[] {
   }
 }
 
-function getBadgeColor(type: string): string {
+function getBadgeVariant(type: string): BadgeVariant {
   switch (type) {
     case 'major':
-      return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
     case 'minor':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
     case 'patch':
-      return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+      return type as BadgeVariant;
     default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+      return 'default';
   }
 }
 
@@ -108,28 +108,10 @@ export default function ChangelogPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
+      <Nav />
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-slate-800">
         <div className="container mx-auto px-4 py-12">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            Back to Home
-          </Link>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
             Changelog
           </h1>
@@ -192,11 +174,9 @@ export default function ChangelogPage() {
                           <code className="px-3 py-1 text-sm rounded-md bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-gray-100 font-mono">
                             {pkg}
                           </code>
-                          <span
-                            className={`px-2 py-0.5 text-xs font-semibold rounded-full ${getBadgeColor(type)}`}
-                          >
+                          <Badge variant={getBadgeVariant(type)} size="sm">
                             {type}
-                          </span>
+                          </Badge>
                         </div>
                       ))}
                     </div>

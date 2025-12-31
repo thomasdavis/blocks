@@ -11,10 +11,10 @@
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
-    "@ai-sdk/openai": "latest",
+    "@ai-sdk/openai": "^3.0.0",
     "@blocksai/ui": "workspace:*",
     "@vercel/analytics": "^1.6.1",
-    "ai": "latest",
+    "ai": "^6.0.0",
     "fumadocs-core": "16.0.14",
     "fumadocs-mdx": "14.0.2",
     "fumadocs-ui": "16.0.14",

@@ -1,5 +1,12 @@
 # @blocks/validators
 
+## 1.1.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @blocksai/ai@3.0.0
+
 ## 1.1.0
 
 ### Minor Changes

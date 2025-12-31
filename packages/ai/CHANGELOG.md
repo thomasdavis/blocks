@@ -1,5 +1,15 @@
 # @blocks/ai
 
+## 3.0.0
+
+### Major Changes
+
+- Upgrade to Vercel AI SDK v6
+  - Updated ai package to ^6.0.0
+  - Updated @ai-sdk/\* packages to ^3.0.0
+  - Replaced deprecated generateObject with generateText + Output.object()
+  - Updated token usage properties for v6 compatibility
+
 ## 2.1.0
 
 ### Minor Changes

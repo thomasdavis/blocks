@@ -100,13 +100,13 @@ importers:
   packages/ai:
     dependencies:
       '@ai-sdk/anthropic':
-        specifier: latest
+        specifier: ^3.0.0
         version: 3.0.2(zod@3.25.76)
       '@ai-sdk/google':
-        specifier: latest
+        specifier: ^3.0.0
         version: 3.0.2(zod@3.25.76)
       '@ai-sdk/openai':
-        specifier: latest
+        specifier: ^3.0.0
         version: 3.0.2(zod@3.25.76)
       '@blocksai/domain':
         specifier: workspace:*
@@ -115,7 +115,7 @@ importers:
         specifier: workspace:*
         version: link:../schema
       ai:
-        specifier: latest
+        specifier: ^6.0.0
         version: 6.0.5(zod@3.25.76)
       zod:
         specifier: ^3.24.1
@@ -274,8 +274,8 @@ importers:
         version: 4.7.8
     devDependencies:
       '@blocksai/cli':
-        specifier: ^0.1.0
-        version: 0.1.2
+        specifier: ^0.2.0
+        version: 0.2.0
       '@types/node':
         specifier: ^22.10.2
         version: 22.19.1
@@ -434,21 +434,21 @@ packages:
       '@types/react':
         optional: true
 
-  '@blocksai/ai@2.0.0':
-    resolution: {integrity: sha512-PM/z3ci3uZB5+dUp4/XsASzHZhub6ex5VkTEmmMW48XjM1Lf+TdDCJ8A/GGCpEqfnwLwuWzQC6A1wh8Uj2VCOQ==}
+  '@blocksai/ai@2.1.0':
+    resolution: {integrity: sha512-gPTY60T0QALVknWW8dhX65CDuPQsqPVijxEkBW7e42vF/UhLDVT6oYzo6geea6BvnQbeVYBS9kMFpjZPwOVQ3A==}
 
-  '@blocksai/cli@0.1.2':
-    resolution: {integrity: sha512-+XbAQCPNSqH9+L9u8wuFRGF/gdOMAjkkhl36z3DBswQr5WcpZEJ1lr3W+gvd4atZ6mL7GMGkgwjFokgvO9rHOA==}
+  '@blocksai/cli@0.2.0':
+    resolution: {integrity: sha512-DpctmArgPauhpWsogI9grSctRnCfzx0/UQuYFa+Wbu4PFwYg094Ab9dn8iFnO6GiwyUMLiKEAt8QiPexZdlJlg==}
     hasBin: true
 
-  '@blocksai/domain@0.2.0':
-    resolution: {integrity: sha512-Wl4v87v9F5rn66WtbtJmxir4NpQODKoXlczNbC97aICvdCOfYWw8RMiZDc/2x9BoF4/8hyQlIcU4jb5lyijsmg==}
+  '@blocksai/domain@0.2.1':
+    resolution: {integrity: sha512-41FhTvfjWXQyLdaz2ZK9GxG44F+gAz719t4S1HbSg8qjUkGgJksPWhPdukS4IGU+JpVxomJD236N4E8WmN411A==}
 
   '@blocksai/schema@1.0.0':
     resolution: {integrity: sha512-DXSIzRyAUWaFE1yfV1lYEqDIXE4gcAlI1HTxTE4sk9Npc9+DzN1HbiagynAaoaP0pIQfpN1Frhd9/sMobTQQBQ==}
 
-  '@blocksai/validators@1.0.1':
-    resolution: {integrity: sha512-n9iuiXBLiO8GsmZ7ssWgQNOxmr9/nmu/ZtGJkkPkuKzNYdJDEz22g7k2H5OWnfid94MH3w6r7+HcCO+RYj8p/A==}
+  '@blocksai/validators@1.1.0':
+    resolution: {integrity: sha512-fsBoPIZ1/Y18z3rbuknEvhifyuYeq8Q2uZ+yUPcPb8AeQ9H/T+x9pI15BcPjCKofDpajxIdKsyTTT+jf8A2VwQ==}
 
   '@changesets/apply-release-plan@7.0.13':
     resolution: {integrity: sha512-BIW7bofD2yAWoE8H4V40FikC+1nNFEKBisMECccS16W1rt6qqhNTBDmIw5HaqmMgtLNz9e7oiALiEUuKrQ4oHg==}
@@ -3837,28 +3837,28 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.6
 
-  '@blocksai/ai@2.0.0':
+  '@blocksai/ai@2.1.0':
     dependencies:
       '@ai-sdk/anthropic': 3.0.2(zod@3.25.76)
       '@ai-sdk/google': 3.0.2(zod@3.25.76)
       '@ai-sdk/openai': 3.0.2(zod@3.25.76)
-      '@blocksai/domain': 0.2.0
+      '@blocksai/domain': 0.2.1
       '@blocksai/schema': 1.0.0
       ai: 6.0.5(zod@3.25.76)
       zod: 3.25.76
 
-  '@blocksai/cli@0.1.2':
+  '@blocksai/cli@0.2.0':
     dependencies:
-      '@blocksai/ai': 2.0.0
-      '@blocksai/domain': 0.2.0
+      '@blocksai/ai': 2.1.0
+      '@blocksai/domain': 0.2.1
       '@blocksai/schema': 1.0.0
-      '@blocksai/validators': 1.0.1
+      '@blocksai/validators': 1.1.0
       chalk: 5.6.2
       commander: 12.1.0
       dotenv: 17.2.3
       ora: 8.2.0
 
-  '@blocksai/domain@0.2.0':
+  '@blocksai/domain@0.2.1':
     dependencies:
       '@blocksai/schema': 1.0.0
 
@@ -3867,10 +3867,10 @@ snapshots:
       yaml: 2.8.1
       zod: 3.25.76
 
-  '@blocksai/validators@1.0.1':
+  '@blocksai/validators@1.1.0':
     dependencies:
-      '@blocksai/ai': 2.0.0
-      '@blocksai/domain': 0.2.0
+      '@blocksai/ai': 2.1.0
+      '@blocksai/domain': 0.2.1
       '@blocksai/schema': 1.0.0
 
   '@changesets/apply-release-plan@7.0.13':

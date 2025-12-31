@@ -1,7 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { google } from "@ai-sdk/google";
-import { generateObject, generateText, type LanguageModel } from "ai";
+import { generateText, Output, type LanguageModel } from "ai";
 import { z } from "zod";
 
 export type ProviderName = "openai" | "anthropic" | "google";
@@ -107,14 +107,14 @@ export class AIProvider {
     prompt: string;
     system?: string;
   }): Promise<z.infer<T>> {
-    const result = await generateObject({
+    const result = await generateText({
       model: this.languageModel,
-      schema: params.schema,
       prompt: params.prompt,
       ...(params.system && { system: params.system }),
+      experimental_output: Output.object({ schema: params.schema }),
     });
 
-    return result.object;
+    return result.experimental_output;
   }
 
   /**
@@ -227,25 +227,27 @@ Analyze ALL files together to determine if this block:
 Return validation issues with specific file references where possible.
 Also provide a brief summary explaining why the block passed or failed validation.`;
 
-    const result = await generateObject({
+    const result = await generateText({
       model: this.languageModel,
-      schema,
       prompt,
       system: systemPrompt,
+      experimental_output: Output.object({ schema }),
     });
 
+    const output = result.experimental_output;
+
     return {
-      isValid: result.object.isValid,
-      issues: result.object.issues,
-      summary: result.object.summary,
+      isValid: output.isValid,
+      issues: output.issues,
+      summary: output.summary,
       _meta: {
         provider: this.provider,
         model: this.modelName,
         prompt,
         systemPrompt,
-        response: JSON.stringify(result.object, null, 2),
+        response: JSON.stringify(output, null, 2),
         tokensUsed: result.usage
-          ? { input: (result.usage as any).promptTokens ?? 0, output: (result.usage as any).completionTokens ?? 0 }
+          ? { input: result.usage.inputTokens ?? 0, output: result.usage.outputTokens ?? 0 }
           : undefined,
       },
     };

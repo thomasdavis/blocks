@@ -24,10 +24,10 @@
   "dependencies": {
     "@blocksai/schema": "workspace:*",
     "@blocksai/domain": "workspace:*",
-    "@ai-sdk/openai": "latest",
-    "@ai-sdk/anthropic": "latest",
-    "@ai-sdk/google": "latest",
-    "ai": "latest",
+    "@ai-sdk/openai": "^3.0.0",
+    "@ai-sdk/anthropic": "^3.0.0",
+    "@ai-sdk/google": "^3.0.0",
+    "ai": "^6.0.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

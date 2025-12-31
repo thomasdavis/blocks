@@ -164,12 +164,12 @@ export class AIProvider {
       isValid: z.boolean(),
       issues: z.array(
         z.object({
-          message: z.string(),
-          severity: z.enum(["error", "warning"]),
-          file: z.string().optional(),
+          message: z.string().describe("Description of the issue found"),
+          severity: z.enum(["error", "warning"]).describe("Severity of the issue"),
+          file: z.string().describe("File path where the issue was found, or empty string if not file-specific"),
         })
       ),
-      summary: z.string().optional().describe("Brief summary of why the block passed or failed validation"),
+      summary: z.string().describe("Brief summary of why the block passed or failed validation"),
     });
 
     const domainRulesText = params.domainRules?.length

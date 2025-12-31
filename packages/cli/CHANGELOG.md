@@ -1,5 +1,13 @@
 # @blocks/cli
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [ab1434e]
+  - @blocksai/ai@3.0.1
+  - @blocksai/validators@1.1.2
+
 ## 0.2.1
 
 ### Patch Changes

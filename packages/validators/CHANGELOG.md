@@ -1,5 +1,12 @@
 # @blocks/validators
 
+## 1.1.2
+
+### Patch Changes
+
+- Updated dependencies [ab1434e]
+  - @blocksai/ai@3.0.1
+
 ## 1.1.1
 
 ### Patch Changes

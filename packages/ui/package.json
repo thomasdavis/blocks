@@ -1,6 +1,6 @@
 {
   "name": "@blocksai/ui",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Styled UI components for Blocks built on Base UI",
   "type": "module",
   "sideEffects": [

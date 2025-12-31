@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { default as __fd_glob_16 } from "../content/docs/getting-started/meta.json?collection=meta"
-import { default as __fd_glob_15 } from "../content/docs/examples/meta.json?collection=meta"
-import { default as __fd_glob_14 } from "../content/docs/core-concepts/meta.json?collection=meta"
+import { default as __fd_glob_16 } from "../content/docs/core-concepts/meta.json?collection=meta"
+import { default as __fd_glob_15 } from "../content/docs/getting-started/meta.json?collection=meta"
+import { default as __fd_glob_14 } from "../content/docs/examples/meta.json?collection=meta"
 import { default as __fd_glob_13 } from "../content/docs/meta.json?collection=meta"
 import * as __fd_glob_12 from "../content/docs/getting-started/quick-start.mdx?collection=docs"
 import * as __fd_glob_11 from "../content/docs/getting-started/installation.mdx?collection=docs"
@@ -26,4 +26,4 @@ const create = server<typeof Config, import("fumadocs-mdx/runtime/types").Intern
 
 export const docs = await create.doc("docs", "content/docs", {"index.mdx": __fd_glob_0, "use-cases.mdx": __fd_glob_1, "core-concepts/entities.mdx": __fd_glob_2, "core-concepts/index.mdx": __fd_glob_3, "core-concepts/measures.mdx": __fd_glob_4, "core-concepts/signals.mdx": __fd_glob_5, "examples/blog-content-validator.mdx": __fd_glob_6, "examples/hr-recommendation-engine.mdx": __fd_glob_7, "examples/json-resume-themes.mdx": __fd_glob_8, "getting-started/ai-configuration.mdx": __fd_glob_9, "getting-started/configuration.mdx": __fd_glob_10, "getting-started/installation.mdx": __fd_glob_11, "getting-started/quick-start.mdx": __fd_glob_12, });
 
-export const meta = await create.meta("meta", "content/docs", {"meta.json": __fd_glob_13, "core-concepts/meta.json": __fd_glob_14, "examples/meta.json": __fd_glob_15, "getting-started/meta.json": __fd_glob_16, });
+export const meta = await create.meta("meta", "content/docs", {"meta.json": __fd_glob_13, "examples/meta.json": __fd_glob_14, "getting-started/meta.json": __fd_glob_15, "core-concepts/meta.json": __fd_glob_16, });

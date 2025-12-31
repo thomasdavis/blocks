@@ -1,6 +1,6 @@
 {
   "name": "@blocksai/ai",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "AI-powered validation using Vercel AI SDK v6",
   "type": "module",
   "main": "./dist/index.js",

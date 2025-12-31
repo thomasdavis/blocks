@@ -1,5 +1,46 @@
 # @blocks/cli
 
+## 0.2.0
+
+### Minor Changes
+
+- 0f855e6: feat: Enhanced validation output with full context and AI metadata
+
+  **@blocksai/validators:**
+  - Added `ValidationContext` interface with: `filesAnalyzed`, `rulesApplied`, `philosophy`, `summary`
+  - Added `AIMetadata` interface with: `provider`, `model`, `prompt`, `response`, `tokensUsed`
+  - Extended `ValidationResult` to include `context` and `ai` fields
+  - Domain validator now captures and returns complete validation context
+
+  **@blocksai/ai:**
+  - Modified `validateDomainSemantics` to return rich response with full prompt, response, model info, and token usage
+  - Added `summary` field to AI validation response
+  - Added `getProviderInfo()` method
+
+  **@blocksai/cli:**
+  - Extended `ValidatorRunResult` to include `context` and `ai` metadata
+  - Run command now passes through rich context from validators to JSON output
+
+  **@blocksai/domain:**
+  - Added `getDefaultDomainRuleIds()` method for capturing applied rule IDs
+
+- Enhanced validator debugging with rich context
+  - All validators now return detailed context: filesAnalyzed, rulesApplied, summary, input/output
+  - Schema validator shows validation checks performed
+  - Shape validator shows file analysis with export details
+  - Domain validator shows rules applied and AI metadata
+  - Added dismissible prop to Dialog component
+  - Fixed modal click propagation bug
+  - Enhanced devtools UI with modern styling and gradient designs
+
+### Patch Changes
+
+- Updated dependencies [0f855e6]
+- Updated dependencies
+  - @blocksai/validators@1.1.0
+  - @blocksai/ai@2.1.0
+  - @blocksai/domain@0.2.1
+
 ## 0.1.2
 
 ### Patch Changes

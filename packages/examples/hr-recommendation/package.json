@@ -14,11 +14,14 @@
   },
   "dependencies": {
     "@blocksai/ai": "workspace:*",
+    "@blocksai/validators": "workspace:*",
+    "effect": "^3.19.13",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@blocksai/cli": "workspace:*",
     "@types/node": "^22.10.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.2"
   }
 }

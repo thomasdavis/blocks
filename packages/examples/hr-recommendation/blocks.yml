@@ -89,7 +89,11 @@ blocks:
       description: "Must always return the expected structured output type"
     - id: american_market
       description: "Evaluations must consider American market context including US degree equivalencies, work authorization (H-1B, green card, citizenship), EEOC compliance, and US industry standards"
-
+    - id: effect_usage
+      description: "Must import from 'effect' package and use Effect.gen or Effect.tryPromise for async operations. Raw async/await and Promise-based patterns are not allowed."
+    - id: prompt_academic
+      description: "All prompts must: (1) cite specific methodologies or frameworks, (2) use domain-specific terminology, (3) include structured evaluation criteria with weighted scoring, (4) reference academic or industry standards"
+  
   adapter.skills:
     description: "Scores candidate skills against job requirements"
     path: "adapters/skills"
@@ -166,7 +170,28 @@ blocks:
           - "Must provide clear hire/no-hire decision with reasoning"
           - "Must identify key strengths and concerns"
 
+  adapter.indigenous_respect:
+    description: "Evaluates candidate awareness and respect for indigenous cultures and perspectives"
+    path: "adapters/indigenous-respect"
+    inputs:
+      - name: resume
+        type: entity.resume
+      - name: job
+        type: entity.job_description
+    outputs:
+      - name: result
+        type: entity.score_result
+        measures:
+          - score_0_1
+          - reasoning_quality
+        constraints:
+          - "Must evaluate demonstrated cultural awareness"
+          - "Must consider community engagement experience"
+          - "Must assess understanding of indigenous perspectives"
+
 validators:
   - "schema"
   - "shape.ts"
   - "domain"
+  - name: "output"
+    run: "validators/output"

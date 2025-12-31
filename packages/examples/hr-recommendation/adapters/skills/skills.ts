@@ -1,3 +1,4 @@
+import { Effect } from "effect";
 import { AIProvider } from "@blocksai/ai";
 import { ScoreResultSchema, type Resume, type JobDescription, type ScoreResult } from "../../types/index.js";
 
@@ -39,10 +40,13 @@ Be objective and reference specific skills from both the job requirements and re
 `;
 };
 
-export async function scoreSkills(resume: Resume, job: JobDescription): Promise<ScoreResult> {
-  return ai.generateStructured({
-    schema: ScoreResultSchema,
-    prompt: buildPrompt(resume, job),
-    system: SYSTEM_PROMPT
+export function scoreSkills(resume: Resume, job: JobDescription): Effect.Effect<ScoreResult, Error> {
+  return Effect.tryPromise({
+    try: () => ai.generateStructured({
+      schema: ScoreResultSchema,
+      prompt: buildPrompt(resume, job),
+      system: SYSTEM_PROMPT
+    }),
+    catch: (error) => new Error(`Skills scoring failed: ${error}`)
   });
 }

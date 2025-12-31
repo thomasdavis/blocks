@@ -3,10 +3,11 @@ import chalk from "chalk";
 import ora from "ora";
 import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from "fs";
 import { join } from "path";
+import { pathToFileURL } from "url";
 import { config as loadEnv } from "dotenv";
 import { parseBlocksConfig } from "@blocksai/schema";
 import { AIProvider } from "@blocksai/ai";
-import { ValidatorRegistry } from "@blocksai/validators";
+import { ValidatorRegistry, type Validator } from "@blocksai/validators";
 import type {
   ValidationRunOutput,
   BlockRunResult,
@@ -19,6 +20,49 @@ loadEnv();
 
 const RUNS_DIR = ".blocks/runs";
 const MAX_RUNS = 50;
+
+/**
+ * Dynamically load a custom validator from a local path
+ * Supports paths like "validators/output" which resolves to:
+ * - dist/validators/output/blocks-validator.js (compiled TypeScript)
+ * - validators/output/blocks-validator.js (if already JS)
+ */
+async function loadCustomValidator(validatorPath: string): Promise<Validator | null> {
+  // Try different file patterns, preferring compiled dist files
+  const patterns = [
+    // Compiled TypeScript output in dist/
+    join(process.cwd(), "dist", validatorPath, "blocks-validator.js"),
+    join(process.cwd(), "dist", validatorPath, "index.js"),
+    join(process.cwd(), "dist", `${validatorPath}.js`),
+    // Direct path (for JS projects or when running with ts-node/tsx)
+    join(process.cwd(), validatorPath, "blocks-validator.js"),
+    join(process.cwd(), validatorPath, "blocks-validator.ts"),
+    join(process.cwd(), validatorPath, "index.js"),
+    join(process.cwd(), validatorPath, "index.ts"),
+    join(process.cwd(), `${validatorPath}.js`),
+    join(process.cwd(), `${validatorPath}.ts`),
+  ];
+
+  for (const filePath of patterns) {
+    if (existsSync(filePath)) {
+      try {
+        const fileUrl = pathToFileURL(filePath).href;
+        const module = await import(fileUrl);
+
+        // Look for default export or named Validator export
+        const ValidatorClass = module.default || module.OutputValidator || module.Validator;
+
+        if (ValidatorClass && typeof ValidatorClass === "function") {
+          return new ValidatorClass();
+        }
+      } catch (error) {
+        // Continue to next pattern
+      }
+    }
+  }
+
+  return null;
+}
 
 /**
  * Generate a unique run ID based on timestamp
@@ -260,7 +304,13 @@ export const runCommand = new Command("run")
           validatorLabel = validatorEntry.name;
         }
 
-        const validator = registry.get(validatorId);
+        let validator = registry.get(validatorId);
+
+        // If not a built-in validator, try loading as custom validator
+        if (!validator && typeof validatorEntry === "object" && validatorEntry.run) {
+          validator = await loadCustomValidator(validatorEntry.run);
+        }
+
         if (!validator) {
           validatorResults.push({
             id: validatorId,

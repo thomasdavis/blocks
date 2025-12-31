@@ -17,6 +17,8 @@ export interface ValidationContext {
   rulesApplied?: string[];            // Domain rules checked
   philosophy?: string[];              // Philosophy statements used
   summary?: string;                   // AI summary of why passed/failed
+  input?: unknown;                    // Input artifacts passed to validator
+  output?: unknown;                   // Output artifacts produced by validator
 }
 
 export interface AIMetadata {

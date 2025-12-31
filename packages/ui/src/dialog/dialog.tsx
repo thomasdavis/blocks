@@ -10,6 +10,11 @@ export interface DialogProps {
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   modal?: boolean;
+  /**
+   * Whether clicking outside the dialog should close it.
+   * @default false (clicking outside will close)
+   */
+  dismissible?: boolean;
 }
 
 export function Dialog({
@@ -18,6 +23,7 @@ export function Dialog({
   defaultOpen,
   onOpenChange,
   modal = true,
+  dismissible = true,
 }: DialogProps) {
   return (
     <BaseDialog.Root
@@ -25,6 +31,7 @@ export function Dialog({
       defaultOpen={defaultOpen}
       onOpenChange={onOpenChange}
       modal={modal}
+      disablePointerDismissal={!dismissible}
     >
       {children}
     </BaseDialog.Root>
@@ -77,7 +84,7 @@ export interface DialogContentProps
 export const DialogContent = React.forwardRef<
   HTMLDivElement,
   DialogContentProps
->(({ className, children, ...props }, ref) => (
+>(({ className, children, onClick, ...props }, ref) => (
   <DialogPortal>
     <DialogBackdrop />
     <BaseDialog.Popup
@@ -92,6 +99,11 @@ export const DialogContent = React.forwardRef<
         "animate-in fade-in-0 zoom-in-95",
         className
       )}
+      onClick={(e) => {
+        // Prevent clicks inside the dialog from closing it
+        e.stopPropagation();
+        onClick?.(e);
+      }}
       {...props}
     >
       {children}

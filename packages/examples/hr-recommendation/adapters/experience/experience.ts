@@ -1,3 +1,4 @@
+import { Effect } from "effect";
 import { AIProvider } from "@blocksai/ai";
 import { ScoreResultSchema, type Resume, type JobDescription, type ScoreResult } from "../../types/index.js";
 
@@ -48,10 +49,13 @@ Reference specific roles and achievements from the resume.
 `;
 };
 
-export async function scoreExperience(resume: Resume, job: JobDescription): Promise<ScoreResult> {
-  return ai.generateStructured({
-    schema: ScoreResultSchema,
-    prompt: buildPrompt(resume, job),
-    system: SYSTEM_PROMPT
+export function scoreExperience(resume: Resume, job: JobDescription): Effect.Effect<ScoreResult, Error> {
+  return Effect.tryPromise({
+    try: () => ai.generateStructured({
+      schema: ScoreResultSchema,
+      prompt: buildPrompt(resume, job),
+      system: SYSTEM_PROMPT
+    }),
+    catch: (error) => new Error(`Experience scoring failed: ${error}`)
   });
 }

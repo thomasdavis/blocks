@@ -1,3 +1,4 @@
+import { Effect } from "effect";
 import { AIProvider } from "@blocksai/ai";
 import {
   RecommendationSchema,
@@ -68,20 +69,25 @@ Provide your final recommendation with clear reasoning.
 `;
 };
 
-export async function getRecommendation(
+export function getRecommendation(
   resume: Resume,
   job: JobDescription
-): Promise<Recommendation> {
-  // Run all adapters in parallel for efficiency
-  const [skills, experience, education] = await Promise.all([
-    scoreSkills(resume, job),
-    scoreExperience(resume, job),
-    scoreEducation(resume, job)
-  ]);
+): Effect.Effect<Recommendation, Error> {
+  return Effect.gen(function* () {
+    // Run all adapters in parallel for efficiency
+    const [skills, experience, education] = yield* Effect.all([
+      scoreSkills(resume, job),
+      scoreExperience(resume, job),
+      scoreEducation(resume, job)
+    ], { concurrency: "unbounded" });
 
-  return ai.generateStructured({
-    schema: RecommendationSchema,
-    prompt: buildPrompt(resume, job, skills, experience, education),
-    system: SYSTEM_PROMPT
+    return yield* Effect.tryPromise({
+      try: () => ai.generateStructured({
+        schema: RecommendationSchema,
+        prompt: buildPrompt(resume, job, skills, experience, education),
+        system: SYSTEM_PROMPT
+      }),
+      catch: (error) => new Error(`Recommendation generation failed: ${error}`)
+    });
   });
 }

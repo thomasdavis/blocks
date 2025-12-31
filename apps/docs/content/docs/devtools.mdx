@@ -1,0 +1,222 @@
+---
+title: Devtools
+description: Visual UI for exploring and debugging validation runs
+---
+
+# Blocks Devtools
+
+Devtools is a visual interface for exploring your validation run history, debugging issues, and understanding what validators are checking.
+
+## Installation
+
+```bash
+pnpm add @blocksai/devtools
+# or
+npm install @blocksai/devtools
+```
+
+## Quick Start
+
+After running validations with `blocks run`, launch the devtools:
+
+```bash
+npx blocks-devtools
+```
+
+This opens a browser at `http://localhost:4200` showing your validation history.
+
+<Callout type="info">
+Devtools reads from `.blocks/runs/` in your current directory. Make sure you've run `blocks run --all` at least once to generate validation data.
+</Callout>
+
+## Dashboard Overview
+
+The dashboard shows three key metrics:
+
+- **Total Runs** - Number of validation runs recorded
+- **Pass Rate** - Percentage of runs with no errors
+- **Today** - Runs executed today
+
+Below the stats, you'll see a list of recent validation runs, sorted by most recent first.
+
+## Run Details
+
+Click on any run to see detailed results. The run detail view includes:
+
+### Hero Summary Card
+
+A color-coded card showing overall status:
+- **Green** - All blocks passed validation
+- **Amber** - Warnings present but no errors
+- **Red** - One or more blocks failed validation
+
+### Stats Grid
+
+Quick stats about the run:
+- **Run Time** - When the validation was executed
+- **Duration** - How long the full validation took
+- **Blocks** - Pass/total block count
+- **Validators** - Pass/total validator count
+
+### Block Results
+
+Each block is shown in an expandable accordion. Click to expand and see:
+
+1. **Validator List** - Each validator that ran, with pass/fail status
+2. **Issues** - Any errors, warnings, or info messages
+3. **Quick Stats** - Files analyzed, rules applied, tokens used (for AI validators)
+
+## Validator Detail Modal
+
+Click "Details" on any validator row to open a rich debugging modal with four tabs:
+
+### Details Tab
+
+Shows the validation summary and metadata:
+- **Summary** - Human-readable description of what was validated
+- **Files Analyzed** - List of all files the validator examined
+- **Domain Rules Applied** - Which rules from your `blocks.yml` were checked
+- **Issues** - Detailed view of any problems found, with file locations and suggestions
+
+### Artifacts Tab
+
+Side-by-side view of input and output data:
+- **Input** - What was passed to the validator (block config, test data, etc.)
+- **Output** - Detailed results from the validation
+
+### AI Context Tab
+
+For AI-powered validators (like `domain`), shows:
+- **Token Usage** - Input/output token counts and total
+- **AI Prompt** - The full prompt sent to the AI model (with copy button)
+- **AI Response** - The raw response from the AI (with copy button)
+
+This is invaluable for debugging why the AI flagged certain issues or understanding how your domain rules are being interpreted.
+
+### Raw JSON Tab
+
+Complete validator result as JSON. Useful for programmatic analysis or debugging edge cases.
+
+## Understanding Validator Output
+
+Each validator returns structured results:
+
+```typescript
+interface ValidationResult {
+  valid: boolean;
+  issues: ValidationIssue[];
+  context?: {
+    filesAnalyzed: string[];    // Files the validator read
+    rulesApplied: string[];     // Rules that were checked
+    summary: string;            // Human-readable summary
+    input: any;                 // What was validated
+    output: any;                // Detailed results
+  };
+  ai?: {
+    model: string;              // AI model used
+    prompt: string;             // Full prompt sent
+    response: string;           // Raw AI response
+    tokensUsed: {
+      input: number;
+      output: number;
+    };
+  };
+}
+```
+
+### Issue Types
+
+Issues are categorized by severity:
+
+| Type | Description | Blocks Run? |
+|------|-------------|-------------|
+| `error` | Critical issue that fails validation | No |
+| `warning` | Potential problem worth reviewing | Yes |
+| `info` | Informational note | Yes |
+
+## Workflow Tips
+
+### 1. Run Validation First
+
+Always run validation before opening devtools:
+
+```bash
+blocks run --all
+npx blocks-devtools
+```
+
+### 2. Filter by Status
+
+Look at the hero card color to quickly identify problematic runs.
+
+### 3. Drill Into AI Context
+
+When the domain validator flags unexpected issues, check the AI Context tab to see:
+- What prompt was generated from your `blocks.yml`
+- How the AI interpreted your domain rules
+- The raw reasoning in the AI response
+
+### 4. Use Raw JSON for Automation
+
+Export the raw JSON from runs to integrate with CI/CD dashboards or custom tooling.
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `4200` | Port for the devtools server |
+| `BLOCKS_PROJECT_DIR` | `process.cwd()` | Directory to read `.blocks/runs/` from |
+
+## Integration with CI/CD
+
+Devtools is primarily designed for local development. For CI/CD, use the CLI with JSON output:
+
+```bash
+blocks run --all --json > results.json
+```
+
+Results are also automatically saved to `.blocks/runs/<timestamp>.json` for later analysis.
+
+## Troubleshooting
+
+### No runs showing
+
+Make sure you've run validation at least once:
+
+```bash
+blocks run --all
+```
+
+Check that `.blocks/runs/` exists and contains `.json` files.
+
+### Port already in use
+
+Set a different port:
+
+```bash
+PORT=4201 npx blocks-devtools
+```
+
+### Runs from wrong directory
+
+Devtools looks for `.blocks/runs/` in your current working directory. Make sure you're in your project root when launching.
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Validators"
+    description="Learn about built-in and custom validators"
+    href="/docs/validation"
+  />
+  <Card
+    title="CLI Reference"
+    description="Full CLI command documentation"
+    href="/docs/cli"
+  />
+  <Card
+    title="Custom Validators"
+    description="Build your own validators with rich context"
+    href="/docs/validation/custom-validators"
+  />
+</Cards>

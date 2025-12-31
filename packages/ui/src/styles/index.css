@@ -1,0 +1,9 @@
+/**
+ * @blocksai/ui - Main stylesheet
+ *
+ * Import this file in your app:
+ * @import "@blocksai/ui/styles.css";
+ */
+
+@import "./tokens.css";
+@import "./animations.css";

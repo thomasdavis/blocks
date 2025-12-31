@@ -1,0 +1,222 @@
+/**
+ * Animation keyframes and utilities for @blocksai/ui
+ */
+
+@layer utilities {
+  /* ========================================
+   * Fade Animations
+   * ======================================== */
+  @keyframes ui-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes ui-fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  /* ========================================
+   * Scale Animations
+   * ======================================== */
+  @keyframes ui-scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes ui-scale-out {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  /* ========================================
+   * Slide Animations
+   * ======================================== */
+  @keyframes ui-slide-in-from-top {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes ui-slide-in-from-bottom {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes ui-slide-in-from-left {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes ui-slide-in-from-right {
+    from {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* ========================================
+   * Accordion/Collapsible Animations
+   * ======================================== */
+  @keyframes ui-accordion-down {
+    from {
+      height: 0;
+      opacity: 0;
+    }
+    to {
+      height: var(--accordion-content-height);
+      opacity: 1;
+    }
+  }
+
+  @keyframes ui-accordion-up {
+    from {
+      height: var(--accordion-content-height);
+      opacity: 1;
+    }
+    to {
+      height: 0;
+      opacity: 0;
+    }
+  }
+
+  /* ========================================
+   * Loading Animations
+   * ======================================== */
+  @keyframes ui-bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-25%);
+    }
+  }
+
+  @keyframes ui-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes ui-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ========================================
+   * Utility Classes
+   * ======================================== */
+
+  /* Fade */
+  .ui-animate-fade-in {
+    animation: ui-fade-in var(--ui-duration-normal) var(--ui-ease-out) forwards;
+  }
+
+  .ui-animate-fade-out {
+    animation: ui-fade-out var(--ui-duration-fast) var(--ui-ease-in) forwards;
+  }
+
+  /* Scale */
+  .ui-animate-scale-in {
+    animation: ui-scale-in var(--ui-duration-normal) var(--ui-ease-out) forwards;
+  }
+
+  .ui-animate-scale-out {
+    animation: ui-scale-out var(--ui-duration-fast) var(--ui-ease-in) forwards;
+  }
+
+  /* Slide */
+  .ui-animate-slide-in-top {
+    animation: ui-slide-in-from-top var(--ui-duration-normal) var(--ui-ease-out)
+      forwards;
+  }
+
+  .ui-animate-slide-in-bottom {
+    animation: ui-slide-in-from-bottom var(--ui-duration-normal)
+      var(--ui-ease-out) forwards;
+  }
+
+  .ui-animate-slide-in-left {
+    animation: ui-slide-in-from-left var(--ui-duration-normal)
+      var(--ui-ease-out) forwards;
+  }
+
+  .ui-animate-slide-in-right {
+    animation: ui-slide-in-from-right var(--ui-duration-normal)
+      var(--ui-ease-out) forwards;
+  }
+
+  /* Accordion */
+  .ui-animate-accordion-down {
+    animation: ui-accordion-down var(--ui-duration-slow) var(--ui-ease-out)
+      forwards;
+  }
+
+  .ui-animate-accordion-up {
+    animation: ui-accordion-up var(--ui-duration-slow) var(--ui-ease-in)
+      forwards;
+  }
+
+  /* Loading */
+  .ui-animate-bounce {
+    animation: ui-bounce 0.6s infinite;
+  }
+
+  .ui-animate-pulse {
+    animation: ui-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .ui-animate-spin {
+    animation: ui-spin 1s linear infinite;
+  }
+}

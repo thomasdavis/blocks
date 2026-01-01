@@ -15,12 +15,22 @@ import type {
   ValidatorRunResult,
   RunCommandOptions,
 } from "../types.js";
+import {
+  CacheManager,
+  SkipLogic,
+  computeContentHash,
+  type BlockCacheEntry,
+  type CachedValidatorResult,
+} from "../cache/index.js";
 
 // Load environment variables from .env file in current directory
 loadEnv();
 
 const RUNS_DIR = ".blocks/runs";
 const MAX_RUNS = 50;
+
+// Estimated time for domain validation (for time saved calculation)
+const ESTIMATED_DOMAIN_VALIDATION_MS = 500;
 
 /**
  * Dynamically load a custom validator from a local path
@@ -163,6 +173,8 @@ export const runCommand = new Command("run")
   .option("--json", "Output results as JSON")
   .option("--output <path>", "Write JSON results to file (implies --json)")
   .option("-c, --concurrency <number>", "Number of validators to run in parallel", "1")
+  .option("--force", "Force full validation, ignore cache")
+  .option("--no-cache", "Disable caching (don't read or write cache)")
   .action(async (blockName: string | undefined, options: RunCommandOptions) => {
     const concurrency = Math.max(1, parseInt(String(options.concurrency), 10) || 1);
     const isJsonMode = options.json || options.output;
@@ -187,8 +199,9 @@ export const runCommand = new Command("run")
     }
 
     let config;
+    let yamlContent: string;
     try {
-      const yamlContent = readFileSync(configPath, "utf-8");
+      yamlContent = readFileSync(configPath, "utf-8");
       config = parseBlocksConfig(yamlContent);
       if (!isJsonMode) spinner?.succeed("Configuration loaded");
     } catch (error) {
@@ -201,6 +214,24 @@ export const runCommand = new Command("run")
         );
       }
       process.exit(1);
+    }
+
+    // Initialize cache manager
+    // Commander.js --no-cache sets options.cache to false
+    const cacheDisabled = options.cache === false;
+    const forceMode = options.force === true;
+    const cacheManager = new CacheManager(process.cwd(), cacheDisabled);
+    cacheManager.initializeCache(config, yamlContent);
+
+    // Initialize skip logic
+    const skipLogic = new SkipLogic(cacheManager, config, yamlContent, forceMode);
+
+    // Show global changes summary if any
+    if (!isJsonMode && !cacheDisabled) {
+      const globalSummary = skipLogic.getGlobalChangesSummary();
+      if (globalSummary) {
+        console.log(chalk.yellow(`  Cache: ${globalSummary}`));
+      }
     }
 
     // Determine which blocks to validate
@@ -219,6 +250,9 @@ export const runCommand = new Command("run")
       process.exit(1);
     }
 
+    // Prune deleted blocks from cache
+    cacheManager.pruneDeletedBlocks(blocksToValidate);
+
     // Initialize AI provider from config or defaults
     const ai = new AIProvider({
       provider: config.ai?.provider,
@@ -231,6 +265,8 @@ export const runCommand = new Command("run")
     let totalPassed = 0;
     let totalFailed = 0;
     let totalWarnings = 0;
+    let totalValidatorsSkipped = 0;
+    let totalValidatorsRun = 0;
 
     // Run validators for each block
     for (const name of blocksToValidate) {
@@ -295,6 +331,21 @@ export const runCommand = new Command("run")
       // Determine which validators to run (default to domain only)
       const validatorsToRun = config.validators ?? ["domain"];
 
+      // Get validator IDs for cache decision
+      // For custom validators, use the name (e.g., "output") not the run path (e.g., "validators/output")
+      // since the name maps to the validator's internal ID via VALIDATOR_ID_MAP
+      const validatorIds = validatorsToRun.map((v) =>
+        typeof v === "string" ? v : v.name
+      );
+
+      // Get cache decision for this block
+      const cacheDecision = skipLogic.decideBlock(name, blockPath, validatorIds);
+
+      // Show cache decision in non-JSON mode
+      if (!isJsonMode && !cacheDisabled) {
+        console.log(chalk.gray(`  Cache: ${cacheDecision.summary}`));
+      }
+
       // Create concurrency limiter
       const limit = pLimit(concurrency);
 
@@ -302,7 +353,10 @@ export const runCommand = new Command("run")
       const isParallel = concurrency > 1;
       let blockSpinner: ReturnType<typeof ora> | undefined;
       if (!isJsonMode && isParallel) {
-        blockSpinner = ora(`  Running ${validatorsToRun.length} validators (concurrency: ${concurrency})...`).start();
+        const runCount = cacheDecision.validators.filter((v) => v.shouldRun).length;
+        if (runCount > 0) {
+          blockSpinner = ora(`  Running ${runCount} validators (concurrency: ${concurrency})...`).start();
+        }
       }
 
       // Prepare validator tasks
@@ -310,20 +364,50 @@ export const runCommand = new Command("run")
         return limit(async (): Promise<ValidatorRunResult> => {
           let validatorId: string;
           let validatorLabel: string;
+          let validatorRunPath: string | undefined;
 
           if (typeof validatorEntry === "string") {
             validatorId = validatorEntry;
             validatorLabel = validatorEntry;
           } else {
-            validatorId = validatorEntry.run;
+            // Use name for cache lookup, run for loading custom validator
+            validatorId = validatorEntry.name;
+            validatorRunPath = validatorEntry.run;
             validatorLabel = validatorEntry.name;
           }
+
+          // Check if we should skip this validator
+          const decision = cacheDecision.validators.find(
+            (v) => v.validatorId === validatorId
+          );
+
+          if (decision && !decision.shouldRun && decision.cachedResult) {
+            // Use cached result
+            totalValidatorsSkipped++;
+            return {
+              id: validatorId,
+              label: validatorLabel,
+              passed: decision.cachedResult.passed,
+              duration: 0,
+              issues: decision.cachedResult.issues?.map((i) => ({
+                type: i.type as "error" | "warning" | "info",
+                code: i.code,
+                message: i.message,
+              })) || [],
+              skipped: true,
+              skipReason: decision.reason.type === "cached"
+                ? (decision.reason as { message: string }).message
+                : "Cached",
+            };
+          }
+
+          totalValidatorsRun++;
 
           let validator = registry.get(validatorId);
 
           // If not a built-in validator, try loading as custom validator
-          if (!validator && typeof validatorEntry === "object" && validatorEntry.run) {
-            validator = await loadCustomValidator(validatorEntry.run);
+          if (!validator && validatorRunPath) {
+            validator = await loadCustomValidator(validatorRunPath);
           }
 
           if (!validator) {
@@ -406,7 +490,9 @@ export const runCommand = new Command("run")
 
         // Print output in non-JSON mode
         if (!isJsonMode) {
-          if (result.issues.length > 0) {
+          if (result.skipped) {
+            console.log(chalk.gray(`  ⏭ [${result.label}] cached`));
+          } else if (result.issues.length > 0) {
             for (const issue of result.issues) {
               const icon = issue.type === "error" ? "✗" : issue.type === "warning" ? "⚠" : "ℹ";
               const color =
@@ -438,12 +524,56 @@ export const runCommand = new Command("run")
         }
       }
 
+      // Update cache with results
+      if (!cacheDisabled) {
+        const cacheEntry: BlockCacheEntry = {
+          blockName: name,
+          blockPath,
+          files: cacheDecision.currentFiles,
+          contentHash: cacheDecision.currentContentHash,
+          configHash: skipLogic.getNewFingerprint().blockConfigs[name]?.definitionHash || "",
+          lastValidated: new Date().toISOString(),
+          lastRunId: runId,
+          validatorResults: {},
+        };
+
+        // Store results for validators that were actually run
+        for (const result of validatorResults) {
+          if (!result.skipped) {
+            cacheEntry.validatorResults[result.id] = {
+              passed: result.passed,
+              hash: cacheDecision.currentContentHash,
+              issues: result.issues.map((i) => ({
+                type: i.type,
+                code: i.code,
+                message: i.message,
+              })),
+            };
+          } else {
+            // Preserve cached results
+            const existingEntry = cacheManager.getBlockEntry(name);
+            if (existingEntry?.validatorResults[result.id]) {
+              cacheEntry.validatorResults[result.id] = existingEntry.validatorResults[result.id];
+            }
+          }
+        }
+
+        cacheManager.updateBlockEntry(cacheEntry);
+      }
+
+      const skippedCount = validatorResults.filter((v) => v.skipped).length;
+
       blockResults.push({
         blockName: name,
         blockPath,
         hasErrors,
         hasWarnings,
         validators: validatorResults,
+        cache: !cacheDisabled ? {
+          decision: cacheDecision.summary,
+          skippedValidators: skippedCount,
+          revalidationReason: cacheDecision.validators.find((v) => v.shouldRun)?.reason.type,
+        } : undefined,
       });
 
       if (hasErrors) {
@@ -453,6 +583,12 @@ export const runCommand = new Command("run")
       } else {
         totalPassed++;
       }
+    }
+
+    // Save cache
+    if (!cacheDisabled) {
+      cacheManager.updateConfigFingerprint(skipLogic.getNewFingerprint());
+      cacheManager.save();
     }
 
     // Build output object
@@ -468,6 +604,11 @@ export const runCommand = new Command("run")
         passed: totalPassed,
         failed: totalFailed,
         warnings: totalWarnings,
+        cached: !cacheDisabled ? {
+          validatorsSkipped: totalValidatorsSkipped,
+          validatorsRun: totalValidatorsRun,
+          timeSavedMs: totalValidatorsSkipped * ESTIMATED_DOMAIN_VALIDATION_MS,
+        } : undefined,
       },
       blocks: blockResults,
     };
@@ -483,6 +624,14 @@ export const runCommand = new Command("run")
     if (isJsonMode) {
       console.log(JSON.stringify(output, null, 2));
     } else {
+      // Show cache summary
+      if (!cacheDisabled && totalValidatorsSkipped > 0) {
+        console.log(
+          chalk.cyan(
+            `\n  Cache: ${totalValidatorsSkipped} validator(s) skipped, ~${(totalValidatorsSkipped * ESTIMATED_DOMAIN_VALIDATION_MS / 1000).toFixed(1)}s saved`
+          )
+        );
+      }
       console.log();
     }
 

@@ -24,7 +24,8 @@
   "dependencies": {
     "@blocksai/schema": "workspace:*",
     "@blocksai/domain": "workspace:*",
-    "@blocksai/ai": "workspace:*"
+    "@blocksai/ai": "workspace:*",
+    "p-limit": "^6.1.0"
   },
   "devDependencies": {
     "@blocks/tsconfig": "workspace:*",

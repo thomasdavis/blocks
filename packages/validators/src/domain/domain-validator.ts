@@ -4,6 +4,7 @@ import { AIProvider } from "@blocksai/ai";
 import type { Validator, ValidatorContext, ValidationResult, ValidationIssue } from "../types.js";
 import { readFileSync, existsSync, readdirSync, statSync } from "fs";
 import { join, basename } from "path";
+import pLimit from "p-limit";
 
 /**
  * Read all files from a block directory recursively
@@ -127,18 +128,106 @@ export class DomainValidator implements Validator {
     }
 
     // Use block-specific rules if present, otherwise use defaults from blocks.domain_rules
-    const domainRules = block.domain_rules
-      ? block.domain_rules.map((r) => r.description)
-      : this.registry.getDefaultDomainRules();
+    const domainRulesWithIds = block.domain_rules
+      ? block.domain_rules
+      : this.registry.getDefaultDomainRulesWithIds?.() ?? [];
+    const domainRules = domainRulesWithIds.map((r: { description: string }) => r.description);
     const philosophy = context.config.philosophy ?? [];
 
     // Capture rule IDs for context
-    const rulesApplied = block.domain_rules
-      ? block.domain_rules.map((r) => r.id)
-      : this.registry.getDefaultDomainRuleIds?.() ?? [];
+    const rulesApplied = domainRulesWithIds.map((r: { id: string }) => r.id);
+
+    // Get concurrency level (default to 1 for sequential execution)
+    const concurrency = context.concurrency ?? 1;
 
     // Use AI to validate semantic alignment with all block files
     try {
+      // If concurrency > 1 and we have multiple rules, run rules in parallel
+      if (concurrency > 1 && domainRulesWithIds.length > 1) {
+        const limit = pLimit(concurrency);
+        const blockDefinition = JSON.stringify(block, null, 2);
+
+        // Create tasks for each rule
+        const ruleTasks = domainRulesWithIds.map((rule: { id: string; description: string }) => {
+          return limit(async () => {
+            try {
+              return await this.ai.validateSingleDomainRule({
+                blockName: context.blockName,
+                blockDefinition,
+                files: blockFiles,
+                rule,
+                philosophy,
+              });
+            } catch (error) {
+              return {
+                ruleId: rule.id,
+                isValid: false,
+                issues: [{
+                  message: `Failed to validate rule ${rule.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
+                  severity: "warning" as const,
+                  file: "",
+                }],
+                summary: `Rule validation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+                _meta: {
+                  provider: "",
+                  model: "",
+                  prompt: "",
+                  systemPrompt: "",
+                  response: "",
+                },
+              };
+            }
+          });
+        });
+
+        // Execute all rule validations in parallel
+        const ruleResults = await Promise.all(ruleTasks);
+
+        // Aggregate results
+        let totalInputTokens = 0;
+        let totalOutputTokens = 0;
+        const summaries: string[] = [];
+
+        for (const result of ruleResults) {
+          for (const issue of result.issues) {
+            issues.push({
+              type: issue.severity,
+              code: "DOMAIN_SEMANTIC_ISSUE",
+              message: `[${result.ruleId}] ${issue.message}`,
+              file: issue.file || undefined,
+            });
+          }
+          if (result.summary) {
+            summaries.push(`${result.ruleId}: ${result.summary}`);
+          }
+          if (result._meta.tokensUsed) {
+            totalInputTokens += result._meta.tokensUsed.input;
+            totalOutputTokens += result._meta.tokensUsed.output;
+          }
+        }
+
+        const providerInfo = this.ai.getProviderInfo();
+
+        return {
+          valid: issues.filter((i) => i.type === "error").length === 0,
+          issues,
+          context: {
+            filesAnalyzed,
+            rulesApplied,
+            philosophy,
+            summary: summaries.join("\n"),
+          },
+          ai: {
+            provider: providerInfo.provider,
+            model: providerInfo.model,
+            prompt: `[Parallel execution of ${domainRulesWithIds.length} rules with concurrency ${concurrency}]`,
+            response: `[${ruleResults.length} rule validations completed]`,
+            tokensUsed: { input: totalInputTokens, output: totalOutputTokens },
+          },
+        };
+      }
+
+      // Sequential execution (original behavior)
       const validation = await this.ai.validateDomainSemantics({
         blockName: context.blockName,
         blockDefinition: JSON.stringify(block, null, 2),

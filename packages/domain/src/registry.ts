@@ -132,4 +132,19 @@ export class DomainRegistry {
     }
     return defaultRules.map((rule) => rule.id);
   }
+
+  /**
+   * Get default domain rules with both ID and description
+   * Used for parallel rule validation
+   */
+  getDefaultDomainRulesWithIds(): Array<{ id: string; description: string }> {
+    const defaultRules = this.config.blocks.domain_rules;
+    if (!defaultRules || !Array.isArray(defaultRules)) {
+      return [];
+    }
+    return defaultRules.map((rule) => ({
+      id: rule.id,
+      description: rule.description,
+    }));
+  }
 }

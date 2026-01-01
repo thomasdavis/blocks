@@ -47,4 +47,5 @@ export interface RunCommandOptions {
   config: string;
   json?: boolean;
   output?: string;
+  concurrency?: number;
 }

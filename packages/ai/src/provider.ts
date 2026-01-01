@@ -254,6 +254,110 @@ Also provide a brief summary explaining why the block passed or failed validatio
   }
 
   /**
+   * Validate a single domain rule using AI
+   * Used for parallel rule validation
+   */
+  async validateSingleDomainRule(params: {
+    blockName: string;
+    blockDefinition: string;
+    files: Record<string, string>;
+    rule: { id: string; description: string };
+    philosophy?: string[];
+  }): Promise<{
+    ruleId: string;
+    isValid: boolean;
+    issues: Array<{ message: string; severity: "error" | "warning"; file?: string }>;
+    summary?: string;
+    _meta: {
+      provider: string;
+      model: string;
+      prompt: string;
+      systemPrompt: string;
+      response: string;
+      tokensUsed?: { input: number; output: number };
+    };
+  }> {
+    const schema = z.object({
+      isValid: z.boolean(),
+      issues: z.array(
+        z.object({
+          message: z.string().describe("Description of the issue found"),
+          severity: z.enum(["error", "warning"]).describe("Severity of the issue"),
+          file: z.string().describe("File path where the issue was found, or empty string if not file-specific"),
+        })
+      ),
+      summary: z.string().describe("Brief explanation of whether this rule was satisfied"),
+    });
+
+    const philosophyText = params.philosophy?.length
+      ? `\n\nBLOCKS PHILOSOPHY:\n${params.philosophy.map((p) => `- ${p}`).join("\n")}`
+      : "";
+
+    const filesText = Object.entries(params.files)
+      .map(
+        ([path, content]) => `
+--- ${path} ---
+\`\`\`
+${content}
+\`\`\`
+`
+      )
+      .join("\n");
+
+    const systemPrompt = `You are validating a single domain rule for a block in the Blocks framework.
+
+Your role is to analyze block source code (not runtime behavior) to check if it satisfies the specified domain rule.
+
+Focus on SOURCE CODE analysis:
+- For templates: Check template source for the rule requirements
+- For code: Check if logic satisfies the rule
+- Do NOT focus on runtime behavior`;
+
+    const prompt = `Block Name: ${params.blockName}
+${philosophyText}
+
+Block Definition:
+${params.blockDefinition}
+
+DOMAIN RULE TO CHECK:
+ID: ${params.rule.id}
+Description: ${params.rule.description}
+
+BLOCK FILES:
+${filesText}
+
+VALIDATION TASK:
+Analyze if this block satisfies the domain rule "${params.rule.id}".
+Return any issues found with file references where possible.`;
+
+    const result = await generateText({
+      model: this.languageModel,
+      prompt,
+      system: systemPrompt,
+      experimental_output: Output.object({ schema }),
+    });
+
+    const output = result.experimental_output;
+
+    return {
+      ruleId: params.rule.id,
+      isValid: output.isValid,
+      issues: output.issues,
+      summary: output.summary,
+      _meta: {
+        provider: this.provider,
+        model: this.modelName,
+        prompt,
+        systemPrompt,
+        response: JSON.stringify(output, null, 2),
+        tokensUsed: result.usage
+          ? { input: result.usage.inputTokens ?? 0, output: result.usage.outputTokens ?? 0 }
+          : undefined,
+      },
+    };
+  }
+
+  /**
    * Detect language of text
    */
   async detectLanguage(text: string): Promise<string> {

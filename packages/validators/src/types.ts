@@ -42,6 +42,8 @@ export interface ValidatorContext {
   blockName: string;
   blockPath: string;
   config: any;
+  /** Concurrency level for parallel rule validation (default: 1) */
+  concurrency?: number;
 }
 
 export interface Validator {

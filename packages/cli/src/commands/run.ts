@@ -5,6 +5,7 @@ import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, unlink
 import { join } from "path";
 import { pathToFileURL } from "url";
 import { config as loadEnv } from "dotenv";
+import pLimit from "p-limit";
 import { parseBlocksConfig } from "@blocksai/schema";
 import { AIProvider } from "@blocksai/ai";
 import { ValidatorRegistry, type Validator } from "@blocksai/validators";
@@ -161,7 +162,9 @@ export const runCommand = new Command("run")
   .option("--config <path>", "Path to blocks.yml", "blocks.yml")
   .option("--json", "Output results as JSON")
   .option("--output <path>", "Write JSON results to file (implies --json)")
+  .option("-c, --concurrency <number>", "Number of validators to run in parallel", "1")
   .action(async (blockName: string | undefined, options: RunCommandOptions) => {
+    const concurrency = Math.max(1, parseInt(String(options.concurrency), 10) || 1);
     const isJsonMode = options.json || options.output;
     const startTime = Date.now();
 
@@ -279,6 +282,7 @@ export const runCommand = new Command("run")
         blockName: name,
         blockPath,
         config,
+        concurrency,
       };
 
       let hasErrors = false;
@@ -291,123 +295,133 @@ export const runCommand = new Command("run")
       // Determine which validators to run (default to domain only)
       const validatorsToRun = config.validators ?? ["domain"];
 
-      // Execute validators in order
-      for (const validatorEntry of validatorsToRun) {
-        let validatorId: string;
-        let validatorLabel: string;
+      // Create concurrency limiter
+      const limit = pLimit(concurrency);
 
-        if (typeof validatorEntry === "string") {
-          validatorId = validatorEntry;
-          validatorLabel = validatorEntry;
-        } else {
-          validatorId = validatorEntry.run;
-          validatorLabel = validatorEntry.name;
-        }
+      // Show spinner for parallel execution in non-JSON mode
+      const isParallel = concurrency > 1;
+      let blockSpinner: ReturnType<typeof ora> | undefined;
+      if (!isJsonMode && isParallel) {
+        blockSpinner = ora(`  Running ${validatorsToRun.length} validators (concurrency: ${concurrency})...`).start();
+      }
 
-        let validator = registry.get(validatorId);
+      // Prepare validator tasks
+      const validatorTasks = validatorsToRun.map((validatorEntry, index) => {
+        return limit(async (): Promise<ValidatorRunResult> => {
+          let validatorId: string;
+          let validatorLabel: string;
 
-        // If not a built-in validator, try loading as custom validator
-        if (!validator && typeof validatorEntry === "object" && validatorEntry.run) {
-          validator = await loadCustomValidator(validatorEntry.run);
-        }
-
-        if (!validator) {
-          validatorResults.push({
-            id: validatorId,
-            label: validatorLabel,
-            passed: false,
-            duration: 0,
-            issues: [
-              {
-                type: "error",
-                code: "UNKNOWN_VALIDATOR",
-                message: `Unknown validator: ${validatorId}`,
-              },
-            ],
-          });
-          hasErrors = true;
-          if (!isJsonMode) {
-            console.log(chalk.red(`  ✗ Unknown validator: ${validatorId}`));
+          if (typeof validatorEntry === "string") {
+            validatorId = validatorEntry;
+            validatorLabel = validatorEntry;
+          } else {
+            validatorId = validatorEntry.run;
+            validatorLabel = validatorEntry.name;
           }
-          continue;
-        }
 
-        // Run validator (with spinner for slow ones in non-JSON mode)
-        const needsSpinner =
-          !isJsonMode && (validatorId === "domain" || validatorId === "domain.validation");
-        let validatorSpinner: ReturnType<typeof ora> | undefined;
+          let validator = registry.get(validatorId);
 
-        if (needsSpinner) {
-          validatorSpinner = ora(`  Running ${validatorLabel}...`).start();
-        }
+          // If not a built-in validator, try loading as custom validator
+          if (!validator && typeof validatorEntry === "object" && validatorEntry.run) {
+            validator = await loadCustomValidator(validatorEntry.run);
+          }
 
-        const validatorStart = Date.now();
+          if (!validator) {
+            return {
+              id: validatorId,
+              label: validatorLabel,
+              passed: false,
+              duration: 0,
+              issues: [
+                {
+                  type: "error",
+                  code: "UNKNOWN_VALIDATOR",
+                  message: `Unknown validator: ${validatorId}`,
+                },
+              ],
+            };
+          }
 
-        try {
-          const result = await validator.validate(context);
-          const duration = Date.now() - validatorStart;
+          // Run validator (with spinner for slow ones in non-JSON mode, only for sequential execution)
+          const needsSpinner =
+            !isJsonMode && !isParallel && (validatorId === "domain" || validatorId === "domain.validation");
+          let validatorSpinner: ReturnType<typeof ora> | undefined;
 
-          if (validatorSpinner) validatorSpinner.stop();
+          if (needsSpinner) {
+            validatorSpinner = ora(`  Running ${validatorLabel}...`).start();
+          }
 
-          const passed = result.issues.filter((i) => i.type === "error").length === 0;
-          const hasValidatorWarnings = result.issues.some((i) => i.type === "warning");
+          const validatorStart = Date.now();
 
-          validatorResults.push({
-            id: validator.id,
-            label: validatorLabel,
-            passed,
-            duration,
-            issues: result.issues,
-            context: result.context,
-            ai: result.ai,
-          });
+          try {
+            const result = await validator.validate(context);
+            const duration = Date.now() - validatorStart;
 
-          if (!passed) hasErrors = true;
-          if (hasValidatorWarnings) hasWarnings = true;
+            if (validatorSpinner) validatorSpinner.stop();
 
-          // Print output in non-JSON mode
-          if (!isJsonMode) {
-            if (result.issues.length > 0) {
-              for (const issue of result.issues) {
-                const icon = issue.type === "error" ? "✗" : issue.type === "warning" ? "⚠" : "ℹ";
-                const color =
-                  issue.type === "error"
-                    ? chalk.red
-                    : issue.type === "warning"
-                      ? chalk.yellow
-                      : chalk.blue;
-                console.log(color(`  ${icon} [${validatorLabel}] ${issue.message}`));
-                if (issue.suggestion) {
-                  console.log(chalk.gray(`    → ${issue.suggestion}`));
-                }
+            const passed = result.issues.filter((i) => i.type === "error").length === 0;
+
+            return {
+              id: validator.id,
+              label: validatorLabel,
+              passed,
+              duration,
+              issues: result.issues,
+              context: result.context,
+              ai: result.ai,
+            };
+          } catch (error) {
+            const duration = Date.now() - validatorStart;
+            if (validatorSpinner) validatorSpinner.fail(`${validatorLabel} failed`);
+
+            return {
+              id: validatorId,
+              label: validatorLabel,
+              passed: false,
+              duration,
+              issues: [
+                {
+                  type: "error",
+                  code: "VALIDATOR_ERROR",
+                  message: error instanceof Error ? error.message : "Unknown error",
+                },
+              ],
+            };
+          }
+        });
+      });
+
+      // Execute all validator tasks with concurrency limit
+      const results = await Promise.all(validatorTasks);
+
+      // Stop block spinner if running
+      if (blockSpinner) blockSpinner.stop();
+
+      // Process results and print output
+      for (const result of results) {
+        validatorResults.push(result);
+
+        if (!result.passed) hasErrors = true;
+        if (result.issues.some((i) => i.type === "warning")) hasWarnings = true;
+
+        // Print output in non-JSON mode
+        if (!isJsonMode) {
+          if (result.issues.length > 0) {
+            for (const issue of result.issues) {
+              const icon = issue.type === "error" ? "✗" : issue.type === "warning" ? "⚠" : "ℹ";
+              const color =
+                issue.type === "error"
+                  ? chalk.red
+                  : issue.type === "warning"
+                    ? chalk.yellow
+                    : chalk.blue;
+              console.log(color(`  ${icon} [${result.label}] ${issue.message}`));
+              if (issue.suggestion) {
+                console.log(chalk.gray(`    → ${issue.suggestion}`));
               }
-            } else {
-              console.log(chalk.green(`  ✓ ${validatorLabel} ok`));
             }
-          }
-        } catch (error) {
-          const duration = Date.now() - validatorStart;
-          if (validatorSpinner) validatorSpinner.fail(`${validatorLabel} failed`);
-
-          validatorResults.push({
-            id: validatorId,
-            label: validatorLabel,
-            passed: false,
-            duration,
-            issues: [
-              {
-                type: "error",
-                code: "VALIDATOR_ERROR",
-                message: error instanceof Error ? error.message : "Unknown error",
-              },
-            ],
-          });
-          hasErrors = true;
-
-          if (!isJsonMode) {
-            console.error(
-              chalk.red(`  Error: ${error instanceof Error ? error.message : "Unknown error"}`)
-            );
+          } else {
+            console.log(chalk.green(`  ✓ ${result.label} ok`));
           }
         }
       }

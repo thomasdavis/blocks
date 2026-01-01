@@ -1,4 +1,4 @@
 {
   "title": "Documentation",
-  "pages": ["index", "getting-started", "use-cases", "core-concepts", "validation", "cli", "devtools", "ai-integration", "api", "examples", "advanced", "contributing"]
+  "pages": ["index", "getting-started", "use-cases", "specification", "core-concepts", "validation", "cli", "devtools", "ai-integration", "api", "examples", "advanced", "contributing"]
 }

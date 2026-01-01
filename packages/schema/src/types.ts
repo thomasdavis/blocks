@@ -1,33 +1,28 @@
 import { z } from "zod";
 
 /**
- * Core schema definitions for blocks.yml
- * Based on the full PRD specification
+ * Core schema definitions for blocks.yml v2.0
+ * Based on the Blocks Specification v2.0
  */
 
 // ——————————————————————————————————————————
 // Domain Semantics
 // ——————————————————————————————————————————
 
-export const DomainFieldSchema = z.object({
+export const DomainEntitySchema = z.object({
   fields: z.array(z.string()),
+  optional: z.array(z.string()).optional(),
 });
 
-export const DomainEntitySchema = z.record(z.string(), DomainFieldSchema);
-
-export const DomainSignalSchema = z.object({
+export const DomainSemanticSchema = z.object({
   description: z.string(),
   extraction_hint: z.string().optional(),
-});
-
-export const DomainMeasureSchema = z.object({
-  constraints: z.array(z.string()),
+  schema: z.any().optional(), // JSON Schema for runtime validation
 });
 
 export const DomainSchema = z.object({
-  entities: DomainEntitySchema.optional(),
-  signals: z.record(z.string(), DomainSignalSchema).optional(),
-  measures: z.record(z.string(), DomainMeasureSchema).optional(),
+  entities: z.record(z.string(), DomainEntitySchema).optional(),
+  semantics: z.record(z.string(), DomainSemanticSchema).optional(),
 });
 
 // ——————————————————————————————————————————
@@ -43,7 +38,7 @@ export const BlockInputSchema = z.object({
 export const BlockOutputSchema = z.object({
   name: z.string(),
   type: z.string(),
-  measures: z.array(z.string()).optional(),
+  semantics: z.array(z.string()).optional(),
   constraints: z.array(z.string()).optional(),
 });
 
@@ -54,14 +49,18 @@ export const DomainRuleSchema = z.object({
 
 export const BlockDefinitionSchema = z.object({
   description: z.string(),
-  path: z.string().optional(), // Custom path to block implementation
+  path: z.string().optional(),
   inputs: z.array(BlockInputSchema).optional(),
   outputs: z.array(BlockOutputSchema).optional(),
-  domain_rules: z.array(DomainRuleSchema).optional(),
-  test_data: z.union([
-    z.string(),  // File path to test data
-    z.any()      // Inline test data object
-  ]).optional(),
+  exclude: z.array(z.string()).optional(),
+  skip_validators: z.array(z.string()).optional(),
+  validators: z.record(z.string(), z.any()).optional(),
+  test_data: z
+    .union([
+      z.string(), // File path to test data
+      z.any(), // Inline test data object
+    ])
+    .optional(),
 });
 
 // ——————————————————————————————————————————
@@ -69,21 +68,31 @@ export const BlockDefinitionSchema = z.object({
 // ——————————————————————————————————————————
 
 /**
+ * Validator configuration - allows domain rules and custom config
+ */
+export const ValidatorConfigSchema = z
+  .object({
+    rules: z.array(DomainRuleSchema).optional(),
+  })
+  .passthrough(); // Allow custom config fields
+
+/**
  * Validator entry - union type supporting both short names and custom validators
  *
  * Examples:
  *   - "schema" (short name)
- *   - "shape.ts" (short name)
+ *   - "shape" (short name)
  *   - "domain" (short name)
- *   - { name: "my_linter", run: "lint.eslint", config: {...} } (custom)
+ *   - { name: "domain", config: { rules: [...] } } (with config)
+ *   - { name: "output", run: "validators/output", config: {...} } (custom)
  */
 export const ValidatorEntrySchema = z.union([
-  z.string(),  // Short names for built-in validators
+  z.string(), // Short names for built-in validators
   z.object({
     name: z.string(),
-    run: z.string(),
-    config: z.any().optional(),
-  })
+    run: z.string().optional(),
+    config: ValidatorConfigSchema.optional(),
+  }),
 ]);
 
 export const ValidatorsSchema = z.array(ValidatorEntrySchema).optional();
@@ -106,42 +115,51 @@ export const AIConfigSchema = z.object({
    * Google: "gemini-1.5-flash", "gemini-1.5-pro"
    */
   model: z.string().optional(),
+
+  /**
+   * Behavior on AI failure
+   * - "warn": Return valid with warning (default)
+   * - "error": Fail validation on AI error
+   * - "skip": Skip AI validation entirely
+   */
+  on_failure: z.enum(["warn", "error", "skip"]).optional(),
 });
 
 // ——————————————————————————————————————————
-// Blocks Collection (supports default domain_rules + block definitions)
+// Cache Configuration
 // ——————————————————————————————————————————
 
-export const BlocksSchema = z.record(
-  z.string(),
-  z.union([
-    z.array(DomainRuleSchema), // For the domain_rules key
-    BlockDefinitionSchema,      // For all other keys (block definitions)
-  ])
-);
+export const CacheConfigSchema = z.object({
+  path: z.string().optional(),
+});
+
+// ——————————————————————————————————————————
+// Blocks Collection
+// ——————————————————————————————————————————
+
+export const BlocksSchema = z.record(z.string(), BlockDefinitionSchema);
 
 // ——————————————————————————————————————————
 // Root Blocks Configuration
 // ——————————————————————————————————————————
 
 export const BlocksConfigSchema = z.object({
+  $schema: z.string().optional(),
   name: z.string(),
-  root: z.string().optional(),
   philosophy: z.array(z.string()).optional(),
   domain: DomainSchema.optional(),
   blocks: BlocksSchema,
   validators: ValidatorsSchema.optional(),
   ai: AIConfigSchema.optional(),
+  cache: CacheConfigSchema.optional(),
 });
 
 // ——————————————————————————————————————————
 // Type Exports
 // ——————————————————————————————————————————
 
-export type DomainField = z.infer<typeof DomainFieldSchema>;
 export type DomainEntity = z.infer<typeof DomainEntitySchema>;
-export type DomainSignal = z.infer<typeof DomainSignalSchema>;
-export type DomainMeasure = z.infer<typeof DomainMeasureSchema>;
+export type DomainSemantic = z.infer<typeof DomainSemanticSchema>;
 export type Domain = z.infer<typeof DomainSchema>;
 
 export type BlockInput = z.infer<typeof BlockInputSchema>;
@@ -150,9 +168,11 @@ export type DomainRule = z.infer<typeof DomainRuleSchema>;
 export type BlockDefinition = z.infer<typeof BlockDefinitionSchema>;
 export type Blocks = z.infer<typeof BlocksSchema>;
 
+export type ValidatorConfig = z.infer<typeof ValidatorConfigSchema>;
 export type ValidatorEntry = z.infer<typeof ValidatorEntrySchema>;
 export type Validators = z.infer<typeof ValidatorsSchema>;
 
 export type AIConfig = z.infer<typeof AIConfigSchema>;
+export type CacheConfig = z.infer<typeof CacheConfigSchema>;
 
 export type BlocksConfig = z.infer<typeof BlocksConfigSchema>;

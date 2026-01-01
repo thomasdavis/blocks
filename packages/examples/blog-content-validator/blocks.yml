@@ -1,36 +1,25 @@
-# Blocks Configuration: Blog Content Validator
-# Domain: Content quality validation for markdown blog posts
+$schema: "blocks/v2"
 
 name: "Blog Content Validator"
-root: "validators"
 
-# AI Configuration (optional)
-# Defaults to OpenAI gpt-4o-mini if not specified
 ai:
-  provider: "openai"  # Options: openai, anthropic, google
-  model: "gpt-4o-mini"  # OpenAI: gpt-4o-mini, gpt-4o | Anthropic: claude-3-5-sonnet-20241022 | Google: gemini-1.5-flash
+  provider: "openai"
+  model: "gpt-4o-mini"
+  on_failure: "warn"
 
-# Philosophy statements guide AI validation
 philosophy:
   - "Blog posts must include humor and maintain an engaging, conversational tone"
   - "Content should be accessible and relatable, not overly formal or academic"
 
-# Domain semantics
 domain:
   entities:
     blog_post:
-      description: "A blog post in markdown format"
-      fields:
-        - path
-        - content
+      fields: [path, content]
 
     validation_result:
-      description: "Result of content validation"
-      fields:
-        - valid
-        - message
+      fields: [valid, message]
 
-  signals:
+  semantics:
     humor_presence:
       description: "Detects presence and quality of humor in content"
       extraction_hint: "Look for wit, personal anecdotes, conversational tone, storytelling"
@@ -39,41 +28,38 @@ domain:
       description: "Measures how conversational and engaging the writing is"
       extraction_hint: "Check for second-person pronouns (you, your), first-person (I, we), questions, casual language"
 
-  measures:
     humor_score:
-      constraints:
-        - "Must include humor or light-hearted elements"
-        - "Humor should be authentic, not forced"
+      description: "Must include humor or light-hearted elements. Humor should be authentic, not forced."
 
     tone_quality:
-      constraints:
-        - "Must be conversational and engaging"
-        - "Avoid corporate jargon and overly formal language"
+      description: "Must be conversational and engaging. Avoid corporate jargon and overly formal language."
 
-# Block definitions
+validators:
+  - schema
+  - shape
+  - name: domain
+    config:
+      rules:
+        - id: humor_required
+          description: "Blog posts must include humor, wit, or light-hearted commentary"
+        - id: conversational_tone
+          description: "Writing must be conversational, using 'you' and 'I' to connect with readers"
+        - id: no_corporate_speak
+          description: "Avoid corporate jargon like 'leverage', 'synergy', 'paradigm shift'"
+
 blocks:
-  # Default domain rules for all blog validators
-  domain_rules:
-    - id: humor_required
-      description: "Blog posts must include humor, wit, or light-hearted commentary"
-    - id: conversational_tone
-      description: "Writing must be conversational, using 'you' and 'I' to connect with readers"
-    - id: no_corporate_speak
-      description: "Avoid corporate jargon like 'leverage', 'synergy', 'paradigm shift'"
-
   validator.blog_post:
-    type: validator
     description: "Validates blog post content for humor and conversational tone"
     path: "validators/blog-post"
+    exclude:
+      - "**/*.test.ts"
     inputs:
       - name: post
         type: entity.blog_post
-        description: "Blog post to validate"
     outputs:
       - name: result
         type: entity.validation_result
-        measures: [humor_score, tone_quality]
+        semantics: [humor_score, tone_quality]
         constraints:
           - "Must detect engaging, conversational content"
           - "Must ensure humor is present"
-    # Inherits blocks.domain_rules automatically

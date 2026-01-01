@@ -80,20 +80,20 @@ If `template.hbs` passes validation during development, it will ALWAYS produce c
 - `types.ts` (229 lines) - Zod schemas for entire blocks.yml structure
 - `parser.ts` (26 lines) - YAML parsing functions
 
-**Schema Structure:**
+**Schema Structure (v2.0):**
 ```typescript
 BlocksConfigSchema = {
+  $schema?: "blocks/v2"
   name: string
-  root?: string
   philosophy?: string[]
   domain?: {
-    entities: Record<string, { fields: string[] }>
-    signals: Record<string, { description, extraction_hint? }>
-    measures: Record<string, { constraints: string[] }>
+    entities: Record<string, { fields: string[], optional?: string[] }>
+    semantics: Record<string, { description, extraction_hint?, schema? }>
   }
   blocks: Record<string, BlockDefinition>
-  validators?: Array<string | { name: string; run: string; config?: any }>
-  ai?: AIConfig
+  validators?: Array<string | { name: string; run?: string; config?: any }>
+  ai?: { provider?, model?, on_failure?: "warn" | "error" | "skip" }
+  cache?: { path: string }
 }
 ```
 
@@ -119,14 +119,16 @@ isValidBlocksConfig(config: unknown): boolean
 - `registry.ts` (123 lines) - Central domain configuration registry
 - `analyzer.ts` (127 lines) - Static domain compliance checking
 
-**DomainRegistry Methods:**
+**DomainRegistry Methods (v2.0):**
 ```typescript
 getEntities(): Record<string, Entity>
-getSignals(): Record<string, Signal>
-getMeasures(): Record<string, Measure>
+getSemantics(): Record<string, Semantic>
 getBlock(name: string): BlockDefinition | undefined
-getDomainRules(blockName?: string): DomainRule[]
+getDomainRules(): DomainRule[]  // From validator config
+getBlockDomainRules(blockName: string): DomainRule[]  // Merged rules
 getPhilosophy(): string[]
+shouldSkipValidator(blockName: string, validatorName: string): boolean
+getBlockExcludePatterns(blockName: string): string[]
 ```
 
 **DomainAnalyzer Methods:**
@@ -219,11 +221,12 @@ interface ValidationResult {
 
 **Key Implementation Details:**
 - Loads .env file for API keys
-- Determines block path: `block.path` → `config.root` → "blocks"
+- Determines block path: `block.path` → default "blocks" directory
 - Creates context object: `{ blockName, blockPath, config }`
 - Runs validators in sequence: schema → shape → domain
 - Colored output with Chalk, spinners with Ora
 - Exits with error code if validation fails
+- Respects `block.skip_validators` and `block.exclude` patterns
 
 **run.ts Flow:**
 ```typescript
@@ -268,46 +271,53 @@ function readAllBlockFiles(blockPath: string): Record<string, string> {
 }
 ```
 
-### Block Path Resolution (Flexible)
+### Block Path Resolution (v2.0)
 
 **Priority:**
-1. `block.path` in blocks.yml - Custom path
-2. `config.root` + blockName - Configured root
-3. Default "blocks" directory
+1. `block.path` in blocks.yml - Explicit path (required if not in ./blocks/)
+2. Default "blocks" directory + blockName
 
-**Why:** Users can organize projects however they want. Respect their structure.
+**Note:** The `root` field was removed in v2.0. Each block must declare an explicit `path` if not in the default location.
 
-### Default Domain Rules (DRY)
+**Why:** Explicit paths are clearer than implicit resolution from a global root.
+
+### Domain Rules in Validator Config (v2.0)
 
 **Schema Support:**
 ```yaml
-blocks:
-  domain_rules:  # Inherited by all blocks
-    - id: semantic_html
-      description: "..."
+validators:
+  - name: domain
+    config:
+      rules:  # Global rules for all blocks
+        - id: semantic_html
+          description: "..."
 
+blocks:
   theme.modern:
     description: "..."
-    # Inherits defaults
+    # Inherits global rules
 
   theme.creative:
-    domain_rules:  # Overrides defaults completely
-      - id: creative_freedom
-        description: "..."
+    validators:
+      domain:
+        rules:  # Additional rules (deep merged with global)
+          - id: creative_freedom
+            description: "..."
 ```
 
 **Inheritance Logic:**
-- If block omits `domain_rules`: inherits `blocks.domain_rules`
-- If block defines `domain_rules`: overrides completely (explicit beats implicit)
+- Global rules defined in `validators[].config.rules`
+- Block-level rules in `block.validators.domain.rules` are **deep merged** with global rules
+- Same ID rules are deduplicated (block rule wins)
 
 ### AI Validation Context
 
 When domain validator calls AI, it passes:
 
 1. **Project Philosophy** - from `philosophy` field
-2. **Domain Concepts** - entities, signals, measures
-3. **ALL Block Files** - complete source code
-4. **Domain Rules** - default + block-specific
+2. **Domain Concepts** - entities and semantics
+3. **ALL Block Files** - complete source code (respecting `exclude` patterns)
+4. **Domain Rules** - global rules merged with block-specific rules
 5. **Validation Instructions** - what to check
 
 **Prompt Structure:**
@@ -318,8 +328,7 @@ Project Philosophy:
 
 Domain Concepts:
 - Entities: resume, user, theme_config
-- Signals: readability, engagement
-- Measures: valid_html, score_0_1
+- Semantics: readability, engagement, score_0_1
 
 Domain Rules:
 - Must use semantic HTML tags

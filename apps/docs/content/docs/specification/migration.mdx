@@ -1,0 +1,282 @@
+---
+title: Migration Guide
+description: Upgrade from Blocks v1.0 to v2.0
+---
+
+# Migration Guide
+
+This guide covers upgrading from Blocks v1.0 to v2.0.
+
+## Breaking Changes Summary
+
+| Change | v1.0 | v2.0 |
+|--------|------|------|
+| Schema version | None | `$schema: "blocks/v2"` required |
+| Domain vocabulary | `signals` + `measures` | `semantics` (merged) |
+| Domain rules | `blocks.domain_rules` + block-level | Validator config: `validators[].config.rules` |
+| Block path | `root` + `path` | `path` only (remove `root`) |
+
+## Step-by-Step Migration
+
+### 1. Add Schema Version
+
+Add the `$schema` field at the top of your `blocks.yml`:
+
+```yaml
+# v1.0
+name: "My Project"
+
+# v2.0
+$schema: "blocks/v2"
+name: "My Project"
+```
+
+### 2. Remove `root` Field
+
+The `root` field is removed. Add explicit `path` to each block:
+
+```yaml
+# v1.0
+root: "adapters"
+blocks:
+  adapter.skills:
+    description: "..."  # Lives in ./adapters/adapter.skills/
+
+# v2.0
+blocks:
+  adapter.skills:
+    description: "..."
+    path: "adapters/skills"  # Explicit path
+```
+
+### 3. Merge Signals and Measures into Semantics
+
+The `signals` and `measures` fields are merged into a single `semantics` field:
+
+```yaml
+# v1.0
+domain:
+  signals:
+    skill_alignment:
+      description: "How well skills match"
+      extraction_hint: "Compare required skills"
+  measures:
+    score_0_1:
+      constraints:
+        - "Value between 0 and 1"
+
+# v2.0
+domain:
+  semantics:
+    skill_alignment:
+      description: "How well skills match"
+      extraction_hint: "Compare required skills"
+    score_0_1:
+      description: "Value between 0 and 1"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
+```
+
+**Key changes:**
+- `signals` fields move directly to `semantics`
+- `measures.constraints` becomes `semantics.<name>.description` + optional `schema`
+- Add JSON Schema in `schema` field for runtime validation
+
+### 4. Move Domain Rules to Validator Config
+
+Domain rules move from block-level to validator configuration:
+
+```yaml
+# v1.0
+blocks:
+  domain_rules:
+    - id: rule1
+      description: "Global rule"
+  adapter.skills:
+    domain_rules:
+      - id: rule2
+        description: "Block-specific rule"
+
+# v2.0
+validators:
+  - name: domain
+    config:
+      rules:
+        - id: rule1
+          description: "Global rule"
+
+blocks:
+  adapter.skills:
+    validators:
+      domain:
+        rules:
+          - id: rule2
+            description: "Block-specific rule (added to global)"
+```
+
+### 5. Update Output References
+
+Update output measure references to use semantics:
+
+```yaml
+# v1.0
+outputs:
+  - name: score
+    type: number
+    measures: [score_0_1]
+
+# v2.0
+outputs:
+  - name: score
+    type: number
+    semantics: [score_0_1]
+```
+
+### 6. Add AI Failure Handling (Optional)
+
+v2.0 adds explicit AI failure handling:
+
+```yaml
+ai:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  on_failure: "warn"  # warn | error | skip
+```
+
+### 7. Add Exclude Patterns (Optional)
+
+v2.0 supports file exclusion patterns per block:
+
+```yaml
+blocks:
+  adapter.skills:
+    exclude:
+      - "**/*.test.ts"
+      - "__mocks__/**"
+```
+
+## Complete Migration Example
+
+### Before (v1.0)
+
+```yaml
+name: "HR Recommendation Engine"
+
+root: "adapters"
+
+domain:
+  entities:
+    resume:
+      fields: [basics, work, education, skills]
+
+  signals:
+    skill_alignment:
+      description: "How well candidate skills match"
+      extraction_hint: "Compare required skills against resume"
+
+  measures:
+    score_0_1:
+      constraints:
+        - "Value must be between 0 and 1"
+
+blocks:
+  domain_rules:
+    - id: objective_scoring
+      description: "Scores based on objective criteria"
+
+  adapter.skills:
+    description: "Evaluates candidate skills"
+    domain_rules:
+      - id: case_insensitive
+        description: "Compare skills case-insensitively"
+    inputs:
+      - name: resume
+        type: entity.resume
+    outputs:
+      - name: result
+        type: object
+        measures: [score_0_1]
+
+ai:
+  provider: "openai"
+  model: "gpt-4.1-mini"
+```
+
+### After (v2.0)
+
+```yaml
+$schema: "blocks/v2"
+
+name: "HR Recommendation Engine"
+
+domain:
+  entities:
+    resume:
+      fields: [basics, work, education, skills]
+
+  semantics:
+    skill_alignment:
+      description: "How well candidate skills match"
+      extraction_hint: "Compare required skills against resume"
+    score_0_1:
+      description: "Value must be between 0 and 1"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
+
+validators:
+  - schema
+  - shape
+  - name: domain
+    config:
+      rules:
+        - id: objective_scoring
+          description: "Scores based on objective criteria"
+
+blocks:
+  adapter.skills:
+    description: "Evaluates candidate skills"
+    path: "adapters/skills"
+    exclude:
+      - "**/*.test.ts"
+    inputs:
+      - name: resume
+        type: entity.resume
+    outputs:
+      - name: result
+        type: object
+        semantics: [score_0_1]
+    validators:
+      domain:
+        rules:
+          - id: case_insensitive
+            description: "Compare skills case-insensitively"
+
+ai:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  on_failure: "warn"
+```
+
+## Validation
+
+After migration, run validation to ensure everything works:
+
+```bash
+blocks run --all
+```
+
+The CLI will validate your `blocks.yml` against the v2.0 schema and report any issues.
+
+## New Features in v2.0
+
+With migration complete, you can use these new v2.0 features:
+
+- **`exclude` patterns** - Exclude test files, mocks, etc. from validation
+- **`skip_validators`** - Skip specific validators per block
+- **`ai.on_failure`** - Control behavior when AI validation fails
+- **`cache.path`** - Configure cache location for monorepos
+- **Deep merge for rules** - Block rules add to global rules instead of replacing

@@ -7,7 +7,7 @@ description: Understanding domain modeling in Blocks
 
 Blocks treats domain concepts as first-class, executable artifacts — inspired by Cube.dev, Malloy, and PDDL.
 
-## The Three Pillars
+## The Two Pillars
 
 ### Entities
 
@@ -20,6 +20,7 @@ domain:
       fields: [id, name, email, created_at]
     resume:
       fields: [basics, work, education, skills]
+      optional: [certifications]
 ```
 
 Reference entities using `entity.<name>`:
@@ -32,47 +33,35 @@ blocks:
         type: entity.user
 ```
 
-### Signals
+### Semantics
 
-**Signals** are domain-specific concepts to extract or calculate.
+**Semantics** define your domain vocabulary — terms and concepts that give meaning to your data.
 
 ```yaml
 domain:
-  signals:
+  semantics:
     engagement:
       description: "How engaged is the user?"
       extraction_hint: "Based on activity frequency and recency"
-    readability:
-      description: "Clear visual hierarchy and typography"
-```
 
-Signals guide AI validation and give semantic meaning to data.
-
-### Measures
-
-**Measures** are constraints on output values.
-
-```yaml
-domain:
-  measures:
     score_0_1:
-      constraints:
-        - "Value must be between 0 and 1."
-        - "Higher values indicate stronger signal."
-    semantic_html:
-      constraints:
-        - "Use semantic tags (header, main, section)"
-        - "Proper heading hierarchy (h1 → h2 → h3)"
+      description: "Normalized score between 0 and 1"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
 ```
 
-Reference measures in outputs:
+Semantics can be purely conceptual (for AI context) or include constraints (with JSON Schema).
+
+Reference semantics in outputs:
 
 ```yaml
 blocks:
   my_block:
     outputs:
       - name: score
-        measures: [score_0_1]
+        semantics: [score_0_1]
 ```
 
 ## Why Domain Modeling Matters
@@ -98,18 +87,18 @@ blocks:
     href="/docs/core-concepts/entities"
   />
   <Card
-    title="Signals"
-    description="Understand domain signals"
-    href="/docs/core-concepts/signals"
-  />
-  <Card
-    title="Measures"
-    description="Define output constraints"
-    href="/docs/core-concepts/measures"
+    title="Semantics"
+    description="Define domain vocabulary"
+    href="/docs/core-concepts/semantics"
   />
   <Card
     title="Philosophy"
     description="Guide development with design principles"
     href="/docs/core-concepts/philosophy"
+  />
+  <Card
+    title="Specification"
+    description="Complete v2.0 reference"
+    href="/docs/specification"
   />
 </Cards>

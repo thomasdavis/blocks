@@ -1,0 +1,285 @@
+---
+title: Validators
+description: Validator configuration, pipeline, and customization
+---
+
+# Validators
+
+Validators analyze your blocks for compliance with the domain model. They form a pipeline that runs during development.
+
+## Validator Pipeline
+
+Validators run in array order, but **all validators always run** - no fail-fast. This provides complete diagnostics.
+
+```yaml
+validators:
+  - schema    # Fast structural check
+  - shape     # Fast file existence check
+  - domain    # AI-powered semantic analysis
+  - output    # Custom runtime validation
+```
+
+## Built-in Validators
+
+| Short Name | Full ID | Purpose |
+|------------|---------|---------|
+| `schema` | `schema.io` | Validates blocks.yml structure |
+| `shape` | `shape.exports` | Verifies file exports exist |
+| `domain` | `domain.semantic` | AI-powered semantic validation |
+
+Short names and full IDs both work for flexibility.
+
+## Validator Configuration
+
+### Basic Usage
+
+String format for built-in validators without config:
+
+```yaml
+validators:
+  - schema
+  - shape
+  - domain
+```
+
+### With Configuration
+
+Object format for validators with config:
+
+```yaml
+validators:
+  - name: domain
+    config:
+      rules:
+        - id: objective_scoring
+          description: "Scores must be based on objective criteria"
+        - id: graceful_degradation
+          description: "Handle missing data without throwing"
+```
+
+### Domain Rules
+
+Domain rules are evaluated by the AI validator. Each rule has:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `id` | Yes | Unique identifier for the rule |
+| `description` | Yes | What the rule requires (for AI context) |
+
+```yaml
+validators:
+  - name: domain
+    config:
+      rules:
+        - id: effect_usage
+          description: "Must use Effect.gen or Effect.tryPromise for async"
+        - id: eeoc_compliance
+          description: "Never consider protected characteristics"
+        - id: american_market
+          description: "Evaluations calibrated for American job market"
+```
+
+## Per-Block Overrides
+
+Blocks can override validator config. Overrides are **deep merged** with global config:
+
+```yaml
+validators:
+  - name: domain
+    config:
+      rules:
+        - id: global_rule
+          description: "Applies to all blocks"
+
+blocks:
+  adapter.skills:
+    validators:
+      domain:
+        rules:
+          # This rule is ADDED to global rules
+          - id: skills_specific
+            description: "Must compare skill names case-insensitively"
+```
+
+**Important:**
+- Blocks can only configure validators that exist in the global `validators` array
+- Rules merge by default - same ID rules are deduplicated (block rule wins)
+- No mechanism to remove global rules (explicit is better)
+
+## Block Opt-Out
+
+Blocks can skip specific validators:
+
+```yaml
+blocks:
+  legacy.module:
+    skip_validators: [domain]  # Only run schema and shape
+
+  generated.code:
+    skip_validators: [domain, shape]  # Only schema
+```
+
+## Custom Validators
+
+Custom validators follow npm package conventions:
+
+```javascript
+// validators/output/index.js
+export default {
+  id: "output.runtime",
+  description: "Validates block output against test data",
+
+  // Declare dependencies on other validators
+  dependsOn: ["schema"],
+
+  async validate(context) {
+    const { blockName, blockPath, config, testData } = context;
+
+    // Your validation logic here
+
+    return {
+      status: "passed",  // passed | failed | skipped | warning | error
+      issues: []
+    };
+  }
+};
+```
+
+### Registering Custom Validators
+
+```yaml
+validators:
+  - schema
+  - shape
+  - name: output
+    run: "validators/output"  # Path to validator
+    config:
+      strict: true
+```
+
+### Validator Sources
+
+Validators can come from multiple sources:
+
+```yaml
+validators:
+  # Local file
+  - name: custom
+    run: "./validators/custom"
+
+  # npm package
+  - name: eslint
+    run: "@blocks/validator-eslint"
+```
+
+## Validator Dependencies
+
+Validators can declare dependencies on other validators:
+
+```javascript
+export default {
+  id: "output.runtime",
+  dependsOn: ["schema"],  // Waits for schema to complete first
+  // ...
+};
+```
+
+The system resolves dependencies and orders execution accordingly.
+
+## Validation Results
+
+Results use multiple states for clarity:
+
+```typescript
+type ValidationStatus =
+  | "passed"   // All checks passed
+  | "failed"   // Hard failure, issues found
+  | "skipped"  // Validator was skipped
+  | "warning"  // Soft issues, didn't block
+  | "error";   // Validator itself errored
+
+interface ValidationResult {
+  status: ValidationStatus;
+  issues: ValidationIssue[];
+}
+
+interface ValidationIssue {
+  type: "error" | "warning";
+  code: string;
+  message: string;
+  file?: string;
+  line?: number;
+}
+```
+
+## AI Failure Handling
+
+Configure how to handle AI validator failures:
+
+```yaml
+ai:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  on_failure: "warn"  # warn | error | skip
+```
+
+| Mode | Behavior |
+|------|----------|
+| `warn` | Return valid with warning (default) |
+| `error` | Fail validation on AI error |
+| `skip` | Skip AI validation entirely |
+
+## Domain Validator Intelligence
+
+The domain validator prioritizes token usage:
+
+- **Prioritize meaningful files** - Entry points, exports, core logic first
+- **Smart truncation** - Don't just cut off at limit
+- **Report token usage** - Always show how many tokens were used
+- **Skip large files** - Summarize instead of sending full content
+
+## Complete Example
+
+```yaml
+$schema: "blocks/v2"
+
+name: "HR Recommendation Engine"
+
+validators:
+  - schema
+  - shape
+  - name: domain
+    config:
+      rules:
+        - id: objective_scoring
+          description: "Scores based on objective criteria from inputs"
+        - id: transparent_reasoning
+          description: "Provide clear reasoning referencing data points"
+        - id: graceful_degradation
+          description: "Handle missing data without throwing"
+        - id: effect_usage
+          description: "Use Effect.gen or Effect.tryPromise for async"
+  - name: output
+    run: "validators/output"
+
+blocks:
+  adapter.skills:
+    description: "Evaluates candidate skills"
+    path: "adapters/skills"
+    exclude: ["**/*.test.ts"]
+    validators:
+      domain:
+        rules:
+          - id: case_insensitive
+            description: "Compare skill names case-insensitively"
+
+  legacy.module:
+    description: "Legacy code, skip domain validation"
+    path: "src/legacy"
+    skip_validators: [domain]
+
+ai:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  on_failure: "warn"
+```

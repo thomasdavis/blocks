@@ -1,0 +1,228 @@
+---
+title: Domain Model
+description: Entities and semantics in the Blocks domain model
+---
+
+# Domain Model
+
+The domain model defines your project's vocabulary - the data types and concepts that validators use to understand your code.
+
+## Overview
+
+```yaml
+domain:
+  entities:
+    # Core data types
+    resume:
+      fields: [basics, work, education, skills]
+      optional: [certifications]
+
+  semantics:
+    # Domain vocabulary
+    skill_alignment:
+      description: "How well candidate skills match requirements"
+    score_0_1:
+      description: "Normalized score between 0 and 1"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
+```
+
+## Entities
+
+Entities define core data types with their fields. They represent the "things" in your domain.
+
+### Basic Structure
+
+```yaml
+domain:
+  entities:
+    user:
+      fields: [id, name, email, created_at]
+
+    resume:
+      fields: [basics, work, education, skills]
+      optional: [certifications, projects]
+```
+
+### Field Optionality
+
+Fields listed in `optional` are not required. All other fields are required:
+
+```yaml
+domain:
+  entities:
+    score_result:
+      fields: [score, reasoning, matched_items, gaps]
+      optional: [confidence]  # confidence is optional
+```
+
+### Referencing Entities
+
+Reference entities in block inputs/outputs using `entity.<name>`:
+
+```yaml
+blocks:
+  adapter.skills:
+    inputs:
+      - name: resume
+        type: entity.resume
+    outputs:
+      - name: result
+        type: entity.score_result
+```
+
+### Entity Design
+
+Entities are intentionally simple - just field names without types. This keeps configuration accessible while allowing validators to infer types from context.
+
+Internally, field lists compile to JSON Schema for runtime validation when needed.
+
+## Semantics
+
+Semantics define your domain vocabulary - terms and concepts that give meaning to data. This replaces the separate "signals" and "measures" concepts from v1.0.
+
+### Basic Structure
+
+```yaml
+domain:
+  semantics:
+    # Conceptual term
+    skill_alignment:
+      description: "How well candidate skills match job requirements"
+      extraction_hint: "Compare required/preferred skills against resume"
+
+    # Measurable constraint
+    score_0_1:
+      description: "Normalized score between 0 and 1"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
+```
+
+### Semantic Fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `description` | Yes | What this concept means |
+| `extraction_hint` | No | How to identify or calculate it |
+| `schema` | No | JSON Schema for runtime validation |
+
+### Referencing Semantics
+
+Reference semantics in block outputs to apply constraints:
+
+```yaml
+blocks:
+  adapter.skills:
+    outputs:
+      - name: result
+        type: entity.score_result
+        semantics: [score_0_1, skill_alignment]
+```
+
+### When to Use Schema
+
+Add a `schema` when you need runtime validation of specific values:
+
+```yaml
+domain:
+  semantics:
+    # No schema - conceptual only
+    readability:
+      description: "How easy the content is to read"
+
+    # With schema - runtime validation
+    score_0_1:
+      description: "Normalized score"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
+
+    # With complex schema
+    valid_html:
+      description: "Valid HTML5 output"
+      schema:
+        type: string
+        pattern: "^<!DOCTYPE html>"
+```
+
+## External References
+
+Support for external references at all levels:
+
+```yaml
+domain:
+  entities:
+    # Local file reference
+    resume:
+      $ref: "./schemas/resume.yml"
+
+    # URL reference
+    job_posting:
+      $ref: "https://example.com/schemas/job.json"
+```
+
+Resolution priority: Local files, then URLs.
+
+## Philosophy
+
+Philosophy statements provide AI context but are not directly enforced:
+
+```yaml
+philosophy:
+  - "All adapters should use the Effect library"
+  - "Scores must include reasoning for transparency"
+  - "Handle missing data gracefully without throwing"
+```
+
+These are included in domain validator prompts. The AI considers them when evaluating code semantics.
+
+## Complete Example
+
+```yaml
+$schema: "blocks/v2"
+
+name: "HR Recommendation Engine"
+
+philosophy:
+  - "Scoring adapters must provide objective, consistent evaluations"
+  - "Each adapter focuses on a single dimension of candidate fit"
+  - "Scores must include reasoning for transparency"
+
+domain:
+  entities:
+    resume:
+      fields: [basics, work, education, skills]
+      optional: [certifications, projects]
+
+    job_posting:
+      fields: [title, company, requirements, preferred]
+      optional: [salary_range, location]
+
+    score_result:
+      fields: [score, reasoning, matched_items, gaps]
+      optional: [confidence]
+
+  semantics:
+    skill_alignment:
+      description: "How well candidate skills match job requirements"
+      extraction_hint: "Compare required/preferred skills against resume skills"
+
+    experience_relevance:
+      description: "Relevance of work history to the position"
+      extraction_hint: "Evaluate years, roles, industries, responsibilities"
+
+    score_0_1:
+      description: "Normalized score between 0 and 1"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
+
+    reasoning_quality:
+      description: "Reasoning must be specific, actionable, and reference data points"
+```

@@ -1,7 +1,13 @@
-import type { BlocksConfig, BlockDefinition } from "@blocksai/schema";
+import type {
+  BlocksConfig,
+  BlockDefinition,
+  DomainRule,
+  ValidatorEntry,
+} from "@blocksai/schema";
 
 /**
- * Domain Registry - Central registry for domain entities, signals, and measures
+ * Domain Registry - Central registry for domain entities and semantics
+ * Updated for Blocks Spec v2.0
  */
 export class DomainRegistry {
   private config: BlocksConfig;
@@ -11,67 +17,62 @@ export class DomainRegistry {
   }
 
   /**
-   * Get all defined entities
+   * Get all defined entities with their fields and optional fields
    */
-  getEntities(): Map<string, string[]> {
-    const entities = new Map<string, string[]>();
+  getEntities(): Map<
+    string,
+    { fields: string[]; optional?: string[] }
+  > {
+    const entities = new Map<
+      string,
+      { fields: string[]; optional?: string[] }
+    >();
     if (this.config.domain?.entities) {
       for (const [name, def] of Object.entries(this.config.domain.entities)) {
-        entities.set(name, def.fields);
+        entities.set(name, {
+          fields: def.fields,
+          optional: def.optional,
+        });
       }
     }
     return entities;
   }
 
   /**
-   * Get all defined signals
+   * Get all defined semantics (merged signals + measures from v1.0)
    */
-  getSignals(): Map<string, { description: string; extractionHint?: string }> {
-    const signals = new Map();
-    if (this.config.domain?.signals) {
-      for (const [name, def] of Object.entries(this.config.domain.signals)) {
-        signals.set(name, {
+  getSemantics(): Map<
+    string,
+    { description: string; extractionHint?: string; schema?: unknown }
+  > {
+    const semantics = new Map<
+      string,
+      { description: string; extractionHint?: string; schema?: unknown }
+    >();
+    if (this.config.domain?.semantics) {
+      for (const [name, def] of Object.entries(this.config.domain.semantics)) {
+        semantics.set(name, {
           description: def.description,
           extractionHint: def.extraction_hint,
+          schema: def.schema,
         });
       }
     }
-    return signals;
-  }
-
-  /**
-   * Get all defined measures
-   */
-  getMeasures(): Map<string, string[]> {
-    const measures = new Map<string, string[]>();
-    if (this.config.domain?.measures) {
-      for (const [name, def] of Object.entries(this.config.domain.measures)) {
-        measures.set(name, def.constraints);
-      }
-    }
-    return measures;
+    return semantics;
   }
 
   /**
    * Get a block definition by name
    */
   getBlock(name: string): BlockDefinition | undefined {
-    const block = this.config.blocks[name];
-    // Skip domain_rules (which is an array, not a BlockDefinition)
-    if (Array.isArray(block)) {
-      return undefined;
-    }
-    return block;
+    return this.config.blocks[name];
   }
 
   /**
-   * Get all block definitions (excludes domain_rules)
+   * Get all block definitions
    */
   getBlocks(): Map<string, BlockDefinition> {
-    const entries = Object.entries(this.config.blocks).filter(
-      ([key, value]) => key !== "domain_rules" && !Array.isArray(value)
-    ) as [string, BlockDefinition][];
-    return new Map(entries);
+    return new Map(Object.entries(this.config.blocks));
   }
 
   /**
@@ -82,24 +83,10 @@ export class DomainRegistry {
   }
 
   /**
-   * Check if a signal exists
+   * Check if a semantic exists
    */
-  hasSignal(name: string): boolean {
-    return !!this.config.domain?.signals?.[name];
-  }
-
-  /**
-   * Check if a measure exists
-   */
-  hasMeasure(name: string): boolean {
-    return !!this.config.domain?.measures?.[name];
-  }
-
-  /**
-   * Get required template sections (removed - blocks are just functions)
-   */
-  getRequiredTemplateSections(): string[] {
-    return [];
+  hasSemantic(name: string): boolean {
+    return !!this.config.domain?.semantics?.[name];
   }
 
   /**
@@ -110,41 +97,88 @@ export class DomainRegistry {
   }
 
   /**
-   * Get default domain rules that apply to all blocks
-   * These are defined at blocks.domain_rules
+   * Get domain rules from the domain validator config
+   * In v2.0, rules are defined in validators[].config.rules
    */
-  getDefaultDomainRules(): string[] {
-    const defaultRules = this.config.blocks.domain_rules;
-    if (!defaultRules || !Array.isArray(defaultRules)) {
+  getDomainRules(): DomainRule[] {
+    if (!this.config.validators) {
       return [];
     }
-    return defaultRules.map((rule) => rule.description);
+
+    for (const validator of this.config.validators) {
+      if (typeof validator === "string") {
+        continue;
+      }
+      if (validator.name === "domain" && validator.config?.rules) {
+        return validator.config.rules;
+      }
+    }
+    return [];
   }
 
   /**
-   * Get default domain rule IDs that apply to all blocks
-   * These are defined at blocks.domain_rules
+   * Get domain rules as descriptions (for backward compatibility)
    */
-  getDefaultDomainRuleIds(): string[] {
-    const defaultRules = this.config.blocks.domain_rules;
-    if (!defaultRules || !Array.isArray(defaultRules)) {
-      return [];
-    }
-    return defaultRules.map((rule) => rule.id);
+  getDomainRuleDescriptions(): string[] {
+    return this.getDomainRules().map((rule) => rule.description);
   }
 
   /**
-   * Get default domain rules with both ID and description
-   * Used for parallel rule validation
+   * Get domain rules with IDs (for parallel rule validation)
    */
-  getDefaultDomainRulesWithIds(): Array<{ id: string; description: string }> {
-    const defaultRules = this.config.blocks.domain_rules;
-    if (!defaultRules || !Array.isArray(defaultRules)) {
-      return [];
-    }
-    return defaultRules.map((rule) => ({
+  getDomainRulesWithIds(): Array<{ id: string; description: string }> {
+    return this.getDomainRules().map((rule) => ({
       id: rule.id,
       description: rule.description,
     }));
+  }
+
+  /**
+   * Get merged domain rules for a specific block
+   * Block-level rules are deep merged with global rules
+   */
+  getBlockDomainRules(blockName: string): DomainRule[] {
+    const globalRules = this.getDomainRules();
+    const block = this.getBlock(blockName);
+
+    if (!block?.validators?.domain?.rules) {
+      return globalRules;
+    }
+
+    // Deep merge: add block rules, dedup by ID
+    const blockRules = block.validators.domain.rules as DomainRule[];
+    const ruleMap = new Map<string, DomainRule>();
+
+    for (const rule of globalRules) {
+      ruleMap.set(rule.id, rule);
+    }
+    for (const rule of blockRules) {
+      ruleMap.set(rule.id, rule);
+    }
+
+    return Array.from(ruleMap.values());
+  }
+
+  /**
+   * Check if a block should skip a specific validator
+   */
+  shouldSkipValidator(blockName: string, validatorName: string): boolean {
+    const block = this.getBlock(blockName);
+    return block?.skip_validators?.includes(validatorName) ?? false;
+  }
+
+  /**
+   * Get file exclusion patterns for a block
+   */
+  getBlockExcludePatterns(blockName: string): string[] {
+    const block = this.getBlock(blockName);
+    return block?.exclude ?? [];
+  }
+
+  /**
+   * Get the validators array from config
+   */
+  getValidators(): ValidatorEntry[] {
+    return this.config.validators ?? [];
   }
 }

@@ -1,4 +1,4 @@
 {
   "title": "Core Concepts",
-  "pages": ["index", "entities", "signals", "measures", "blocks", "philosophy"]
+  "pages": ["index", "entities", "semantics", "blocks", "philosophy"]
 }

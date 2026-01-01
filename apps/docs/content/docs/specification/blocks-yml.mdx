@@ -1,0 +1,276 @@
+---
+title: blocks.yml Reference
+description: Complete schema reference for blocks.yml configuration
+---
+
+# blocks.yml Reference
+
+The `blocks.yml` file is the single source of truth for your Blocks project. This page documents the complete v2.0 schema.
+
+## Complete Schema
+
+```yaml
+# Schema version (required for v2+)
+$schema: "blocks/v2"
+
+# Project identifier (required)
+name: "My Project"
+
+# Guiding principles for AI validators (optional)
+philosophy:
+  - "Design principle one"
+  - "Design principle two"
+
+# Domain model (optional)
+domain:
+  entities:
+    entity_name:
+      fields: [field1, field2, field3]
+      optional: [field3]  # Optional fields
+
+  semantics:
+    semantic_name:
+      description: "What this concept means"
+      extraction_hint: "How to identify it"  # Optional
+      schema:  # Optional JSON Schema for runtime validation
+        type: number
+        minimum: 0
+        maximum: 1
+
+# Validation pipeline (optional, defaults to [domain])
+validators:
+  - schema  # Built-in short name
+  - shape   # Built-in short name
+  - name: domain
+    config:
+      rules:
+        - id: rule_id
+          description: "Rule description"
+  - name: custom
+    run: "validators/custom"
+    config:
+      key: value
+
+# Block definitions (required)
+blocks:
+  block.name:
+    description: "What this block does"  # Required
+    path: "path/to/block"  # Required if not in ./blocks/
+    exclude:
+      - "**/*.test.ts"
+      - "__mocks__/**"
+    inputs:
+      - name: input_name
+        type: entity.entity_name
+      - name: optional_input
+        type: object
+        optional: true
+    outputs:
+      - name: output_name
+        type: entity.result_type
+        semantics: [semantic_name]
+    skip_validators: []  # Validators to skip
+    validators:  # Per-block overrides (deep merged)
+      domain:
+        rules:
+          - id: additional_rule
+            description: "Block-specific rule"
+    test_data: "fixtures/test.json"
+
+# AI provider configuration (optional)
+ai:
+  provider: "openai"  # openai | anthropic | google
+  model: "gpt-4o-mini"
+  on_failure: "warn"  # warn | error | skip
+
+# Cache configuration (optional)
+cache:
+  path: ".blocks/cache.json"
+```
+
+## Top-Level Fields
+
+### `$schema`
+
+Declares the specification version. Required for v2.0+.
+
+```yaml
+$schema: "blocks/v2"
+```
+
+### `name`
+
+**Required.** Project identifier used in validation output.
+
+```yaml
+name: "HR Recommendation Engine"
+```
+
+### `philosophy`
+
+Optional array of guiding principles. Included in domain validator AI prompts but not directly enforced.
+
+```yaml
+philosophy:
+  - "Scoring adapters must provide objective evaluations"
+  - "Each adapter focuses on a single dimension"
+  - "All adapters should use the Effect library"
+```
+
+### `domain`
+
+Optional domain model containing entities and semantics. See [Domain Model](/docs/specification/domain-model) for details.
+
+### `validators`
+
+Optional validation pipeline. See [Validators](/docs/specification/validators) for details. Defaults to `[domain]` if omitted.
+
+### `blocks`
+
+**Required.** Block definitions. Each key is a block name, value is the block configuration.
+
+### `ai`
+
+Optional AI provider configuration:
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `provider` | `"openai" \| "anthropic" \| "google"` | `"openai"` | AI provider |
+| `model` | `string` | `"gpt-4o-mini"` | Model identifier |
+| `on_failure` | `"warn" \| "error" \| "skip"` | `"warn"` | Behavior when AI fails |
+
+### `cache`
+
+Optional cache configuration:
+
+```yaml
+cache:
+  path: ".blocks/cache.json"  # Configurable for monorepos
+```
+
+Cache behavior:
+- Content-hash based (never expires based on time)
+- Same file content = same cached result
+- Use `--force` to bypass cache
+
+## Block Definition Fields
+
+### `description`
+
+**Required.** Describes the block's purpose. Used in domain validator prompts.
+
+```yaml
+blocks:
+  adapter.skills:
+    description: "Evaluates candidate skills against job requirements"
+```
+
+### `path`
+
+Path to block directory, relative to project root. Required if block is not in `./blocks/`.
+
+```yaml
+blocks:
+  adapter.skills:
+    path: "adapters/skills"  # Lives in ./adapters/skills/
+
+  my_block:
+    # No path - lives in ./blocks/my_block/
+```
+
+### `exclude`
+
+Glob patterns for files to exclude from validation:
+
+```yaml
+blocks:
+  adapter.skills:
+    exclude:
+      - "**/*.test.ts"
+      - "**/*.spec.ts"
+      - "__tests__/**"
+      - "__mocks__/**"
+```
+
+### `inputs`
+
+Input parameters for the block:
+
+```yaml
+inputs:
+  - name: resume
+    type: entity.resume
+  - name: config
+    type: object
+    optional: true  # Optional input
+```
+
+### `outputs`
+
+Output values from the block:
+
+```yaml
+outputs:
+  - name: result
+    type: entity.score_result
+    semantics: [score_0_1]  # Reference semantics
+    constraints:  # Additional constraints
+      - "Must include reasoning"
+```
+
+### `skip_validators`
+
+Validators to skip for this block:
+
+```yaml
+blocks:
+  legacy.module:
+    skip_validators: [domain]  # Only run schema and shape
+```
+
+### `validators`
+
+Per-block validator config overrides. Deep merged with global config:
+
+```yaml
+blocks:
+  adapter.skills:
+    validators:
+      domain:
+        rules:
+          # This rule is ADDED to global rules
+          - id: skills_specific
+            description: "Must compare skill names case-insensitively"
+```
+
+### `test_data`
+
+Test data for output validators. Flexible format:
+
+```yaml
+# File path
+test_data: "fixtures/test.json"
+
+# Folder
+test_data: "fixtures/"
+
+# Inline
+test_data:
+  resume: { skills: ["Python", "TypeScript"] }
+  job: { required_skills: ["Python"] }
+```
+
+## Block Naming
+
+Block names use any naming convention. Dot notation is convention only - no semantic meaning:
+
+```yaml
+blocks:
+  adapter.skills: {}    # Convention
+  skills-adapter: {}    # Also valid
+  SkillsAdapter: {}     # Also valid
+```
+
+## File Scope
+
+Everything in a block's folder IS the block. Validators read all files recursively (respecting `exclude` patterns).

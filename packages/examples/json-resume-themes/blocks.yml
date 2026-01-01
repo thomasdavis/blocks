@@ -1,21 +1,17 @@
-name: "JSON Resume Themes"
-root: "themes"
+$schema: "blocks/v2"
 
-# AI Configuration (optional)
-# Defaults to OpenAI gpt-4o-mini if not specified
+name: "JSON Resume Themes"
+
 ai:
-  provider: "openai"  # Options: openai, anthropic, google
-  model: "gpt-4o-mini"  # OpenAI: gpt-4o-mini, gpt-4o | Anthropic: claude-3-5-sonnet-20241022 | Google: gemini-1.5-flash
+  provider: "openai"
+  model: "gpt-4o-mini"
+  on_failure: "warn"
 
 philosophy:
   - "Resume themes must prioritize readability and professionalism."
   - "All themes must be responsive and accessible."
   - "Semantic HTML and proper structure are required."
   - "Themes should express the candidate's story clearly."
-
-# ——————————————————————————————————————————
-# DOMAIN SEMANTICS
-# ——————————————————————————————————————————
 
 domain:
   entities:
@@ -41,7 +37,7 @@ domain:
     theme_config:
       fields: [colors, fonts, layout, spacing]
 
-  signals:
+  semantics:
     readability:
       description: "How easy is the resume to read and scan?"
       extraction_hint: "Look for proper typography, spacing, visual hierarchy"
@@ -58,61 +54,37 @@ domain:
       description: "WCAG compliance and screen reader friendliness"
       extraction_hint: "Verify semantic HTML, ARIA labels, color contrast"
 
-  measures:
     valid_html:
-      constraints:
-        - "Must output valid HTML5"
-        - "Must pass W3C validation"
+      description: "Must output valid HTML5 and pass W3C validation"
 
     responsive_layout:
-      constraints:
-        - "Must work on mobile (320px+)"
-        - "Must work on tablet (768px+)"
-        - "Must work on desktop (1024px+)"
+      description: "Must work on mobile (320px+), tablet (768px+), and desktop (1024px+)"
 
     accessibility_score:
-      constraints:
-        - "Must use semantic HTML5 tags"
-        - "Must include ARIA labels where appropriate"
-        - "Color contrast must meet WCAG AA standards"
+      description: "Must use semantic HTML5 tags, include ARIA labels, and meet WCAG AA color contrast"
 
-templates:
-  required_sections:
-    - basics
-    - work
-    - education
-    - skills
-
-  optional_sections:
-    - volunteer
-    - awards
-    - publications
-    - languages
-    - interests
-    - references
-
-# ——————————————————————————————————————————
-# BLOCK DEFINITIONS
-# ——————————————————————————————————————————
+validators:
+  - schema
+  - shape
+  - name: domain
+    config:
+      rules:
+        - id: semantic_html
+          description: "Must use semantic HTML tags (header, main, section, article)"
+        - id: accessibility
+          description: "Must include proper ARIA labels and semantic structure"
+        - id: responsive_design
+          description: "Must use CSS media queries for responsive layout"
+        - id: visual_hierarchy
+          description: "Must establish clear visual hierarchy with typography"
 
 blocks:
-  # Default domain rules for ALL resume themes
-  domain_rules:
-    - id: semantic_html
-      description: "Must use semantic HTML tags (header, main, section, article)"
-    - id: accessibility
-      description: "Must include proper ARIA labels and semantic structure"
-    - id: responsive_design
-      description: "Must use CSS media queries for responsive layout"
-    - id: visual_hierarchy
-      description: "Must establish clear visual hierarchy with typography"
-
   theme.modern_professional:
-    type: template
     description: "Clean, modern resume theme with professional styling"
-    path: "themes/modern-professional"  # Custom path to theme implementation
-    template_engine: hbs
-    test_data: "test-data/sample-resume.json"  # Can be file path or inline data object
+    path: "themes/modern-professional"
+    exclude:
+      - "**/*.test.ts"
+      - "**/*.spec.ts"
     inputs:
       - name: resume
         type: entity.resume
@@ -122,15 +94,10 @@ blocks:
     outputs:
       - name: html
         type: string
-        measures: [valid_html, responsive_layout, accessibility_score]
+        semantics: [valid_html, responsive_layout, accessibility_score]
         constraints:
           - "Must include all required sections"
           - "Must be mobile responsive"
           - "Must use semantic HTML5"
           - "Must have proper heading hierarchy (h1, h2, h3)"
-    sections:
-      - basics
-      - work
-      - education
-      - skills
-    # Inherits blocks.domain_rules (semantic_html, accessibility, responsive_design, visual_hierarchy)
+    test_data: "test-data/sample-resume.json"

@@ -1,5 +1,6 @@
+$schema: "blocks/v2"
+
 name: "My Blocks Project"
-root: "."
 
 philosophy:
   - "Blocks must be small, composable, deterministic."
@@ -11,22 +12,26 @@ domain:
     user:
       fields: [id, name, email]
 
-  signals:
+  semantics:
     user_engagement:
       description: "How engaged is the user?"
       extraction_hint: "Look for login frequency, feature usage."
 
-  measures:
     score_0_1:
-      constraints:
-        - "Value must be between 0 and 1."
+      description: "Value must be between 0 and 1."
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
 
 blocks:
   example_block:
     description: "An example block"
+    path: "blocks/example_block"
     inputs:
       - name: user
         type: entity.user
     outputs:
       - name: score
-        type: measure.score_0_1
+        type: number
+        semantics: [score_0_1]

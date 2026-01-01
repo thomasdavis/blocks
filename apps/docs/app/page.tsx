@@ -9,25 +9,15 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
       <Nav />
       <main>
-      {/* Discovery Phase Banner */}
-      <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 dark:from-blue-500/5 dark:to-cyan-500/5 border-b border-blue-200 dark:border-blue-900">
-        <div className="container mx-auto px-4 py-3">
-          <p className="text-center text-sm text-slate-700 dark:text-slate-300">
-            🔬 <span className="font-semibold">Discovery Phase:</span> We're exploring what Blocks should be through practical examples.
-            <Link href="/docs/getting-started" className="ml-2 underline hover:text-blue-600 dark:hover:text-blue-400">
-              Learn more →
-            </Link>
-          </p>
-        </div>
-      </div>
-
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20">
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
-            Human-AI Collaboration
+            Guardrails That Keep Your
             <br />
-            with Guardrails
+            Agentic Code Generation
+            <br />
+            Aligned With Your Domain
           </h1>
 
           {/* AI-Generated Elevator Pitch */}
@@ -82,24 +72,28 @@ export default function HomePage() {
             </div>
             <pre className="p-6 overflow-x-auto text-sm">
               <code className="text-slate-300">
-{`philosophy:
-  - "Blog posts must include humor and conversational tone"
-  - "Resume themes must prioritize readability"
+{`$schema: "blocks/v2"
 
-blocks:
-  # Default domain rules for ALL blocks
-  domain_rules:
-    - id: humor_required
-      description: "Must include wit or light-hearted commentary"
+philosophy:
+  - "Blog posts must include humor"
 
-  validator.blog_post:
-    description: "Validates blog content"
-    # Inherits domain_rules automatically
+domain:
+  semantics:
+    humor_score:
+      description: "How funny is this content?"
 
 validators:
-  - schema    # Fast structural checks
-  - shape.ts  # File structure validation
-  - domain    # AI-powered semantic analysis`}
+  - schema
+  - name: domain
+    config:
+      rules:
+        - id: humor_required
+          description: "Must include wit"
+
+blocks:
+  validator.blog_post:
+    description: "Validates blog content"
+    path: "validators/blog"`}
               </code>
             </pre>
           </div>
@@ -393,10 +387,10 @@ validators:
       <div className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Ready to Explore Blocks?
+            Ready to Add Guardrails to Your AI Codebase?
           </h2>
           <p className="text-xl text-slate-600 dark:text-slate-400 mb-8">
-            Join the discovery phase. Build examples, shape the spec, and help define what Blocks becomes.
+            Create a feedback loop where AI agents run validation until all code aligns with your domain requirements.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

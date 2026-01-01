@@ -1,0 +1,284 @@
+---
+title: Semantics
+description: Define domain vocabulary with semantics
+---
+
+# Semantics
+
+Semantics define your **domain vocabulary** — the terms and concepts that give meaning to your data. In v2.0, semantics replace the separate "signals" and "measures" concepts from v1.0.
+
+## What Are Semantics?
+
+Semantics represent domain-specific concepts:
+
+- **skill_alignment** - How well candidate skills match job requirements
+- **score_0_1** - A normalized score between 0 and 1
+- **readability** - How easy content is to understand
+- **professional_tone** - Appropriate business language
+
+Semantics can be purely conceptual (for AI context) or include constraints (for validation).
+
+## Defining Semantics
+
+Define semantics in `blocks.yml`:
+
+```yaml title="blocks.yml"
+$schema: "blocks/v2"
+
+domain:
+  semantics:
+    # Conceptual semantic - no constraints
+    skill_alignment:
+      description: "How well candidate skills match job requirements"
+      extraction_hint: "Compare required skills against resume skills"
+
+    # Constrained semantic - with JSON Schema
+    score_0_1:
+      description: "Normalized score between 0 and 1"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
+
+    # Complex semantic with detailed guidance
+    reasoning_quality:
+      description: "Reasoning must be specific, actionable, and reference data points"
+      extraction_hint: "Look for concrete examples and measurable criteria"
+```
+
+Each semantic has:
+- **description** (required) - What this concept means
+- **extraction_hint** (optional) - How to identify or calculate it
+- **schema** (optional) - JSON Schema for runtime validation
+
+## Using Semantics
+
+Reference semantics in block outputs:
+
+```yaml
+blocks:
+  adapter.skills:
+    outputs:
+      - name: result
+        type: entity.score_result
+        semantics: [score_0_1, reasoning_quality]
+```
+
+Multiple semantics can be applied to a single output.
+
+## Conceptual vs Constrained
+
+### Conceptual Semantics
+
+Provide AI context without runtime validation:
+
+```yaml
+semantics:
+  readability:
+    description: "How easy the content is to read"
+
+  culture_fit:
+    description: "Alignment with company values"
+    extraction_hint: "Compare candidate values with job requirements"
+```
+
+These guide AI validation and document domain intent.
+
+### Constrained Semantics
+
+Include JSON Schema for runtime validation:
+
+```yaml
+semantics:
+  score_0_1:
+    description: "Normalized score"
+    schema:
+      type: number
+      minimum: 0
+      maximum: 1
+
+  valid_html:
+    description: "Valid HTML5 output"
+    schema:
+      type: string
+      pattern: "^<!DOCTYPE html>"
+```
+
+The schema is used for runtime type checking when needed.
+
+## How Semantics Are Validated
+
+### Domain Validator (AI)
+
+The domain validator uses semantics to:
+- Understand what outputs should represent
+- Check code produces appropriate values
+- Verify extraction hints are followed
+
+### Schema Validator
+
+Checks that:
+- Referenced semantics exist in `domain.semantics`
+- Semantic names are valid identifiers
+
+### Runtime Validation
+
+If a semantic has a `schema`, it can be used for runtime type checking:
+
+```typescript
+// Generated from schema
+const Score0_1Schema = z.number().min(0).max(1);
+```
+
+## Validation Example
+
+```yaml
+domain:
+  semantics:
+    score_0_1:
+      description: "Value must be between 0 and 1"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
+
+blocks:
+  calculate_engagement:
+    outputs:
+      - name: score
+        type: number
+        semantics: [score_0_1]
+```
+
+**Implementation that fails:**
+
+```typescript
+export function calculateEngagement(user: User) {
+  return { score: 2.5 };  // Violates score_0_1
+}
+```
+
+**Implementation that passes:**
+
+```typescript
+export function calculateEngagement(user: User) {
+  const rawScore = calculateRawScore(user);
+  const score = Math.min(Math.max(rawScore, 0), 1);
+  return { score };
+}
+```
+
+## Migration from v1.0
+
+In v1.0, "signals" and "measures" were separate concepts. In v2.0, they're merged into "semantics":
+
+```yaml
+# v1.0
+domain:
+  signals:
+    engagement:
+      description: "User activity level"
+      extraction_hint: "Based on login frequency"
+  measures:
+    score_0_1:
+      constraints:
+        - "Value between 0 and 1"
+
+# v2.0
+domain:
+  semantics:
+    engagement:
+      description: "User activity level"
+      extraction_hint: "Based on login frequency"
+    score_0_1:
+      description: "Value between 0 and 1"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
+```
+
+See the [Migration Guide](/docs/specification/migration) for complete upgrade instructions.
+
+## Common Semantics Library
+
+Here are common semantics you might define:
+
+```yaml
+domain:
+  semantics:
+    # Scores
+    score_0_1:
+      description: "Normalized score between 0 and 1"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
+
+    percentage:
+      description: "Percentage value 0-100"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 100
+
+    # Format
+    valid_html:
+      description: "Valid HTML5 syntax"
+
+    valid_json:
+      description: "Valid JSON format"
+
+    # Quality
+    semantic_html:
+      description: "Semantic HTML5 tags with ARIA labels"
+      extraction_hint: "Check for header, main, section, article tags"
+
+    professional_tone:
+      description: "Formal, business-appropriate language"
+
+    # Domain-specific
+    skill_alignment:
+      description: "Match between candidate and job skills"
+      extraction_hint: "Compare required/preferred skills against resume"
+
+    experience_relevance:
+      description: "Relevance of work history to position"
+      extraction_hint: "Evaluate years, roles, industries"
+```
+
+## Best Practices
+
+### DO:
+
+- Define semantics that represent real domain concepts
+- Write clear, specific descriptions
+- Add extraction hints for complex concepts
+- Use JSON Schema for constraints that need runtime validation
+
+### DON'T:
+
+- Create semantics for simple data fields (`user_name`, `email`)
+- Make descriptions too vague (`quality`, `score`)
+- Skip extraction hints for complex concepts
+- Duplicate semantics unnecessarily
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Entities"
+    description="Define core data types"
+    href="/docs/core-concepts/entities"
+  />
+  <Card
+    title="Blocks"
+    description="Create blocks with semantic outputs"
+    href="/docs/core-concepts/blocks"
+  />
+  <Card
+    title="Specification"
+    description="Complete v2.0 specification"
+    href="/docs/specification"
+  />
+</Cards>

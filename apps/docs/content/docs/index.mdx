@@ -40,10 +40,9 @@ Not locking down code — giving you a semantic compass.
 
 Define your domain semantics in `blocks.yml`:
 
-- **Entities** - the "things" in your system
-- **Signals** - domain concepts to extract
-- **Measures** - constraints on outputs
-- **Philosophy** - design principles
+- **Entities** - the "things" in your system with their fields
+- **Semantics** - domain vocabulary (conceptual terms and constraints)
+- **Philosophy** - design principles for AI context
 
 ### Multi-Layer Validation
 
@@ -99,25 +98,32 @@ Blocks detects when code diverges from spec and helps you decide how to resolve 
 Here's a simple block that calculates user engagement scores:
 
 ```yaml title="blocks.yml"
+$schema: "blocks/v2"
+
 domain:
   entities:
     user:
       fields: [id, name, email]
 
-  measures:
+  semantics:
     score_0_1:
-      constraints:
-        - "Value must be between 0 and 1."
+      description: "Value must be between 0 and 1"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
 
 blocks:
   user_engagement_score:
     description: "Calculate user engagement score"
+    path: "blocks/user_engagement_score"
     inputs:
       - name: user
         type: entity.user
     outputs:
       - name: score
-        type: measure.score_0_1
+        type: number
+        semantics: [score_0_1]
 ```
 
 ```typescript title="blocks/user_engagement_score/block.ts"

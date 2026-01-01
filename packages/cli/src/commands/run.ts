@@ -235,8 +235,9 @@ export const runCommand = new Command("run")
     }
 
     // Determine which blocks to validate
+    // v2.0: No more domain_rules at block level - all keys are block definitions
     const blocksToValidate = options.all
-      ? Object.keys(config.blocks).filter((key) => key !== "domain_rules")
+      ? Object.keys(config.blocks)
       : blockName
         ? [blockName]
         : [];
@@ -316,8 +317,8 @@ export const runCommand = new Command("run")
       if (blockDef.path) {
         blockPath = join(process.cwd(), blockDef.path);
       } else {
-        const blocksRoot = config.root || "blocks";
-        blockPath = join(process.cwd(), blocksRoot, name);
+        // v2.0: No more 'root' field - default to ./blocks/ directory
+        blockPath = join(process.cwd(), "blocks", name);
       }
 
       const context = {

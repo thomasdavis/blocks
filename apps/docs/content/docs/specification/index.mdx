@@ -1,0 +1,99 @@
+---
+title: Blocks Specification v2.0
+description: The complete specification for the Blocks validation framework
+---
+
+# Blocks Specification v2.0
+
+> **Guardrails that keep your agentic code generation aligned with your domain**
+
+Blocks is a development-time validation framework for AI-generated code. It creates a feedback loop where AI agents (like Claude Code) can iteratively run validation until all code aligns with domain requirements.
+
+## Key Innovation
+
+Unlike runtime validation frameworks, Blocks validates *source code intent* at development time, treating code as the artifact to validate.
+
+```
+Same input → Same code → Same output
+```
+
+If source code passes validation during development, it will produce correct output at runtime.
+
+## What Blocks Solves
+
+For AI-generated codebases, Blocks addresses three interconnected problems:
+
+1. **Catching AI mistakes** - LLMs hallucinate; Blocks catches semantic errors before they ship
+2. **Enforcing standards** - Consistent patterns across AI-generated code
+3. **Domain alignment** - AI stays within business domain boundaries
+
+## The Feedback Loop
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│   AI Agent (Claude Code, etc.)                          │
+│        │                                                │
+│        ▼                                                │
+│   Generate/Modify Code                                  │
+│        │                                                │
+│        ▼                                                │
+│   blocks run --all                                      │
+│        │                                                │
+│        ├── Pass ──► Done                                │
+│        │                                                │
+│        └── Fail ──► Read errors, fix code, repeat       │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Quick Reference
+
+| Concept | Description |
+|---------|-------------|
+| `$schema` | Version declaration: `"blocks/v2"` |
+| `philosophy` | AI context for domain validator |
+| `domain.entities` | Core data types with fields |
+| `domain.semantics` | Domain vocabulary (merged signals + measures) |
+| `validators` | Validation pipeline configuration |
+| `blocks` | Block definitions with inputs/outputs |
+| `ai` | AI provider configuration |
+| `cache` | Caching configuration |
+
+## Design Principles
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Philosophy enforcement | AI context only | Let AI interpret, don't over-engineer |
+| Entity types | Simple fields | Keep accessible, compile to JSON Schema internally |
+| Signals + Measures | Merged as "semantics" | Same concept, reduce confusion |
+| Rule inheritance | Auto-merge | DRY without complexity |
+| Path resolution | Explicit paths | Remove ambiguity |
+| Validation flow | Always run all | Complete diagnostics matter |
+| Cache expiry | Content-hash only | Deterministic behavior |
+| AI failures | Configurable | Different contexts need different behavior |
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="blocks.yml Reference"
+    description="Complete schema documentation"
+    href="/docs/specification/blocks-yml"
+  />
+  <Card
+    title="Domain Model"
+    description="Entities and semantics"
+    href="/docs/specification/domain-model"
+  />
+  <Card
+    title="Validators"
+    description="Validator configuration and pipeline"
+    href="/docs/specification/validators"
+  />
+  <Card
+    title="Migration Guide"
+    description="Upgrade from v1.0 to v2.0"
+    href="/docs/specification/migration"
+  />
+</Cards>

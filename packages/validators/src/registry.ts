@@ -11,6 +11,7 @@ import type { BlocksConfig } from "@blocksai/schema";
  */
 const BUILT_IN_VALIDATORS = {
   schema: "schema.io",
+  shape: "shape.exports.ts",
   "shape.ts": "shape.exports.ts",
   domain: "domain.validation",
 } as const;

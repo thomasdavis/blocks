@@ -277,8 +277,8 @@ importers:
         version: 4.7.8
     devDependencies:
       '@blocksai/cli':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: workspace:*
+        version: link:../../cli
       '@types/node':
         specifier: ^22.10.2
         version: 22.19.1
@@ -358,6 +358,9 @@ importers:
       '@blocksai/schema':
         specifier: workspace:*
         version: link:../schema
+      minimatch:
+        specifier: ^10.0.1
+        version: 10.1.1
       p-limit:
         specifier: ^6.1.0
         version: 6.2.0
@@ -439,22 +442,6 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
-
-  '@blocksai/ai@2.1.0':
-    resolution: {integrity: sha512-gPTY60T0QALVknWW8dhX65CDuPQsqPVijxEkBW7e42vF/UhLDVT6oYzo6geea6BvnQbeVYBS9kMFpjZPwOVQ3A==}
-
-  '@blocksai/cli@0.2.0':
-    resolution: {integrity: sha512-DpctmArgPauhpWsogI9grSctRnCfzx0/UQuYFa+Wbu4PFwYg094Ab9dn8iFnO6GiwyUMLiKEAt8QiPexZdlJlg==}
-    hasBin: true
-
-  '@blocksai/domain@0.2.1':
-    resolution: {integrity: sha512-41FhTvfjWXQyLdaz2ZK9GxG44F+gAz719t4S1HbSg8qjUkGgJksPWhPdukS4IGU+JpVxomJD236N4E8WmN411A==}
-
-  '@blocksai/schema@1.0.0':
-    resolution: {integrity: sha512-DXSIzRyAUWaFE1yfV1lYEqDIXE4gcAlI1HTxTE4sk9Npc9+DzN1HbiagynAaoaP0pIQfpN1Frhd9/sMobTQQBQ==}
-
-  '@blocksai/validators@1.1.0':
-    resolution: {integrity: sha512-fsBoPIZ1/Y18z3rbuknEvhifyuYeq8Q2uZ+yUPcPb8AeQ9H/T+x9pI15BcPjCKofDpajxIdKsyTTT+jf8A2VwQ==}
 
   '@changesets/apply-release-plan@7.0.13':
     resolution: {integrity: sha512-BIW7bofD2yAWoE8H4V40FikC+1nNFEKBisMECccS16W1rt6qqhNTBDmIw5HaqmMgtLNz9e7oiALiEUuKrQ4oHg==}
@@ -1127,6 +1114,14 @@ packages:
     peerDependenciesMeta:
       '@types/node':
         optional: true
+
+  '@isaacs/balanced-match@4.0.1':
+    resolution: {integrity: sha512-yzMTt9lEb8Gv7zRioUilSglI0c0smZ9k5D65677DLWLtWJaXIS3CqcGyUFByYKlnUj6TkjLVs54fBl6+TiGQDQ==}
+    engines: {node: 20 || >=22}
+
+  '@isaacs/brace-expansion@5.0.0':
+    resolution: {integrity: sha512-ZT55BDLV0yv0RBm2czMiZ+SqCGO7AvmOM3G/w2xhVPH+te0aKgFjmBvGlL1dH+ql2tgGO3MVrbb3jCKyvpgnxA==}
+    engines: {node: 20 || >=22}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -2909,6 +2904,10 @@ packages:
     resolution: {integrity: sha512-VP79XUPxV2CigYP3jWwAUFSku2aKqBH7uTAapFWCBqutsbmDo96KY5o8uh6U+/YSIn5OxJnXp73beVkpqMIGhA==}
     engines: {node: '>=18'}
 
+  minimatch@10.1.1:
+    resolution: {integrity: sha512-enIvLvRAFZYXJzkCYG5RKmPfrFArdLv+R+lbQ53BmIMLIry74bjKzX6iHAm8WYamJkhSSEabrWN5D97XnKObjQ==}
+    engines: {node: 20 || >=22}
+
   minimatch@9.0.5:
     resolution: {integrity: sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow==}
     engines: {node: '>=16 || 14 >=14.17'}
@@ -3851,42 +3850,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.6
 
-  '@blocksai/ai@2.1.0':
-    dependencies:
-      '@ai-sdk/anthropic': 3.0.2(zod@3.25.76)
-      '@ai-sdk/google': 3.0.2(zod@3.25.76)
-      '@ai-sdk/openai': 3.0.2(zod@3.25.76)
-      '@blocksai/domain': 0.2.1
-      '@blocksai/schema': 1.0.0
-      ai: 6.0.5(zod@3.25.76)
-      zod: 3.25.76
-
-  '@blocksai/cli@0.2.0':
-    dependencies:
-      '@blocksai/ai': 2.1.0
-      '@blocksai/domain': 0.2.1
-      '@blocksai/schema': 1.0.0
-      '@blocksai/validators': 1.1.0
-      chalk: 5.6.2
-      commander: 12.1.0
-      dotenv: 17.2.3
-      ora: 8.2.0
-
-  '@blocksai/domain@0.2.1':
-    dependencies:
-      '@blocksai/schema': 1.0.0
-
-  '@blocksai/schema@1.0.0':
-    dependencies:
-      yaml: 2.8.1
-      zod: 3.25.76
-
-  '@blocksai/validators@1.1.0':
-    dependencies:
-      '@blocksai/ai': 2.1.0
-      '@blocksai/domain': 0.2.1
-      '@blocksai/schema': 1.0.0
-
   '@changesets/apply-release-plan@7.0.13':
     dependencies:
       '@changesets/config': 3.1.1
@@ -4385,6 +4348,12 @@ snapshots:
       iconv-lite: 0.7.0
     optionalDependencies:
       '@types/node': 22.19.1
+
+  '@isaacs/balanced-match@4.0.1': {}
+
+  '@isaacs/brace-expansion@5.0.0':
+    dependencies:
+      '@isaacs/balanced-match': 4.0.1
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -6410,6 +6379,10 @@ snapshots:
       picomatch: 2.3.1
 
   mimic-function@5.0.1: {}
+
+  minimatch@10.1.1:
+    dependencies:
+      '@isaacs/brace-expansion': 5.0.0
 
   minimatch@9.0.5:
     dependencies:

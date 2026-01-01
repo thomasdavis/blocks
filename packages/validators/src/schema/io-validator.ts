@@ -69,9 +69,9 @@ export class IOSchemaValidator implements Validator {
         }
         if (output.name && output.type) {
           checksPerformed.push(`  ✓ Output "${output.name}" has valid schema (type: ${output.type})`);
-          // Check for measures
-          if (output.measures && output.measures.length > 0) {
-            checksPerformed.push(`    └─ Measures: ${output.measures.join(", ")}`);
+          // Check for semantics
+          if (output.semantics && output.semantics.length > 0) {
+            checksPerformed.push(`    └─ Semantics: ${output.semantics.join(", ")}`);
           }
         }
       }

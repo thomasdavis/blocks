@@ -41,18 +41,17 @@ export class DomainAnalyzer {
       }
     }
 
-    // Check outputs reference valid measures
+    // Check outputs reference valid semantics
     if (block.outputs) {
       for (const output of block.outputs) {
-        if (output.measures) {
-          for (const measure of output.measures) {
-            const measureName = measure.replace("measure.", "");
-            if (!this.registry.hasMeasure(measureName)) {
+        if (output.semantics) {
+          for (const semantic of output.semantics) {
+            if (!this.registry.hasSemantic(semantic)) {
               issues.push({
                 type: "error",
-                code: "UNKNOWN_MEASURE",
-                message: `Output "${output.name}" references unknown measure "${measureName}"`,
-                suggestion: `Add measure "${measureName}" to domain.measures`,
+                code: "UNKNOWN_SEMANTIC",
+                message: `Output "${output.name}" references unknown semantic "${semantic}"`,
+                suggestion: `Add semantic "${semantic}" to domain.semantics`,
               });
             }
           }
@@ -73,8 +72,7 @@ export class DomainAnalyzer {
     blockName: string,
     detectedConcepts: {
       entities?: string[];
-      signals?: string[];
-      measures?: string[];
+      semantics?: string[];
       outputs?: string[];
     }
   ): DomainIssue[] {
@@ -94,29 +92,15 @@ export class DomainAnalyzer {
       }
     }
 
-    // Check for undocumented signals
-    if (detectedConcepts.signals) {
-      for (const signal of detectedConcepts.signals) {
-        if (!this.registry.hasSignal(signal)) {
+    // Check for undocumented semantics
+    if (detectedConcepts.semantics) {
+      for (const semantic of detectedConcepts.semantics) {
+        if (!this.registry.hasSemantic(semantic)) {
           issues.push({
             type: "warning",
-            code: "UNDOCUMENTED_SIGNAL",
-            message: `Block "${blockName}" uses undocumented signal "${signal}"`,
-            suggestion: `Consider adding "${signal}" to domain.signals in blocks.yml`,
-          });
-        }
-      }
-    }
-
-    // Check for undocumented measures
-    if (detectedConcepts.measures) {
-      for (const measure of detectedConcepts.measures) {
-        if (!this.registry.hasMeasure(measure)) {
-          issues.push({
-            type: "warning",
-            code: "UNDOCUMENTED_MEASURE",
-            message: `Block "${blockName}" uses undocumented measure "${measure}"`,
-            suggestion: `Consider adding "${measure}" to domain.measures in blocks.yml`,
+            code: "UNDOCUMENTED_SEMANTIC",
+            message: `Block "${blockName}" uses undocumented semantic "${semantic}"`,
+            suggestion: `Consider adding "${semantic}" to domain.semantics in blocks.yml`,
           });
         }
       }

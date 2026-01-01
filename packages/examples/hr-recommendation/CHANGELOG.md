@@ -1,5 +1,13 @@
 # @blocks-examples/hr-recommendation
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies [6b372c1]
+  - @blocksai/validators@1.2.0
+  - @blocksai/ai@3.0.2
+
 ## 0.1.3
 
 ### Patch Changes

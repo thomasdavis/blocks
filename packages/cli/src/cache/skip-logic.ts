@@ -409,7 +409,7 @@ export class SkipLogic {
       summary = `${skippedCount}/${decisions.length} cached`;
     } else if (needsRevalidation && allReasons.length > 0) {
       // Show first reason
-      summary = allReasons[0].message;
+      summary = allReasons[0]!.message;
     } else {
       summary = "Running validation";
     }

@@ -38,7 +38,7 @@ const ESTIMATED_DOMAIN_VALIDATION_MS = 500;
  * - dist/validators/output/blocks-validator.js (compiled TypeScript)
  * - validators/output/blocks-validator.js (if already JS)
  */
-async function loadCustomValidator(validatorPath: string): Promise<Validator | null> {
+async function loadCustomValidator(validatorPath: string): Promise<Validator | undefined> {
   // Try different file patterns, preferring compiled dist files
   const patterns = [
     // Compiled TypeScript output in dist/
@@ -72,7 +72,7 @@ async function loadCustomValidator(validatorPath: string): Promise<Validator | n
     }
   }
 
-  return null;
+  return undefined;
 }
 
 /**
@@ -306,6 +306,12 @@ export const runCommand = new Command("run")
       // Get block path
       const blockDef = config.blocks[name];
       let blockPath: string;
+
+      // blockDef could be an array (for domain_rules) or a block definition object
+      if (Array.isArray(blockDef)) {
+        // This shouldn't happen since we filter out domain_rules
+        continue;
+      }
 
       if (blockDef.path) {
         blockPath = join(process.cwd(), blockDef.path);
@@ -552,8 +558,9 @@ export const runCommand = new Command("run")
           } else {
             // Preserve cached results
             const existingEntry = cacheManager.getBlockEntry(name);
-            if (existingEntry?.validatorResults[result.id]) {
-              cacheEntry.validatorResults[result.id] = existingEntry.validatorResults[result.id];
+            const existingResult = existingEntry?.validatorResults[result.id];
+            if (existingResult) {
+              cacheEntry.validatorResults[result.id] = existingResult;
             }
           }
         }

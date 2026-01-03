@@ -1,5 +1,15 @@
 # @blocksai/devtools
 
+## 0.2.1
+
+### Patch Changes
+
+- 486c1cd: fix: move TypeScript and build dependencies to dependencies (not devDependencies)
+
+  When devtools is installed as a standalone package and run via `blocks-devtools`,
+  devDependencies aren't installed, causing TypeScript parsing errors. This moves
+  the necessary dependencies so they're available at runtime.
+
 ## 0.2.0
 
 ### Minor Changes

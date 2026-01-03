@@ -1,15 +1,24 @@
 {
   "name": "@blocksai/devtools",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Visual UI for Blocks validation runs",
   "type": "module",
   "bin": {
     "blocks-devtools": "./bin/devtools.js"
   },
+  "files": [
+    "bin",
+    "src",
+    ".next",
+    "next.config.mjs",
+    "tsconfig.json",
+    "postcss.config.mjs"
+  ],
   "scripts": {
     "dev": "next dev -p 4200",
     "build": "next build",
-    "start": "next start -p 4200"
+    "start": "next start -p 4200",
+    "prepublishOnly": "next build"
   },
   "dependencies": {
     "@blocksai/ui": "workspace:*",

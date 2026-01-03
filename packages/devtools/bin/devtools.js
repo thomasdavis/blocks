@@ -30,16 +30,16 @@ const nextBin = nodeModulesDir ? join(nodeModulesDir, ".bin", "next") : "next";
 
 const PORT = process.env.PORT || 4200;
 
-// Check if we're in development mode (source exists) or production mode (built)
-const isDev = existsSync(join(appDir, "src"));
+// Check if we have a production build (.next folder with BUILD_ID)
+const hasProductionBuild = existsSync(join(appDir, ".next", "BUILD_ID"));
 
 console.log("🧱 Starting Blocks Devtools...");
 console.log(`   Working directory: ${process.cwd()}`);
 console.log(`   Looking for runs in: .blocks/runs/`);
 console.log();
 
-// Start Next.js using the local next binary
-const nextCommand = isDev ? "dev" : "start";
+// Always use production mode when we have a build (npx installs the built version)
+const nextCommand = hasProductionBuild ? "start" : "dev";
 const server = spawn(nextBin, [nextCommand, "-p", String(PORT)], {
   cwd: appDir,
   stdio: "inherit",

@@ -12,6 +12,14 @@ export default function HomePage() {
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20">
         <div className="max-w-5xl mx-auto text-center">
+          {/* Logo */}
+          <div className="mb-8">
+            <img
+              src="/logo.png"
+              alt="Blocks Logo"
+              className="w-24 h-24 mx-auto"
+            />
+          </div>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
             Guardrails That Keep Your
             <br />

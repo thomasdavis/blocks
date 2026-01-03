@@ -1,6 +1,29 @@
-# Blocks
+<p align="center">
+  <img src="assets/logo.png" alt="Blocks Logo" width="120" height="120">
+</p>
 
-**AI-assisted coding with semantic guardrails**
+<h1 align="center">Blocks</h1>
+
+<p align="center">
+  <strong>AI-assisted coding with semantic guardrails</strong>
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@blocksai/cli"><img src="https://img.shields.io/npm/v/@blocksai/cli.svg" alt="npm version"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://github.com/anthropics/blocks/actions"><img src="https://img.shields.io/github/actions/workflow/status/anthropics/blocks/ci.yml?branch=main" alt="Build Status"></a>
+  <a href="https://www.npmjs.com/package/@blocksai/cli"><img src="https://img.shields.io/npm/dm/@blocksai/cli.svg" alt="Downloads"></a>
+</p>
+
+<p align="center">
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#how-it-works">How It Works</a> •
+  <a href="#examples">Examples</a> •
+  <a href="#packages">Packages</a> •
+  <a href="#contributing">Contributing</a>
+</p>
+
+---
 
 Blocks is a development-time validator that lets AI agents write code freely while maintaining consistency through domain semantics and multi-layer validation. Think of it as a type system for your domain logic—except it uses LLMs to check semantic alignment, not just syntax.
 

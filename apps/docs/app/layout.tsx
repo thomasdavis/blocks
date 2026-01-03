@@ -10,11 +10,22 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: {
     template: '%s | Blocks',
-    default: 'Blocks - Domain-Driven Validation Framework',
+    default: 'Blocks - AI-Powered Semantic Validation',
   },
   description:
-    'Build reliable software with domain-driven validation, multi-layer checking, and AI-powered semantic analysis.',
+    'Teach AI coding assistants your domain rules. Define entities, semantics, and philosophy in YAML. Get AI-powered validation at development time.',
   metadataBase: new URL('https://blocks.dev'),
+  openGraph: {
+    title: 'Blocks - AI-Powered Semantic Validation',
+    description: 'Teach AI coding assistants your domain rules. Development-time validation with AI guardrails.',
+    images: ['/og-image.png'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Blocks - AI-Powered Semantic Validation',
+    description: 'Teach AI coding assistants your domain rules. Development-time validation with AI guardrails.',
+    images: ['/og-image.png'],
+  },
 };
 
 export default function RootLayout({

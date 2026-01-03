@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { default as __fd_glob_24 } from "../content/docs/specification/meta.json?collection=meta"
 import { default as __fd_glob_23 } from "../content/docs/getting-started/meta.json?collection=meta"
-import { default as __fd_glob_22 } from "../content/docs/examples/meta.json?collection=meta"
-import { default as __fd_glob_21 } from "../content/docs/core-concepts/meta.json?collection=meta"
+import { default as __fd_glob_22 } from "../content/docs/core-concepts/meta.json?collection=meta"
+import { default as __fd_glob_21 } from "../content/docs/examples/meta.json?collection=meta"
 import { default as __fd_glob_20 } from "../content/docs/meta.json?collection=meta"
 import * as __fd_glob_19 from "../content/docs/specification/validators.mdx?collection=docs"
 import * as __fd_glob_18 from "../content/docs/specification/migration.mdx?collection=docs"
@@ -34,4 +34,4 @@ const create = server<typeof Config, import("fumadocs-mdx/runtime/types").Intern
 
 export const docs = await create.doc("docs", "content/docs", {"devtools.mdx": __fd_glob_0, "index.mdx": __fd_glob_1, "use-cases.mdx": __fd_glob_2, "core-concepts/entities.mdx": __fd_glob_3, "core-concepts/index.mdx": __fd_glob_4, "core-concepts/measures.mdx": __fd_glob_5, "core-concepts/semantics.mdx": __fd_glob_6, "core-concepts/signals.mdx": __fd_glob_7, "examples/blog-content-validator.mdx": __fd_glob_8, "examples/hr-recommendation-engine.mdx": __fd_glob_9, "examples/json-resume-themes.mdx": __fd_glob_10, "getting-started/ai-configuration.mdx": __fd_glob_11, "getting-started/configuration.mdx": __fd_glob_12, "getting-started/installation.mdx": __fd_glob_13, "getting-started/quick-start.mdx": __fd_glob_14, "specification/blocks-yml.mdx": __fd_glob_15, "specification/domain-model.mdx": __fd_glob_16, "specification/index.mdx": __fd_glob_17, "specification/migration.mdx": __fd_glob_18, "specification/validators.mdx": __fd_glob_19, });
 
-export const meta = await create.meta("meta", "content/docs", {"meta.json": __fd_glob_20, "core-concepts/meta.json": __fd_glob_21, "examples/meta.json": __fd_glob_22, "getting-started/meta.json": __fd_glob_23, "specification/meta.json": __fd_glob_24, });
+export const meta = await create.meta("meta", "content/docs", {"meta.json": __fd_glob_20, "examples/meta.json": __fd_glob_21, "core-concepts/meta.json": __fd_glob_22, "getting-started/meta.json": __fd_glob_23, "specification/meta.json": __fd_glob_24, });

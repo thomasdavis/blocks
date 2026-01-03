@@ -1,0 +1,430 @@
+---
+title: Using AI Effectively
+description: Best practices for getting the most out of AI-powered validation in Blocks
+---
+
+# Using AI Effectively
+
+Blocks uses AI to provide **semantic domain validation** - analyzing your source code to ensure it aligns with your project's domain concepts, philosophy, and rules. This guide covers best practices for getting the most out of AI validation.
+
+## How Blocks Uses AI
+
+Understanding how Blocks uses AI helps you write better configurations:
+
+### What AI Analyzes
+
+When you run `blocks run`, the domain validator:
+
+1. **Reads ALL source files** in your block directory (templates, code, styles, utilities)
+2. **Loads your domain context** (philosophy, entities, semantics, rules)
+3. **Analyzes source code** against domain specifications
+4. **Reports semantic issues** with actionable feedback
+
+### Key Insight: Source Code, Not Output
+
+**Blocks validates SOURCE CODE at development time, not runtime output.**
+
+```
+Same input → Same template → Same output (deterministic)
+```
+
+If your template source passes validation during development, it will produce correct output at runtime. This is why AI analyzes your code structure, not executed results.
+
+## Writing Effective Philosophy
+
+The `philosophy` field defines your project's guiding principles. AI uses these to judge whether code "feels right" for your domain.
+
+### Good Philosophy Examples
+
+```yaml
+philosophy:
+  - "Resume themes must prioritize readability over visual flair"
+  - "All content should be scannable in under 30 seconds"
+  - "Accessibility is non-negotiable - every theme works with screen readers"
+  - "Professional appearance without sacrificing personality"
+```
+
+### Philosophy Best Practices
+
+| Do | Don't |
+|---|---|
+| Be specific and actionable | Use vague platitudes |
+| State measurable goals | Say "make it good" |
+| Define trade-offs clearly | Leave priorities ambiguous |
+| Include accessibility requirements | Assume defaults |
+
+### Bad Philosophy Examples (Avoid)
+
+```yaml
+# Too vague - AI can't validate against this
+philosophy:
+  - "Make things nice"
+  - "Be professional"
+  - "Follow best practices"
+```
+
+## Crafting Domain Rules
+
+Domain rules tell AI exactly what to check. Well-written rules produce better validation results.
+
+### Structure of Good Rules
+
+```yaml
+domain:
+  semantics:
+    readability:
+      description: "Text must be easily readable at a glance"
+      extraction_hint: "Look for font sizes, contrast ratios, line heights"
+
+blocks:
+  theme.modern:
+    validators:
+      domain:
+        rules:
+          - id: semantic_html
+            description: "Must use semantic HTML tags (header, nav, main, section, article, footer)"
+          - id: aria_labels
+            description: "All interactive elements must have ARIA labels for accessibility"
+          - id: print_styles
+            description: "Must include print-specific CSS for resume printing"
+```
+
+### Rule Writing Tips
+
+**Be Specific:**
+```yaml
+# Good - AI knows exactly what to check
+rules:
+  - id: heading_hierarchy
+    description: "Use h1 for name, h2 for sections, h3 for subsections - never skip levels"
+
+# Bad - too ambiguous
+rules:
+  - id: good_headings
+    description: "Use proper heading structure"
+```
+
+**Include Context:**
+```yaml
+# Good - explains the "why"
+rules:
+  - id: single_page
+    description: "Resume must fit on a single page when printed at standard margins (0.5 inch) - recruiters discard multi-page resumes"
+
+# Okay but less helpful
+rules:
+  - id: single_page
+    description: "Must fit on one page"
+```
+
+**Make Rules Testable:**
+```yaml
+# Good - AI can verify this
+rules:
+  - id: color_contrast
+    description: "Text color must have 4.5:1 contrast ratio against background (WCAG AA)"
+
+# Bad - subjective
+rules:
+  - id: looks_good
+    description: "Colors should look professional"
+```
+
+## Optimizing AI Performance
+
+### Choose the Right Model
+
+| Use Case | Recommended Model | Why |
+|---|---|---|
+| Development iteration | gpt-4o-mini, claude-haiku, gemini-flash | Fast, cheap - validate often |
+| CI/CD pipelines | gpt-4o-mini | Good balance of speed and quality |
+| Final validation | gpt-4o, claude-sonnet, gemini-pro | Best accuracy for release |
+| Complex domains | claude-sonnet | Best at nuanced semantic understanding |
+
+### Configuration Examples
+
+**Development (Fast & Cheap):**
+```yaml
+ai:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  on_failure: "warn"  # Don't block on AI errors during dev
+```
+
+**CI/CD Pipeline:**
+```yaml
+ai:
+  provider: "anthropic"
+  model: "claude-3-5-haiku-20241022"
+  on_failure: "error"  # Fail build on domain violations
+```
+
+**Release Validation:**
+```yaml
+ai:
+  provider: "anthropic"
+  model: "claude-3-5-sonnet-20241022"
+  on_failure: "error"
+```
+
+## Helping AI Understand Your Code
+
+### Provide Rich Context
+
+The more context AI has, the better it validates:
+
+```yaml
+domain:
+  entities:
+    resume:
+      fields:
+        - name
+        - contact_info
+        - work_experience
+        - education
+        - skills
+      optional:
+        - summary
+        - certifications
+        - languages
+
+  semantics:
+    professional_tone:
+      description: "Language suitable for business communication"
+      extraction_hint: "Check for formal vocabulary, active voice, quantified achievements"
+
+    ats_compatibility:
+      description: "Parseable by Applicant Tracking Systems"
+      extraction_hint: "Look for standard section headings, plain text fallbacks, no tables for layout"
+```
+
+### Use Extraction Hints
+
+Extraction hints tell AI how to identify concepts in your code:
+
+```yaml
+semantics:
+  engagement_score:
+    description: "How likely a reader is to continue reading"
+    extraction_hint: "Look for hooks, questions, varied sentence length, storytelling elements"
+
+  readability:
+    description: "Ease of reading and comprehension"
+    extraction_hint: "Check Flesch-Kincaid grade level indicators, paragraph length, heading frequency"
+```
+
+## Common Mistakes and Fixes
+
+### Mistake 1: Vague Rules
+
+```yaml
+# Problem: AI doesn't know what "clean" means
+rules:
+  - id: clean_code
+    description: "Code should be clean"
+
+# Solution: Be specific
+rules:
+  - id: function_length
+    description: "Functions should be under 50 lines - extract longer functions into smaller units"
+  - id: naming_conventions
+    description: "Use camelCase for variables, PascalCase for components, SCREAMING_SNAKE for constants"
+```
+
+### Mistake 2: Contradictory Philosophy
+
+```yaml
+# Problem: These contradict each other
+philosophy:
+  - "Maximize visual impact with bold design choices"
+  - "Keep designs minimal and understated"
+
+# Solution: Be clear about priorities
+philosophy:
+  - "Bold typography and whitespace create impact while maintaining minimalism"
+  - "Choose one accent color used sparingly for emphasis"
+```
+
+### Mistake 3: Too Many Rules
+
+```yaml
+# Problem: 50+ rules overwhelm the AI and slow validation
+rules:
+  - id: rule_1
+  - id: rule_2
+  # ... 48 more rules
+
+# Solution: Focus on 5-10 critical rules
+rules:
+  - id: accessibility
+    description: "WCAG AA compliance for all interactive elements"
+  - id: semantic_html
+    description: "Use semantic HTML5 elements appropriately"
+  - id: print_ready
+    description: "Looks professional when printed in black and white"
+```
+
+### Mistake 4: Not Using Block-Level Overrides
+
+```yaml
+# Problem: Same strict rules for all blocks
+validators:
+  - name: domain
+    config:
+      rules:
+        - id: strict_formatting
+          description: "Exact formatting requirements..."
+
+# Solution: Use block-level customization
+blocks:
+  theme.professional:
+    description: "Formal corporate style"
+    # Uses strict global rules
+
+  theme.creative:
+    description: "Artistic portfolio style"
+    validators:
+      domain:
+        skip: true  # Skip domain validation for creative freedom
+```
+
+## Debugging AI Validation
+
+### Understanding Validation Output
+
+```bash
+$ blocks run theme.modern
+
+🔍 Validating theme.modern...
+
+✗ Domain Validation Failed
+
+Issues:
+  1. [ERROR] DOMAIN_SEMANTIC_ISSUE
+     Missing semantic HTML: <header> element not found for resume header section
+     File: template.hbs, relates to rule: semantic_html
+
+  2. [WARNING] DOMAIN_SEMANTIC_ISSUE
+     Low contrast detected: #999 text on #fff background may not meet WCAG AA
+     File: styles.css, relates to rule: accessibility
+
+Suggestions:
+  - Wrap the name/contact section in <header> tag
+  - Increase text color darkness to #595959 or darker
+```
+
+### When AI Gets It Wrong
+
+Sometimes AI validation produces false positives. Handle these with:
+
+**1. Improve the rule description:**
+```yaml
+rules:
+  - id: semantic_html
+    description: "Use semantic HTML5 elements. Note: CSS Grid/Flexbox layouts don't require semantic wrappers for positioning divs."
+```
+
+**2. Add exclusion patterns:**
+```yaml
+blocks:
+  theme.complex:
+    exclude:
+      - "**/*.generated.ts"  # Skip generated files
+      - "**/vendor/**"       # Skip vendor code
+```
+
+**3. Skip specific validators:**
+```yaml
+blocks:
+  theme.legacy:
+    validators:
+      domain:
+        skip: true  # Skip for legacy code
+```
+
+## Cost Management
+
+### Estimating Costs
+
+| Provider | Model | ~Cost per Block Validation |
+|---|---|---|
+| OpenAI | gpt-4o-mini | ~$0.001 |
+| OpenAI | gpt-4o | ~$0.01 |
+| Anthropic | claude-haiku | ~$0.001 |
+| Anthropic | claude-sonnet | ~$0.01 |
+| Google | gemini-flash | ~$0.0005 |
+| Google | gemini-pro | ~$0.005 |
+
+*Costs vary based on code size and complexity*
+
+### Reducing Costs
+
+1. **Use fast models during development:**
+   ```yaml
+   ai:
+     model: "gpt-4o-mini"  # $0.001 per validation
+   ```
+
+2. **Validate only changed blocks:**
+   ```bash
+   blocks run theme.modern  # Instead of blocks run --all
+   ```
+
+3. **Cache validation results:**
+   ```yaml
+   cache:
+     path: ".blocks/cache"
+   ```
+
+4. **Skip AI for simple blocks:**
+   ```yaml
+   blocks:
+     util.helpers:
+       validators:
+         - schema  # Only run schema validator, skip AI
+   ```
+
+## Advanced: Custom AI Prompts
+
+For complex domains, you can influence how AI analyzes code through detailed semantics:
+
+```yaml
+domain:
+  semantics:
+    resume_impact:
+      description: |
+        Measures how effectively the resume communicates professional value.
+        High impact resumes:
+        - Lead with quantified achievements (%, $, numbers)
+        - Use strong action verbs (led, shipped, increased)
+        - Show progression and growth
+        - Include relevant keywords naturally
+        Low impact indicators:
+        - Passive voice ("was responsible for")
+        - Vague descriptions ("helped with projects")
+        - Missing metrics
+        - Generic skills lists
+      extraction_hint: |
+        Analyze work experience sections for:
+        1. Presence of numbers/percentages
+        2. Action verb strength
+        3. Specificity of descriptions
+        4. Keyword relevance to stated role
+```
+
+## Summary
+
+| Area | Best Practice |
+|---|---|
+| **Philosophy** | Specific, measurable, prioritized principles |
+| **Rules** | 5-10 focused, testable requirements |
+| **Models** | Fast for dev, quality for release |
+| **Context** | Rich entity/semantic definitions with extraction hints |
+| **Debugging** | Read error messages, refine rules, use exclusions |
+| **Costs** | Cache results, validate incrementally, match model to need |
+
+## Next Steps
+
+- [Configure your AI provider](/docs/getting-started/ai-configuration)
+- [See validation examples](/docs/examples/hr-recommendation-engine)
+- [Build custom validators](/docs/guides/custom-validators)

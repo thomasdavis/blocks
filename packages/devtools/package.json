@@ -1,6 +1,6 @@
 {
   "name": "@blocksai/devtools",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Visual UI for Blocks validation runs",
   "type": "module",
   "bin": {

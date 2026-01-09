@@ -20,15 +20,19 @@
     "publish:manual": "pnpm run build && pnpm run version-packages && pnpm run release"
   },
   "devDependencies": {
+    "@blocksai/ai": "^3.0.2",
+    "@blocksai/schema": "^1.1.0",
     "@changesets/cli": "^2.27.9",
     "@types/node": "^22.10.2",
     "dotenv": "^17.2.3",
     "openai": "^6.15.0",
     "prettier": "^3.4.2",
     "tsup": "^8.3.5",
+    "tsx": "^4.21.0",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "zod": "^3.24.1"
   },
   "packageManager": "pnpm@9.15.0",
   "engines": {

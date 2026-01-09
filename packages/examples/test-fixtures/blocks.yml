@@ -1,0 +1,71 @@
+$schema: "blocks/v2"
+
+name: "Test Fixtures"
+
+ai:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  on_failure: "warn"
+
+philosophy:
+  - "All HTML output must be accessible and semantic"
+  - "Never use inline styles in templates"
+
+domain:
+  entities:
+    test_input:
+      fields: [id, data]
+    test_output:
+      fields: [result, metadata]
+  semantics:
+    quality:
+      description: "Quality score 0-1"
+
+validators:
+  - schema
+  - shape
+  - name: domain
+    config:
+      rules:
+        - id: semantic_html
+          description: "Must use semantic HTML tags instead of generic divs"
+        - id: no_inline_styles
+          description: "Never use inline style attributes"
+
+blocks:
+  # Should pass all validators
+  test.passing:
+    description: "A valid block that passes all validation"
+    path: packages/examples/test-fixtures/blocks/passing
+    skip_validators:
+      - domain  # Skip domain validation since this block doesn't produce HTML
+    inputs:
+      - name: input
+        type: entity.test_input
+    outputs:
+      - name: output
+        type: entity.test_output
+
+  # TS files without exports - shape validator warns
+  test.shape_no_exports:
+    description: "Block with no exports"
+    path: packages/examples/test-fixtures/blocks/shape-no-exports
+    skip_validators:
+      - domain  # Skip domain validation - only testing shape validator
+    inputs:
+      - name: data
+        type: string
+    outputs:
+      - name: result
+        type: string
+
+  # Violates semantic rules - domain validator (AI) catches
+  test.domain_semantic_broken:
+    description: "Block that violates domain rules"
+    path: packages/examples/test-fixtures/blocks/domain-semantic-broken
+    inputs:
+      - name: content
+        type: string
+    outputs:
+      - name: html
+        type: string

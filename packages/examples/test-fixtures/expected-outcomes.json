@@ -1,0 +1,20 @@
+{
+  "blocks": {
+    "test.passing": {
+      "shouldPass": true,
+      "expectedIssuePatterns": []
+    },
+    "test.shape_no_exports": {
+      "shouldPass": true,
+      "expectedIssuePatterns": [
+        { "code": "NO_EXPORTS", "type": "warning" }
+      ]
+    },
+    "test.domain_semantic_broken": {
+      "shouldPass": false,
+      "expectedIssuePatterns": [
+        { "code": "DOMAIN_SEMANTIC_ISSUE", "messageContains": "semantic" }
+      ]
+    }
+  }
+}

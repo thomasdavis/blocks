@@ -8,6 +8,12 @@ importers:
 
   .:
     devDependencies:
+      '@blocksai/ai':
+        specifier: ^3.0.2
+        version: 3.0.2
+      '@blocksai/schema':
+        specifier: ^1.1.0
+        version: 1.1.0
       '@changesets/cli':
         specifier: ^2.27.9
         version: 2.29.7(@types/node@22.19.1)
@@ -19,13 +25,16 @@ importers:
         version: 17.2.3
       openai:
         specifier: ^6.15.0
-        version: 6.15.0(zod@4.1.12)
+        version: 6.15.0(zod@3.25.76)
       prettier:
         specifier: ^3.4.2
         version: 3.6.2
       tsup:
         specifier: ^8.3.5
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.1)
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
       turbo:
         specifier: ^2.3.3
         version: 2.6.1
@@ -35,6 +44,9 @@ importers:
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.19.1)(lightningcss@1.30.2)
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
 
   apps/docs:
     dependencies:
@@ -447,6 +459,15 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  '@blocksai/ai@3.0.2':
+    resolution: {integrity: sha512-5TePno0o4XJIJq8vT1a1AyXii/EMGsawkOJM/IAoMGigIBoip27KDkAu2ej9N7ROzR5fEH3wxYw+QcJe+yQw8A==}
+
+  '@blocksai/domain@0.3.0':
+    resolution: {integrity: sha512-rKpKI4IMaEQUaV52P0xDzjL/cmrkxTNrigRXd1KAm7pxfa6zO7r2QpsJf+ce5XZrYsLNpcO1mGNDjLNK+UbdOw==}
+
+  '@blocksai/schema@1.1.0':
+    resolution: {integrity: sha512-dmBc+AKAt3GSEcNiwnjZnP7PTcwDNLCpRR0IeC30iZmshPKh4gkomYJjdcdZGrlKN1Ay25v1W7FzO6wpwjXv1g==}
 
   '@changesets/apply-release-plan@7.0.13':
     resolution: {integrity: sha512-BIW7bofD2yAWoE8H4V40FikC+1nNFEKBisMECccS16W1rt6qqhNTBDmIw5HaqmMgtLNz9e7oiALiEUuKrQ4oHg==}
@@ -3867,6 +3888,25 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.6
 
+  '@blocksai/ai@3.0.2':
+    dependencies:
+      '@ai-sdk/anthropic': 3.0.2(zod@3.25.76)
+      '@ai-sdk/google': 3.0.2(zod@3.25.76)
+      '@ai-sdk/openai': 3.0.2(zod@3.25.76)
+      '@blocksai/domain': 0.3.0
+      '@blocksai/schema': 1.1.0
+      ai: 6.0.5(zod@3.25.76)
+      zod: 3.25.76
+
+  '@blocksai/domain@0.3.0':
+    dependencies:
+      '@blocksai/schema': 1.1.0
+
+  '@blocksai/schema@1.1.0':
+    dependencies:
+      yaml: 2.8.1
+      zod: 3.25.76
+
   '@changesets/apply-release-plan@7.0.13':
     dependencies:
       '@changesets/config': 3.1.1
@@ -6505,9 +6545,9 @@ snapshots:
       regex: 6.0.1
       regex-recursion: 6.0.2
 
-  openai@6.15.0(zod@4.1.12):
+  openai@6.15.0(zod@3.25.76):
     optionalDependencies:
-      zod: 4.1.12
+      zod: 3.25.76
 
   ora@8.2.0:
     dependencies:

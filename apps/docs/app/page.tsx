@@ -182,6 +182,92 @@ blocks:
         </div>
       </div>
 
+      {/* AI Feedback Loop Example */}
+      <div className="container mx-auto px-4 py-20">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-4 text-[#cadd6a] uppercase tracking-wide">
+            The Feedback Loop in Action
+          </h2>
+          <p className="text-center text-[#6a8a6a] mb-12 max-w-2xl mx-auto">
+            Watch how an AI agent uses Blocks to iterate until code meets your spec.
+          </p>
+
+          {/* Terminal conversation */}
+          <div className="bg-[#0a120a] rounded-sm border border-[#3a5a3a] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+            {/* Terminal header */}
+            <div className="px-4 py-3 bg-[#080c08] border-b border-[#2a3a2a] flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#aa4a4a]"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-[#aa8a4a]"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-[#4aaa4a]"></div>
+              <span className="ml-3 text-[#5a8a5a] text-xs uppercase tracking-wider">AI Agent Session</span>
+            </div>
+
+            {/* Conversation */}
+            <div className="p-6 space-y-6 text-sm">
+              {/* User request */}
+              <div>
+                <div className="text-[#5a8a5a] text-xs uppercase tracking-wider mb-2">User</div>
+                <div className="text-[#8a9a8a]">Create a new resume theme called "minimal"</div>
+              </div>
+
+              {/* AI writes code */}
+              <div>
+                <div className="text-[#5a8a5a] text-xs uppercase tracking-wider mb-2">Agent</div>
+                <div className="text-[#8a9a8a] mb-3">I'll create the minimal theme with a clean layout.</div>
+                <div className="bg-[#080c08] border border-[#2a3a2a] rounded-sm p-3 text-xs">
+                  <span className="text-[#5a8a5a]">Created:</span> <span className="text-[#8aca8a]">blocks/theme-minimal/template.hbs</span>
+                </div>
+              </div>
+
+              {/* AI runs validation */}
+              <div>
+                <div className="text-[#5a8a5a] text-xs uppercase tracking-wider mb-2">Agent runs validation</div>
+                <div className="bg-[#080c08] border border-[#2a3a2a] rounded-sm p-3 font-mono text-xs">
+                  <div className="text-[#6a8a6a]">$ blocks run theme.minimal</div>
+                  <div className="mt-2 text-[#aa6a4a]">✗ domain.validation failed</div>
+                  <div className="text-[#8a9a8a] ml-4">• Template uses {"<div>"} for navigation, should use {"<nav>"}</div>
+                  <div className="text-[#8a9a8a] ml-4">• Missing aria-label on contact links</div>
+                  <div className="text-[#8a9a8a] ml-4">• Inline styles detected (violates philosophy)</div>
+                </div>
+              </div>
+
+              {/* AI fixes */}
+              <div>
+                <div className="text-[#5a8a5a] text-xs uppercase tracking-wider mb-2">Agent</div>
+                <div className="text-[#8a9a8a] mb-3">I see 3 issues. Let me fix them:</div>
+                <div className="bg-[#080c08] border border-[#2a3a2a] rounded-sm p-3 text-xs space-y-1">
+                  <div><span className="text-[#8aca8a]">1.</span> <span className="text-[#8a9a8a]">Replaced {"<div>"} with {"<nav>"} for navigation</span></div>
+                  <div><span className="text-[#8aca8a]">2.</span> <span className="text-[#8a9a8a]">Added aria-label to all contact links</span></div>
+                  <div><span className="text-[#8aca8a]">3.</span> <span className="text-[#8a9a8a]">Moved inline styles to CSS classes</span></div>
+                </div>
+              </div>
+
+              {/* AI runs validation again */}
+              <div>
+                <div className="text-[#5a8a5a] text-xs uppercase tracking-wider mb-2">Agent runs validation</div>
+                <div className="bg-[#080c08] border border-[#2a3a2a] rounded-sm p-3 font-mono text-xs">
+                  <div className="text-[#6a8a6a]">$ blocks run theme.minimal</div>
+                  <div className="mt-2 text-[#4aaa4a]">✓ schema.io passed</div>
+                  <div className="text-[#4aaa4a]">✓ shape.exports.ts passed</div>
+                  <div className="text-[#4aaa4a]">✓ domain.validation passed</div>
+                  <div className="mt-2 text-[#cadd6a]">All validators passed</div>
+                </div>
+              </div>
+
+              {/* Done */}
+              <div>
+                <div className="text-[#5a8a5a] text-xs uppercase tracking-wider mb-2">Agent</div>
+                <div className="text-[#8aca8a]">Done. The minimal theme is ready and passes all validation.</div>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-center text-[#5a8a5a] mt-6 text-sm">
+            The agent sees validation output, understands the issues, and fixes them autonomously.
+          </p>
+        </div>
+      </div>
+
       {/* Multi-Layer Validation */}
       <div className="container mx-auto px-4 py-20">
         <div className="max-w-6xl mx-auto">

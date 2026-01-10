@@ -43,17 +43,18 @@ export default function ArchitecturePage() {
         <section className="mb-16">
           <div className="p-8 border-2 border-[#5a8a5a] rounded-sm bg-[#0a120a]">
             <h2 className="text-2xl text-[#cadd6a] mb-4 font-bold text-center">
-              Development-Time Validation
+              Spec → Validate → Ship
             </h2>
             <p className="text-[#8a9a8a] text-center max-w-2xl mx-auto mb-6">
-              Blocks validates <span className="text-[#cadd6a]">source code</span> at
-              development time, not runtime behavior. Templates are deterministic:
-              if validation passes during development, the output is guaranteed correct.
+              Define your domain rules. AI writes code. Blocks checks it.
+              Fix drift or update spec. Repeat until aligned.
             </p>
-            <div className="flex justify-center">
-              <code className="px-4 py-2 bg-[#080c08] border border-[#3a5a3a] rounded-sm text-[#8aca8a] text-sm">
-                Same Input → Same Template → Same Output
-              </code>
+            <div className="flex justify-center gap-3 text-sm">
+              <span className="px-3 py-2 bg-[#080c08] border border-[#3a5a3a] rounded-sm text-[#8aca8a]">blocks.yml</span>
+              <span className="text-[#5a8a5a]">→</span>
+              <span className="px-3 py-2 bg-[#080c08] border border-[#3a5a3a] rounded-sm text-[#8aca8a]">blocks run</span>
+              <span className="text-[#5a8a5a]">→</span>
+              <span className="px-3 py-2 bg-[#080c08] border border-[#cadd6a] rounded-sm text-[#cadd6a]">ship</span>
             </div>
           </div>
         </section>

@@ -4,14 +4,30 @@ import { useState } from "react";
 import { Nav } from "../components/nav";
 import { CopyButton } from "../copy-button";
 
-const agentPrompt = `I want to set up Blocks validation for this project. Blocks is a framework that validates source code at development time using AI-powered semantic analysis.
+const agentPrompt = `Set up Blocks validation for this project. Blocks creates a feedback loop between your domain spec and AI agents—it validates code semantically so AI-generated code stays aligned with your requirements.
 
-## What I Need
+Docs: https://blocksai.dev
 
-1. Create a \`blocks.yml\` configuration file at the project root
-2. Define the domain concepts (entities and semantics) relevant to this codebase
-3. Set up validation rules that enforce our coding standards
-4. Create block definitions for the key modules/components
+## What to Do
+
+1. Identify repeating modules in this codebase (these are "blocks")
+   - Examples: themes, posts, endpoints, components, handlers, templates
+   - Anything you have multiples of that should follow consistent rules
+
+2. Create a \`blocks.yml\` file (can live anywhere—validates relative to its location)
+
+3. Define the domain:
+   - Philosophy: High-level principles guiding validation
+   - Entities: Domain objects with their fields
+   - Semantics: Concepts to validate (readability, accessibility, etc.)
+
+4. Configure validators (extensible pipeline):
+   - \`schema\` - Type/structure validation
+   - \`shape\` - File structure and exports
+   - \`domain\` - AI-powered semantic validation
+   - Custom validators as needed
+
+5. Define blocks with their inputs/outputs
 
 ## blocks.yml Structure
 
@@ -20,17 +36,17 @@ $schema: "blocks/v2"
 name: "Project Name"
 
 philosophy:
-  - "High-level principles that guide code quality"
-  - "Domain-specific rules AI should enforce"
+  - "Guiding principles for AI validation"
+  - "What matters in this domain"
 
 domain:
   entities:
     entity_name:
-      fields: [field1, field2]
+      fields: [required_field1, required_field2]
       optional: [optional_field]
   semantics:
-    semantic_name:
-      description: "What this semantic concept means"
+    quality_metric:
+      description: "What this measures"
 
 validators:
   - schema
@@ -39,12 +55,12 @@ validators:
     config:
       rules:
         - id: rule_id
-          description: "What the rule enforces"
+          description: "What to enforce"
 
 blocks:
   namespace.block_name:
     description: "What this block does"
-    path: "path/to/block"
+    path: "relative/path/to/block"
     inputs:
       - name: input_name
         type: entity.entity_name
@@ -53,25 +69,17 @@ blocks:
         type: string
 \`\`\`
 
-## Key Concepts
+## Workflow
 
-- **Philosophy**: High-level principles the AI validator uses to evaluate code semantics
-- **Entities**: Domain objects with required and optional fields
-- **Semantics**: Named concepts the AI can extract/validate (like "readability" or "humor_score")
-- **Validators**: Pipeline of checks (schema validates types, shape validates structure, domain uses AI)
-- **Blocks**: Individual modules/components with defined inputs/outputs
+After setup, the feedback loop:
+\`\`\`
+blocks run --all        # Validate all blocks
+blocks run block.name   # Validate specific block
+\`\`\`
 
-## Steps
+Fix issues, run again, iterate until pass.
 
-1. Analyze the codebase to understand the domain
-2. Identify key entities and their fields
-3. Define semantic concepts that matter for code quality
-4. Create validation rules based on coding standards
-5. Define blocks for the main modules
-
-After setup, I can run \`blocks run --all\` to validate all blocks, or \`blocks run block.name\` for a specific block.
-
-Please analyze this codebase and create an appropriate blocks.yml configuration.`;
+Analyze this codebase and create an appropriate blocks.yml configuration.`;
 
 export default function GettingStartedPage() {
   const [copied, setCopied] = useState(false);
@@ -102,14 +110,25 @@ export default function GettingStartedPage() {
             Getting Started
           </h1>
           <p className="text-[#6a8a6a] text-lg">
-            Set up Blocks validation in your project in minutes.
+            Create a feedback loop between your domain spec and AI agents.
           </p>
         </div>
+
+        {/* What Blocks Does */}
+        <section className="mb-12">
+          <div className="bg-[#0a120a] border border-[#3a5a3a] rounded-sm p-6">
+            <p className="text-[#8a9a8a]">
+              Blocks validates code semantically—AI understands your domain, not just syntax.
+              Run <code className="text-[#8aca8a] bg-[#080c08] px-2 py-1 rounded-sm">blocks run</code> during
+              development, AI sees issues, fixes code, repeat until pass.
+            </p>
+          </div>
+        </section>
 
         {/* Installation */}
         <section className="mb-12">
           <h2 className="text-xl font-bold text-[#cadd6a] uppercase tracking-wide mb-4 flex items-center gap-3">
-            <span className="text-[#5a8a5a]">01.</span> Install the CLI
+            <span className="text-[#5a8a5a]">01.</span> Install
           </h2>
           <div className="bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-4">
             <div className="flex items-center justify-between">
@@ -122,7 +141,7 @@ export default function GettingStartedPage() {
         {/* Initialize */}
         <section className="mb-12">
           <h2 className="text-xl font-bold text-[#cadd6a] uppercase tracking-wide mb-4 flex items-center gap-3">
-            <span className="text-[#5a8a5a]">02.</span> Initialize Configuration
+            <span className="text-[#5a8a5a]">02.</span> Initialize
           </h2>
           <div className="bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-4 mb-4">
             <div className="flex items-center justify-between">
@@ -131,31 +150,26 @@ export default function GettingStartedPage() {
             </div>
           </div>
           <p className="text-[#6a8a6a] text-sm">
-            This creates a <code className="text-[#8aca8a] bg-[#0a120a] px-2 py-1 rounded-sm">blocks.yml</code> file in your project root.
+            Creates <code className="text-[#8aca8a] bg-[#0a120a] px-2 py-1 rounded-sm">blocks.yml</code>.
+            This file can live anywhere—Blocks validates relative to its location.
           </p>
         </section>
 
-        {/* Run Validation */}
+        {/* Run */}
         <section className="mb-12">
           <h2 className="text-xl font-bold text-[#cadd6a] uppercase tracking-wide mb-4 flex items-center gap-3">
-            <span className="text-[#5a8a5a]">03.</span> Run Validation
+            <span className="text-[#5a8a5a]">03.</span> Run
           </h2>
           <div className="space-y-3">
             <div className="bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <code className="text-[#8aca8a]">blocks run --all</code>
-                  <span className="text-[#5a8a5a] ml-4 text-sm"># Validate all blocks</span>
-                </div>
+                <code className="text-[#8aca8a]">blocks run --all</code>
                 <CopyButton text="blocks run --all" />
               </div>
             </div>
             <div className="bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <code className="text-[#8aca8a]">blocks run my.block</code>
-                  <span className="text-[#5a8a5a] ml-4 text-sm"># Validate specific block</span>
-                </div>
+                <code className="text-[#8aca8a]">blocks run my.block</code>
                 <CopyButton text="blocks run my.block" />
               </div>
             </div>
@@ -165,10 +179,10 @@ export default function GettingStartedPage() {
         {/* AI Agent Prompt */}
         <section className="mb-12">
           <h2 className="text-xl font-bold text-[#cadd6a] uppercase tracking-wide mb-4 flex items-center gap-3">
-            <span className="text-[#5a8a5a]">04.</span> Using AI to Configure
+            <span className="text-[#5a8a5a]">04.</span> AI Setup Prompt
           </h2>
           <p className="text-[#6a8a6a] mb-4">
-            Copy this prompt into your AI coding assistant (Claude, Cursor, Copilot, etc.) to have it analyze your codebase and create a <code className="text-[#8aca8a] bg-[#0a120a] px-2 py-1 rounded-sm">blocks.yml</code> configuration:
+            Copy this into your AI coding assistant to configure Blocks for your project:
           </p>
 
           <div className="bg-[#0a120a] border border-[#3a5a3a] rounded-sm overflow-hidden shadow-[0_0_20px_rgba(138,202,138,0.1)]">
@@ -179,7 +193,7 @@ export default function GettingStartedPage() {
                 <div className="w-2.5 h-2.5 rounded-sm bg-[#aa8a4a]"></div>
                 <div className="w-2.5 h-2.5 rounded-sm bg-[#4aaa4a]"></div>
                 <span className="ml-3 text-[#5a8a5a] text-xs uppercase tracking-wider">
-                  AI Agent Prompt
+                  Prompt for AI Agent
                 </span>
               </div>
               <button
@@ -191,21 +205,21 @@ export default function GettingStartedPage() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    Copied!
+                    Copied
                   </>
                 ) : (
                   <>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                    Copy Prompt
+                    Copy
                   </>
                 )}
               </button>
             </div>
 
             {/* Content */}
-            <div className="p-4 max-h-96 overflow-y-auto">
+            <div className="p-4 max-h-80 overflow-y-auto">
               <pre className="text-sm text-[#8a9a8a] whitespace-pre-wrap font-mono leading-relaxed">
                 {agentPrompt}
               </pre>
@@ -213,74 +227,67 @@ export default function GettingStartedPage() {
           </div>
         </section>
 
-        {/* What's Next */}
+        {/* Environment */}
         <section className="mb-12">
           <h2 className="text-xl font-bold text-[#cadd6a] uppercase tracking-wide mb-4 flex items-center gap-3">
-            <span className="text-[#5a8a5a]">05.</span> What's Next
+            <span className="text-[#5a8a5a]">05.</span> Environment
+          </h2>
+          <p className="text-[#6a8a6a] mb-4">
+            Domain validation uses AI. Set your provider's API key:
+          </p>
+          <div className="space-y-2">
+            <div className="bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-4">
+              <code className="text-[#8aca8a]">OPENAI_API_KEY=...</code>
+            </div>
+            <div className="bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-4">
+              <code className="text-[#8aca8a]">ANTHROPIC_API_KEY=...</code>
+            </div>
+            <div className="bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-4">
+              <code className="text-[#8aca8a]">GOOGLE_API_KEY=...</code>
+            </div>
+          </div>
+          <p className="text-[#5a8a5a] text-sm mt-3">
+            Blocks is LLM agnostic—works with any provider.
+          </p>
+        </section>
+
+        {/* What's Next */}
+        <section>
+          <h2 className="text-xl font-bold text-[#cadd6a] uppercase tracking-wide mb-4 flex items-center gap-3">
+            <span className="text-[#5a8a5a]">06.</span> Next
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
             <a
               href="/architecture"
               className="block bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-4 hover:border-[#3a5a3a] transition-colors"
             >
-              <h3 className="text-[#8aca8a] font-semibold mb-2">Architecture</h3>
-              <p className="text-[#6a8a6a] text-sm">
-                Understand how Blocks validates source code at development time.
-              </p>
+              <h3 className="text-[#8aca8a] font-semibold mb-1">Architecture</h3>
+              <p className="text-[#6a8a6a] text-sm">How Blocks validates source code.</p>
             </a>
             <a
               href="/docs"
               className="block bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-4 hover:border-[#3a5a3a] transition-colors"
             >
-              <h3 className="text-[#8aca8a] font-semibold mb-2">Documentation</h3>
-              <p className="text-[#6a8a6a] text-sm">
-                Deep dive into configuration options and validator types.
-              </p>
+              <h3 className="text-[#8aca8a] font-semibold mb-1">Docs</h3>
+              <p className="text-[#6a8a6a] text-sm">Configuration and validators.</p>
             </a>
             <a
               href="/docs/examples"
               className="block bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-4 hover:border-[#3a5a3a] transition-colors"
             >
-              <h3 className="text-[#8aca8a] font-semibold mb-2">Examples</h3>
-              <p className="text-[#6a8a6a] text-sm">
-                See real-world Blocks configurations in action.
-              </p>
+              <h3 className="text-[#8aca8a] font-semibold mb-1">Examples</h3>
+              <p className="text-[#6a8a6a] text-sm">Real configurations in action.</p>
             </a>
             <a
-              href="https://github.com/anthropics/blocks"
+              href="https://github.com/thomasdavis/blocks"
               target="_blank"
               rel="noopener noreferrer"
               className="block bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-4 hover:border-[#3a5a3a] transition-colors"
             >
-              <h3 className="text-[#8aca8a] font-semibold mb-2">GitHub</h3>
-              <p className="text-[#6a8a6a] text-sm">
-                Star the repo and contribute to the project.
-              </p>
+              <h3 className="text-[#8aca8a] font-semibold mb-1">GitHub</h3>
+              <p className="text-[#6a8a6a] text-sm">Source and issues.</p>
             </a>
           </div>
-        </section>
-
-        {/* Environment Variables */}
-        <section>
-          <h2 className="text-xl font-bold text-[#cadd6a] uppercase tracking-wide mb-4 flex items-center gap-3">
-            <span className="text-[#5a8a5a]">06.</span> Environment Setup
-          </h2>
-          <p className="text-[#6a8a6a] mb-4">
-            The domain validator uses AI. Set your API key as an environment variable:
-          </p>
-          <div className="bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-4">
-            <div className="flex items-center justify-between">
-              <code className="text-[#8aca8a]">export OPENAI_API_KEY=your-key-here</code>
-              <CopyButton text="export OPENAI_API_KEY=your-key-here" />
-            </div>
-          </div>
-          <p className="text-[#5a8a5a] text-sm mt-3">
-            Supports OpenAI, Anthropic, and Google. See{" "}
-            <a href="/docs" className="text-[#8aca8a] hover:text-[#cadd6a] transition-colors">
-              docs
-            </a>{" "}
-            for configuration options.
-          </p>
         </section>
       </main>
 
@@ -289,7 +296,7 @@ export default function GettingStartedPage() {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 text-[#5a8a5a] text-sm">
             <div className="w-2 h-2 rounded-full bg-[#5a8a5a] animate-pulse" />
-            <span className="uppercase tracking-wider">Terminal Blueprint Theme</span>
+            <span className="uppercase tracking-wider">Blocks</span>
           </div>
         </div>
       </div>

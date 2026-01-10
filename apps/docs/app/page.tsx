@@ -53,7 +53,7 @@ export default function HomePage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/docs"
+              href="/getting-started"
               className={getButtonClassName("primary", "lg")}
             >
               Get Started
@@ -140,7 +140,7 @@ blocks:
                 <div className="text-2xl mb-3 text-[#8aca8a]">[&gt;_]</div>
                 <h3 className="text-lg font-semibold mb-2 text-[#8aca8a]">AI Agents Write Code</h3>
                 <p className="text-[#6a8a6a] text-sm">
-                  Claude Code (and other AI assistants) can modify blocks too. No restrictions.
+                  Any AI coding assistant can modify blocks. LLM agnostic—works with all providers.
                 </p>
               </div>
 
@@ -408,13 +408,13 @@ blocks:
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/docs/getting-started/installation"
+              href="/getting-started"
               className={getButtonClassName("primary", "lg")}
             >
               Get Started
             </Link>
             <Link
-              href="https://github.com/anthropics/blocks"
+              href="https://github.com/thomasdavis/blocks"
               className={getButtonClassName("outline", "lg")}
             >
               View on GitHub

@@ -22,7 +22,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           },
           {
             text: 'GitHub',
-            url: 'https://github.com/anthropics/blocks',
+            url: 'https://github.com/thomasdavis/blocks',
             external: true,
           },
         ],

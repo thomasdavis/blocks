@@ -290,7 +290,7 @@ export default function ChangelogPage() {
             </p>
             <div className="flex flex-wrap gap-4 text-sm">
               <a
-                href="https://github.com/anthropics/blocks"
+                href="https://github.com/thomasdavis/blocks"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-[#8aca8a] hover:text-[#cadd6a] transition-colors"

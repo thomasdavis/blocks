@@ -48,7 +48,7 @@ export function Nav() {
               );
             })}
             <a
-              href="https://github.com/anthropics/blocks"
+              href="https://github.com/thomasdavis/blocks"
               target="_blank"
               rel="noopener noreferrer"
               className="ml-2 p-2 rounded-sm text-[#5a8a5a] hover:text-[#8aca8a] hover:bg-[#0a120a]/50 transition-all duration-150"

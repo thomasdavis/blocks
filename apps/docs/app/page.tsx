@@ -207,15 +207,16 @@ blocks:
               {/* User request */}
               <div>
                 <div className="text-[#5a8a5a] text-xs uppercase tracking-wider mb-2">User</div>
-                <div className="text-[#8a9a8a]">Create a new resume theme called "minimal"</div>
+                <div className="text-[#8a9a8a]">Add a new scorer module for the job recommendation engine that calculates location proximity score</div>
               </div>
 
               {/* AI writes code */}
               <div>
                 <div className="text-[#5a8a5a] text-xs uppercase tracking-wider mb-2">Agent</div>
-                <div className="text-[#8a9a8a] mb-3">I'll create the minimal theme with a clean layout.</div>
-                <div className="bg-[#080c08] border border-[#2a3a2a] rounded-sm p-3 text-xs">
-                  <span className="text-[#5a8a5a]">Created:</span> <span className="text-[#8aca8a]">blocks/theme-minimal/template.hbs</span>
+                <div className="text-[#8a9a8a] mb-3">I'll create a location scorer that calculates distance-based similarity.</div>
+                <div className="bg-[#080c08] border border-[#2a3a2a] rounded-sm p-3 text-xs space-y-1">
+                  <div><span className="text-[#5a8a5a]">Created:</span> <span className="text-[#8aca8a]">blocks/scorer-location/index.ts</span></div>
+                  <div><span className="text-[#5a8a5a]">Created:</span> <span className="text-[#8aca8a]">blocks/scorer-location/scorer.ts</span></div>
                 </div>
               </div>
 
@@ -223,22 +224,23 @@ blocks:
               <div>
                 <div className="text-[#5a8a5a] text-xs uppercase tracking-wider mb-2">Agent runs validation</div>
                 <div className="bg-[#080c08] border border-[#2a3a2a] rounded-sm p-3 font-mono text-xs">
-                  <div className="text-[#6a8a6a]">$ blocks run theme.minimal</div>
-                  <div className="mt-2 text-[#aa6a4a]">✗ domain.validation failed</div>
-                  <div className="text-[#8a9a8a] ml-4">• Template uses {"<div>"} for navigation, should use {"<nav>"}</div>
-                  <div className="text-[#8a9a8a] ml-4">• Missing aria-label on contact links</div>
-                  <div className="text-[#8a9a8a] ml-4">• Inline styles detected (violates philosophy)</div>
+                  <div className="text-[#6a8a6a]">$ blocks run scorer.location</div>
+                  <div className="mt-2 text-[#4aaa4a]">✓ schema.io passed</div>
+                  <div className="text-[#aa6a4a]">✗ domain.validation failed</div>
+                  <div className="text-[#8a9a8a] ml-4">• Score output range is 0-100, should be normalized 0-1</div>
+                  <div className="text-[#8a9a8a] ml-4">• Missing handling for remote jobs (should return 1.0)</div>
+                  <div className="text-[#8a9a8a] ml-4">• Distance calculation doesn't account for "willing to relocate" flag</div>
                 </div>
               </div>
 
               {/* AI fixes */}
               <div>
                 <div className="text-[#5a8a5a] text-xs uppercase tracking-wider mb-2">Agent</div>
-                <div className="text-[#8a9a8a] mb-3">I see 3 issues. Let me fix them:</div>
+                <div className="text-[#8a9a8a] mb-3">The domain validator caught 3 issues with my scoring logic:</div>
                 <div className="bg-[#080c08] border border-[#2a3a2a] rounded-sm p-3 text-xs space-y-1">
-                  <div><span className="text-[#8aca8a]">1.</span> <span className="text-[#8a9a8a]">Replaced {"<div>"} with {"<nav>"} for navigation</span></div>
-                  <div><span className="text-[#8aca8a]">2.</span> <span className="text-[#8a9a8a]">Added aria-label to all contact links</span></div>
-                  <div><span className="text-[#8aca8a]">3.</span> <span className="text-[#8a9a8a]">Moved inline styles to CSS classes</span></div>
+                  <div><span className="text-[#8aca8a]">1.</span> <span className="text-[#8a9a8a]">Normalized score output to 0-1 range</span></div>
+                  <div><span className="text-[#8aca8a]">2.</span> <span className="text-[#8a9a8a]">Added remote job check → returns 1.0</span></div>
+                  <div><span className="text-[#8aca8a]">3.</span> <span className="text-[#8a9a8a]">Added relocation flag handling → boosts score by 0.3</span></div>
                 </div>
               </div>
 
@@ -246,7 +248,7 @@ blocks:
               <div>
                 <div className="text-[#5a8a5a] text-xs uppercase tracking-wider mb-2">Agent runs validation</div>
                 <div className="bg-[#080c08] border border-[#2a3a2a] rounded-sm p-3 font-mono text-xs">
-                  <div className="text-[#6a8a6a]">$ blocks run theme.minimal</div>
+                  <div className="text-[#6a8a6a]">$ blocks run scorer.location</div>
                   <div className="mt-2 text-[#4aaa4a]">✓ schema.io passed</div>
                   <div className="text-[#4aaa4a]">✓ shape.exports.ts passed</div>
                   <div className="text-[#4aaa4a]">✓ domain.validation passed</div>
@@ -257,7 +259,7 @@ blocks:
               {/* Done */}
               <div>
                 <div className="text-[#5a8a5a] text-xs uppercase tracking-wider mb-2">Agent</div>
-                <div className="text-[#8aca8a]">Done. The minimal theme is ready and passes all validation.</div>
+                <div className="text-[#8aca8a]">Done. The location scorer is ready and integrates with the other scoring modules.</div>
               </div>
             </div>
           </div>

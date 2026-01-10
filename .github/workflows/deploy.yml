@@ -29,6 +29,11 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel
 
+      - name: Create Vercel project config
+        run: |
+          mkdir -p .vercel
+          echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID }}","orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
+
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 

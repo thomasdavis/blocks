@@ -166,7 +166,7 @@ blocks:
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-[#8aca8a] font-semibold font-mono">03.</span>
-                  <p>Blocks validates: schema (types), shape (structure), domain (semantics)</p>
+                  <p>Validators run—built-in or custom. Check types, structure, semantics, or <span className="text-[#8aca8a]">anything</span> (screenshots, contrast, performance, security...)</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-[#8aca8a] font-semibold font-mono">04.</span>

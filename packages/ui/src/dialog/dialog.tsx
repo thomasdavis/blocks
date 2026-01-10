@@ -68,7 +68,7 @@ export const DialogBackdrop = React.forwardRef<
     ref={ref}
     className={cn(
       "fixed inset-0 z-50",
-      "bg-black/50 backdrop-blur-sm",
+      "bg-[#050805]/90 backdrop-blur-sm",
       "animate-in fade-in-0",
       className
     )}
@@ -92,9 +92,9 @@ export const DialogContent = React.forwardRef<
       className={cn(
         "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
         "w-full max-w-lg max-h-[85vh]",
-        "rounded-xl border border-slate-200",
-        "bg-white text-slate-900",
-        "shadow-xl",
+        "rounded-sm border border-[#3a5a3a]",
+        "bg-[#0a120a] text-[#a0b0a0]",
+        "shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_20px_rgba(90,138,90,0.1)]",
         "p-6",
         "animate-in fade-in-0 zoom-in-95",
         className
@@ -134,7 +134,7 @@ export function DialogFooter({ className, ...props }: DialogFooterProps) {
     <div
       className={cn(
         "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-        "mt-6",
+        "mt-6 pt-4 border-t border-[#2a3a2a]",
         className
       )}
       {...props}
@@ -152,8 +152,8 @@ export const DialogTitle = React.forwardRef<
   <BaseDialog.Title
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
-      "text-slate-900",
+      "text-lg font-mono font-semibold leading-none tracking-wide uppercase",
+      "text-[#cadd6a]",
       className
     )}
     {...props}
@@ -171,7 +171,7 @@ export const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <BaseDialog.Description
     ref={ref}
-    className={cn("text-sm text-slate-500 mt-2", className)}
+    className={cn("text-sm font-mono text-[#6a8a6a] mt-2", className)}
     {...props}
   />
 ));
@@ -206,9 +206,10 @@ export const DialogCloseButton = React.forwardRef<
     ref={ref}
     className={cn(
       "absolute right-4 top-4",
-      "rounded-sm opacity-70 p-1",
-      "transition-opacity hover:opacity-100",
-      "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+      "rounded-sm p-1 text-[#5a8a5a]",
+      "transition-all duration-150",
+      "hover:text-[#8aca8a] hover:bg-[#0f1a0f]",
+      "focus:outline-none focus:ring-1 focus:ring-[#5a8a5a]",
       "disabled:pointer-events-none",
       className
     )}

@@ -13,21 +13,21 @@ export interface BannerProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const variantStyles: Record<BannerVariant, string> = {
-  default: "bg-slate-100 border-slate-200 text-slate-900",
-  info: "bg-blue-50 border-blue-200 text-blue-900",
-  warning: "bg-amber-50 border-amber-200 text-amber-900",
-  success: "bg-green-50 border-green-200 text-green-900",
-  error: "bg-red-50 border-red-200 text-red-900",
-  discovery: "bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 text-slate-700",
+  default: "bg-[#0a120a] border-[#2a3a2a] text-[#8a9a8a]",
+  info: "bg-[#081018] border-[#2a3a5a] text-[#6aaaca]",
+  warning: "bg-[#1a1808] border-[#5a4a2a] text-[#caaa6a]",
+  success: "bg-[#081a08] border-[#2a5a2a] text-[#6aca6a]",
+  error: "bg-[#1a0808] border-[#5a2a2a] text-[#ca6a6a]",
+  discovery: "bg-gradient-to-r from-[#0a120a] to-[#0a1a1a] border-[#2a4a4a] text-[#8acaca]",
 };
 
 const iconStyles: Record<BannerVariant, string> = {
-  default: "text-slate-500",
-  info: "text-blue-500",
-  warning: "text-amber-500",
-  success: "text-green-500",
-  error: "text-red-500",
-  discovery: "text-blue-500",
+  default: "text-[#5a8a5a]",
+  info: "text-[#4a8aaa]",
+  warning: "text-[#aa8a4a]",
+  success: "text-[#4aaa4a]",
+  error: "text-[#aa4a4a]",
+  discovery: "text-[#4aaaaa]",
 };
 
 export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(
@@ -84,7 +84,7 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(
         ref={ref}
         role="alert"
         className={cn(
-          "rounded-lg border px-4 py-3",
+          "rounded-sm border px-4 py-3 font-mono",
           variantStyles[variant],
           className
         )}

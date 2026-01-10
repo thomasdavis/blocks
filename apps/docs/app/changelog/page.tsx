@@ -107,15 +107,31 @@ export default function ChangelogPage() {
   const changesets = getChangesets();
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
+    <div className="min-h-screen bg-[#050805] text-[#a0b0a0] font-mono">
+      {/* Scanline overlay effect */}
+      <div
+        className="fixed inset-0 pointer-events-none z-40 opacity-[0.015]"
+        style={{
+          backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.3) 1px, rgba(0,0,0,0.3) 2px)",
+        }}
+      />
+
       <Nav />
+
       {/* Header */}
-      <div className="border-b border-gray-200 dark:border-slate-800">
+      <div className="border-b border-[#2a3a2a] bg-[#080c08]">
         <div className="container mx-auto px-4 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 border border-[#5a8a5a] rotate-45" />
+              <span className="text-xs uppercase tracking-[0.2em] text-[#5a8a5a]">Version History</span>
+              <div className="w-3 h-3 border border-[#5a8a5a] rotate-45" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-[#cadd6a] mb-2 uppercase tracking-wide">
             Changelog
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-[#6a8a6a]">
             Latest updates and changes to Blocks packages
           </p>
         </div>
@@ -125,9 +141,9 @@ export default function ChangelogPage() {
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         {changesets.length === 0 ? (
           <div className="text-center py-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-slate-800 mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-sm bg-[#0a120a] border border-[#3a5a3a] mb-4">
               <svg
-                className="w-8 h-8 text-gray-400"
+                className="w-8 h-8 text-[#5a8a5a]"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -140,10 +156,10 @@ export default function ChangelogPage() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-lg font-semibold text-[#8aca8a] mb-2">
               No changesets yet
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-[#6a8a6a]">
               Changes will appear here when packages are updated.
             </p>
           </div>
@@ -156,13 +172,13 @@ export default function ChangelogPage() {
               >
                 {/* Timeline connector */}
                 {index < changesets.length - 1 && (
-                  <div className="absolute left-4 top-12 bottom-0 w-px bg-gradient-to-b from-gray-200 to-transparent dark:from-slate-700" />
+                  <div className="absolute left-4 top-12 bottom-0 w-px bg-gradient-to-b from-[#3a5a3a] to-transparent" />
                 )}
 
                 <div className="relative">
                   {/* Timeline dot */}
-                  <div className="absolute left-0 top-2 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                    <div className="w-3 h-3 rounded-full bg-white dark:bg-slate-950" />
+                  <div className="absolute left-0 top-2 w-8 h-8 rounded-sm bg-[#0a120a] border border-[#5a8a5a] flex items-center justify-center shadow-[0_0_10px_rgba(138,202,138,0.2)]">
+                    <div className="w-2 h-2 rounded-sm bg-[#8aca8a]" />
                   </div>
 
                   {/* Content */}
@@ -171,7 +187,7 @@ export default function ChangelogPage() {
                     <div className="flex flex-wrap gap-2 mb-3">
                       {Object.entries(changeset.packages).map(([pkg, type]) => (
                         <div key={pkg} className="flex items-center gap-2">
-                          <code className="px-3 py-1 text-sm rounded-md bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-gray-100 font-mono">
+                          <code className="px-3 py-1 text-sm rounded-sm bg-[#0a120a] border border-[#2a3a2a] text-[#8aca8a]">
                             {pkg}
                           </code>
                           <Badge variant={getBadgeVariant(type)} size="sm">
@@ -182,8 +198,8 @@ export default function ChangelogPage() {
                     </div>
 
                     {/* Changeset content */}
-                    <div className="prose prose-gray dark:prose-invert max-w-none">
-                      <div className="bg-gray-50 dark:bg-slate-900/50 rounded-lg p-6 border border-gray-200 dark:border-slate-800">
+                    <div className="max-w-none">
+                      <div className="bg-[#0a120a] rounded-sm p-6 border border-[#2a3a2a]">
                         {changeset.content.split('\n\n').map((paragraph, i) => {
                           // Check if it's a code block
                           if (paragraph.startsWith('```')) {
@@ -192,9 +208,9 @@ export default function ChangelogPage() {
                               return (
                                 <pre
                                   key={i}
-                                  className="mt-4 first:mt-0 bg-gray-900 dark:bg-slate-950 rounded-lg p-4 overflow-x-auto"
+                                  className="mt-4 first:mt-0 bg-[#080c08] border border-[#2a3a2a] rounded-sm p-4 overflow-x-auto"
                                 >
-                                  <code className="text-sm text-gray-100">
+                                  <code className="text-sm text-[#8a9a8a]">
                                     {codeMatch[2]}
                                   </code>
                                 </pre>
@@ -206,9 +222,10 @@ export default function ChangelogPage() {
                           if (paragraph.startsWith('- ') || paragraph.startsWith('* ')) {
                             const items = paragraph.split('\n').filter((line) => line.trim());
                             return (
-                              <ul key={i} className="mt-4 first:mt-0 space-y-2 list-disc list-inside">
+                              <ul key={i} className="mt-4 first:mt-0 space-y-2 list-none">
                                 {items.map((item, j) => (
-                                  <li key={j} className="text-gray-700 dark:text-gray-300">
+                                  <li key={j} className="text-[#8a9a8a] flex items-start gap-2">
+                                    <span className="text-[#5a8a5a]">-</span>
                                     {item.replace(/^[-*]\s+/, '')}
                                   </li>
                                 ))}
@@ -221,7 +238,7 @@ export default function ChangelogPage() {
                             return (
                               <h3
                                 key={i}
-                                className="mt-6 first:mt-0 text-lg font-semibold text-gray-900 dark:text-white"
+                                className="mt-6 first:mt-0 text-lg font-semibold text-[#cadd6a] uppercase tracking-wide"
                               >
                                 {paragraph.replace(/\*\*/g, '')}
                               </h3>
@@ -232,7 +249,7 @@ export default function ChangelogPage() {
                           return (
                             <p
                               key={i}
-                              className="mt-4 first:mt-0 text-gray-700 dark:text-gray-300 leading-relaxed"
+                              className="mt-4 first:mt-0 text-[#8a9a8a] leading-relaxed"
                             >
                               {paragraph}
                             </p>
@@ -242,8 +259,8 @@ export default function ChangelogPage() {
                     </div>
 
                     {/* Metadata */}
-                    <div className="mt-3 text-sm text-gray-500 dark:text-gray-500">
-                      Changeset: <code className="text-xs">{changeset.filename}</code>
+                    <div className="mt-3 text-sm text-[#4a6a4a]">
+                      Changeset: <code className="text-xs text-[#5a8a5a]">{changeset.filename}</code>
                     </div>
                   </div>
                 </div>
@@ -253,18 +270,18 @@ export default function ChangelogPage() {
         )}
 
         {/* Footer */}
-        <div className="mt-16 pt-8 border-t border-gray-200 dark:border-slate-800">
-          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        <div className="mt-16 pt-8 border-t border-[#2a3a2a]">
+          <div className="bg-[#0a120a] rounded-sm p-6 border border-[#3a5a3a]">
+            <h3 className="text-lg font-semibold text-[#cadd6a] mb-2">
               About Changesets
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 mb-4">
+            <p className="text-[#6a8a6a] mb-4">
               This project uses{' '}
               <a
                 href="https://github.com/changesets/changesets"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                className="text-[#8aca8a] hover:text-[#cadd6a] transition-colors"
               >
                 Changesets
               </a>{' '}
@@ -276,7 +293,7 @@ export default function ChangelogPage() {
                 href="https://github.com/anthropics/blocks"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                className="inline-flex items-center gap-2 text-[#8aca8a] hover:text-[#cadd6a] transition-colors"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path
@@ -291,7 +308,7 @@ export default function ChangelogPage() {
                 href="https://www.npmjs.com/org/blocksai"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                className="inline-flex items-center gap-2 text-[#8aca8a] hover:text-[#cadd6a] transition-colors"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M0 7.334v8h6.666v1.332H12v-1.332h12v-8H0zm6.666 6.664H5.334v-4H3.999v4H1.335V8.667h5.331v5.331zm4 0v1.336H8.001V8.667h5.334v5.332h-2.669v-.001zm12.001 0h-1.33v-4h-1.336v4h-1.335v-4h-1.33v4h-2.671V8.667h8.002v5.331zM10.665 10H12v2.667h-1.335V10z" />
@@ -299,6 +316,16 @@ export default function ChangelogPage() {
                 NPM Packages
               </a>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[#2a3a2a] bg-[#080c08] py-8">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-2 text-[#5a8a5a] text-sm">
+            <div className="w-2 h-2 rounded-full bg-[#5a8a5a] animate-pulse" />
+            <span className="uppercase tracking-wider">Terminal Blueprint Theme</span>
           </div>
         </div>
       </div>

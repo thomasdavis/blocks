@@ -1,66 +1,76 @@
 /**
  * Design tokens for @blocksai/ui
+ * Terminal Blueprint Theme
  */
 
 @layer base {
   :root {
     /* ========================================
-     * Color Palette - Light Mode
+     * Terminal Theme - Dark Mode Default
      * ======================================== */
 
     /* Backgrounds */
-    --ui-background: #ffffff;
-    --ui-background-subtle: #f8fafc;
-    --ui-background-muted: #f1f5f9;
+    --ui-background: #050805;
+    --ui-background-subtle: #080c08;
+    --ui-background-muted: #0a120a;
+    --ui-background-elevated: #0f1a0f;
 
     /* Foregrounds */
-    --ui-foreground: #0f172a;
-    --ui-foreground-muted: #64748b;
-    --ui-foreground-subtle: #94a3b8;
+    --ui-foreground: #a0b0a0;
+    --ui-foreground-muted: #6a8a6a;
+    --ui-foreground-subtle: #4a6a4a;
 
-    /* Primary - Blue */
-    --ui-primary: #2563eb;
-    --ui-primary-hover: #1d4ed8;
-    --ui-primary-foreground: #ffffff;
+    /* Primary - Green Glow */
+    --ui-primary: #5a8a5a;
+    --ui-primary-hover: #8aca8a;
+    --ui-primary-foreground: #050805;
+    --ui-primary-glow: rgba(90, 138, 90, 0.3);
 
-    /* Secondary */
-    --ui-secondary: #f1f5f9;
-    --ui-secondary-hover: #e2e8f0;
-    --ui-secondary-foreground: #0f172a;
+    /* Secondary - Muted Green */
+    --ui-secondary: #0a120a;
+    --ui-secondary-hover: #0f1a0f;
+    --ui-secondary-foreground: #8a9a8a;
 
-    /* Accent - Cyan */
-    --ui-accent: #06b6d4;
-    --ui-accent-hover: #0891b2;
-    --ui-accent-foreground: #ffffff;
+    /* Accent - Yellow-Green */
+    --ui-accent: #cadd6a;
+    --ui-accent-hover: #daed8a;
+    --ui-accent-foreground: #050805;
+    --ui-accent-muted: #8aaa4a;
 
-    /* Destructive - Red */
-    --ui-destructive: #dc2626;
-    --ui-destructive-hover: #b91c1c;
-    --ui-destructive-foreground: #ffffff;
+    /* Destructive - Red Terminal */
+    --ui-destructive: #aa4a4a;
+    --ui-destructive-hover: #ca6a6a;
+    --ui-destructive-foreground: #ffd0d0;
 
-    /* Success - Green */
-    --ui-success: #16a34a;
-    --ui-success-hover: #15803d;
-    --ui-success-foreground: #ffffff;
+    /* Success - Bright Green */
+    --ui-success: #4aaa4a;
+    --ui-success-hover: #6aca6a;
+    --ui-success-foreground: #d0ffd0;
 
-    /* Warning - Amber */
-    --ui-warning: #f59e0b;
-    --ui-warning-hover: #d97706;
-    --ui-warning-foreground: #0f172a;
+    /* Warning - Amber Terminal */
+    --ui-warning: #aa8a4a;
+    --ui-warning-hover: #caaa6a;
+    --ui-warning-foreground: #fff0d0;
 
-    /* Info - Blue */
-    --ui-info: #3b82f6;
-    --ui-info-hover: #2563eb;
-    --ui-info-foreground: #ffffff;
+    /* Info - Cyan Terminal */
+    --ui-info: #4a8aaa;
+    --ui-info-hover: #6aaaca;
+    --ui-info-foreground: #d0f0ff;
 
-    /* Borders & Inputs */
-    --ui-border: #e2e8f0;
-    --ui-border-hover: #cbd5e1;
-    --ui-input: #e2e8f0;
-    --ui-ring: #2563eb;
+    /* Borders */
+    --ui-border: #2a3a2a;
+    --ui-border-hover: #3a5a3a;
+    --ui-border-active: #5a8a5a;
+    --ui-border-accent: #8aaa4a;
+
+    /* Input */
+    --ui-input: #0a120a;
+    --ui-input-border: #2a3a2a;
+    --ui-ring: #5a8a5a;
 
     /* Overlay */
-    --ui-overlay: rgba(0, 0, 0, 0.5);
+    --ui-overlay: rgba(5, 8, 5, 0.9);
+    --ui-overlay-blur: rgba(5, 8, 5, 0.8);
 
     /* ========================================
      * Spacing Scale
@@ -86,26 +96,25 @@
     --ui-space-16: 4rem;
 
     /* ========================================
-     * Border Radius
+     * Border Radius - Sharp Terminal Style
      * ======================================== */
     --ui-radius-none: 0;
-    --ui-radius-sm: 0.25rem;
-    --ui-radius-md: 0.375rem;
-    --ui-radius-lg: 0.5rem;
-    --ui-radius-xl: 0.75rem;
-    --ui-radius-2xl: 1rem;
+    --ui-radius-sm: 2px;
+    --ui-radius-md: 3px;
+    --ui-radius-lg: 4px;
+    --ui-radius-xl: 6px;
+    --ui-radius-2xl: 8px;
     --ui-radius-full: 9999px;
 
     /* ========================================
-     * Shadows
+     * Shadows - Terminal Glow
      * ======================================== */
-    --ui-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --ui-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    --ui-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-      0 4px 6px -4px rgba(0, 0, 0, 0.1);
-    --ui-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-      0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --ui-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --ui-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.4), 0 0 8px rgba(90, 138, 90, 0.1);
+    --ui-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.5), 0 0 16px rgba(90, 138, 90, 0.15);
+    --ui-shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 24px rgba(90, 138, 90, 0.2);
+    --ui-shadow-glow: 0 0 10px rgba(138, 202, 138, 0.3);
+    --ui-shadow-glow-accent: 0 0 10px rgba(202, 221, 106, 0.3);
 
     /* ========================================
      * Animation
@@ -121,12 +130,12 @@
     --ui-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
     /* ========================================
-     * Typography
+     * Typography - Monospace Focus
      * ======================================== */
-    --ui-font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    --ui-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-      "Liberation Mono", "Courier New", monospace;
+    --ui-font-sans: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+      Consolas, "Liberation Mono", "Courier New", monospace;
+    --ui-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+      Consolas, "Liberation Mono", "Courier New", monospace;
 
     --ui-text-xs: 0.75rem;
     --ui-text-sm: 0.875rem;
@@ -143,74 +152,33 @@
     --ui-font-medium: 500;
     --ui-font-semibold: 600;
     --ui-font-bold: 700;
+
+    /* ========================================
+     * Terminal-Specific Variables
+     * ======================================== */
+    --ui-scanline-opacity: 0.02;
+    --ui-vignette-opacity: 0.4;
+    --ui-glow-intensity: 0.5;
   }
 
-  /* ========================================
-   * Dark Mode
-   * ======================================== */
-  .dark,
-  [data-theme="dark"] {
-    /* Backgrounds */
-    --ui-background: #0f172a;
-    --ui-background-subtle: #1e293b;
-    --ui-background-muted: #334155;
+  /* Light mode - slightly adjusted terminal */
+  .light,
+  [data-theme="light"] {
+    /* Backgrounds - Lighter terminal */
+    --ui-background: #0a100a;
+    --ui-background-subtle: #0d140d;
+    --ui-background-muted: #101810;
+    --ui-background-elevated: #152015;
 
-    /* Foregrounds */
-    --ui-foreground: #f8fafc;
-    --ui-foreground-muted: #94a3b8;
-    --ui-foreground-subtle: #64748b;
+    /* Foregrounds - Brighter */
+    --ui-foreground: #c0d0c0;
+    --ui-foreground-muted: #8aaa8a;
+    --ui-foreground-subtle: #6a8a6a;
 
-    /* Primary */
-    --ui-primary: #3b82f6;
-    --ui-primary-hover: #60a5fa;
-    --ui-primary-foreground: #ffffff;
-
-    /* Secondary */
-    --ui-secondary: #334155;
-    --ui-secondary-hover: #475569;
-    --ui-secondary-foreground: #f8fafc;
-
-    /* Accent */
-    --ui-accent: #22d3ee;
-    --ui-accent-hover: #67e8f9;
-    --ui-accent-foreground: #0f172a;
-
-    /* Destructive */
-    --ui-destructive: #ef4444;
-    --ui-destructive-hover: #f87171;
-    --ui-destructive-foreground: #ffffff;
-
-    /* Success */
-    --ui-success: #22c55e;
-    --ui-success-hover: #4ade80;
-    --ui-success-foreground: #0f172a;
-
-    /* Warning */
-    --ui-warning: #fbbf24;
-    --ui-warning-hover: #fcd34d;
-    --ui-warning-foreground: #0f172a;
-
-    /* Info */
-    --ui-info: #60a5fa;
-    --ui-info-hover: #93c5fd;
-    --ui-info-foreground: #0f172a;
-
-    /* Borders & Inputs */
-    --ui-border: #334155;
-    --ui-border-hover: #475569;
-    --ui-input: #334155;
-    --ui-ring: #3b82f6;
-
-    /* Overlay */
-    --ui-overlay: rgba(0, 0, 0, 0.7);
-
-    /* Shadows - more subtle in dark mode */
-    --ui-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    --ui-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4),
-      0 2px 4px -2px rgba(0, 0, 0, 0.3);
-    --ui-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4),
-      0 4px 6px -4px rgba(0, 0, 0, 0.3);
-    --ui-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5),
-      0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    /* Brighter accents for light mode */
+    --ui-primary: #6a9a6a;
+    --ui-primary-hover: #9ada9a;
+    --ui-accent: #daed8a;
+    --ui-accent-hover: #eafdaa;
   }
 }

@@ -76,15 +76,15 @@ function Section({
   return (
     <section className="mb-16">
       <div className="flex items-center gap-3 mb-2">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+        <h2 className="text-lg font-mono font-semibold text-[#cadd6a] uppercase tracking-wide">
           {title}
         </h2>
-        <Badge variant={isBaseUI ? "info" : "secondary"} size="sm">
+        <Badge variant={isBaseUI ? "info" : "primary"} size="sm">
           {isBaseUI ? "Base UI" : "Custom"}
         </Badge>
       </div>
-      <p className="text-slate-600 dark:text-slate-400 mb-6">{description}</p>
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6">
+      <p className="text-[#6a8a6a] font-mono text-sm mb-6">{description}</p>
+      <div className="bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-6">
         {children}
       </div>
     </section>
@@ -100,26 +100,41 @@ export default function StyleguidePage() {
   const [inputValue, setInputValue] = useState("");
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-[#050805] text-[#a0b0a0] font-mono">
+      {/* Scanline overlay effect */}
+      <div
+        className="fixed inset-0 pointer-events-none z-50 opacity-[0.015]"
+        style={{
+          backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.3) 1px, rgba(0,0,0,0.3) 2px)",
+        }}
+      />
+
       <Nav />
 
       {/* Header */}
-      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <div className="border-b border-[#2a3a2a] bg-[#080c08]">
         <div className="container mx-auto px-4 py-12">
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 border border-[#5a8a5a] rotate-45" />
+              <span className="text-xs uppercase tracking-[0.2em] text-[#5a8a5a]">Component Library</span>
+              <div className="w-3 h-3 border border-[#5a8a5a] rotate-45" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-[#cadd6a] mb-2 uppercase tracking-wide">
             Styleguide
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 mb-4">
-            All components from <code className="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-sm">@blocksai/ui</code>
+          <p className="text-[#6a8a6a] mb-4">
+            All components from <code className="px-2 py-1 bg-[#0a120a] border border-[#2a3a2a] rounded-sm text-[#8aca8a] text-sm">@blocksai/ui</code>
           </p>
           <div className="flex gap-4 text-sm">
             <div className="flex items-center gap-2">
               <Badge variant="info" size="sm">Base UI</Badge>
-              <span className="text-slate-600 dark:text-slate-400">Built on Base UI primitives</span>
+              <span className="text-[#5a8a5a]">Built on Base UI primitives</span>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" size="sm">Custom</Badge>
-              <span className="text-slate-600 dark:text-slate-400">Custom styled components</span>
+              <Badge variant="primary" size="sm">Custom</Badge>
+              <span className="text-[#5a8a5a]">Custom styled components</span>
             </div>
           </div>
         </div>
@@ -137,11 +152,12 @@ export default function StyleguidePage() {
           <div className="space-y-8">
             {/* Variants */}
             <div>
-              <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4">Variants</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-4">Variants</h3>
               <div className="flex flex-wrap gap-3">
                 <Button variant="default">Default</Button>
                 <Button variant="primary">Primary</Button>
                 <Button variant="secondary">Secondary</Button>
+                <Button variant="accent">Accent</Button>
                 <Button variant="destructive">Destructive</Button>
                 <Button variant="outline">Outline</Button>
                 <Button variant="ghost">Ghost</Button>
@@ -151,7 +167,7 @@ export default function StyleguidePage() {
 
             {/* Sizes */}
             <div>
-              <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4">Sizes</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-4">Sizes</h3>
               <div className="flex flex-wrap items-center gap-3">
                 <Button size="sm">Small</Button>
                 <Button size="md">Medium</Button>
@@ -166,7 +182,7 @@ export default function StyleguidePage() {
 
             {/* States */}
             <div>
-              <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4">States</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-4">States</h3>
               <div className="flex flex-wrap gap-3">
                 <Button variant="primary">Enabled</Button>
                 <Button variant="primary" disabled>Disabled</Button>
@@ -183,11 +199,12 @@ export default function StyleguidePage() {
         >
           <div className="space-y-6">
             <div>
-              <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4">Status Variants</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-4">Status Variants</h3>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="default">Default</Badge>
                 <Badge variant="primary">Primary</Badge>
                 <Badge variant="secondary">Secondary</Badge>
+                <Badge variant="accent">Accent</Badge>
                 <Badge variant="destructive">Destructive</Badge>
                 <Badge variant="outline">Outline</Badge>
                 <Badge variant="success">Success</Badge>
@@ -196,7 +213,7 @@ export default function StyleguidePage() {
               </div>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4">Version Variants</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-4">Version Variants</h3>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="major">major</Badge>
                 <Badge variant="minor">minor</Badge>
@@ -204,7 +221,7 @@ export default function StyleguidePage() {
               </div>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4">Sizes</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-4">Sizes</h3>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="primary" size="sm">Small</Badge>
                 <Badge variant="primary" size="md">Medium</Badge>
@@ -222,7 +239,7 @@ export default function StyleguidePage() {
         >
           <div className="space-y-6 max-w-md">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-2">
                 Text Input
               </label>
               <Input
@@ -232,13 +249,13 @@ export default function StyleguidePage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-2">
                 Disabled Input
               </label>
               <Input placeholder="Disabled" disabled />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-2">
                 Textarea
               </label>
               <Textarea placeholder="Write something..." rows={3} />
@@ -257,7 +274,7 @@ export default function StyleguidePage() {
               checked={checkboxChecked}
               onCheckedChange={(checked) => setCheckboxChecked(checked === true)}
             />
-            <span className="text-slate-700 dark:text-slate-300">
+            <span className="text-[#8a9a8a] font-mono text-sm">
               {checkboxChecked ? "Checked" : "Unchecked"}
             </span>
           </div>
@@ -274,7 +291,7 @@ export default function StyleguidePage() {
               checked={switchChecked}
               onCheckedChange={setSwitchChecked}
             />
-            <span className="text-slate-700 dark:text-slate-300">
+            <span className="text-[#8a9a8a] font-mono text-sm">
               {switchChecked ? "On" : "Off"}
             </span>
           </div>
@@ -310,15 +327,15 @@ export default function StyleguidePage() {
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
                 <RadioItem value="option1" />
-                <span className="text-slate-700 dark:text-slate-300">Option 1</span>
+                <span className="text-[#8a9a8a] font-mono text-sm">Option 1</span>
               </div>
               <div className="flex items-center gap-3">
                 <RadioItem value="option2" />
-                <span className="text-slate-700 dark:text-slate-300">Option 2</span>
+                <span className="text-[#8a9a8a] font-mono text-sm">Option 2</span>
               </div>
               <div className="flex items-center gap-3">
                 <RadioItem value="option3" />
-                <span className="text-slate-700 dark:text-slate-300">Option 3</span>
+                <span className="text-[#8a9a8a] font-mono text-sm">Option 3</span>
               </div>
             </div>
           </RadioGroup>
@@ -335,8 +352,8 @@ export default function StyleguidePage() {
               value={sliderValue}
               onValueChange={setSliderValue}
             />
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Value: {sliderValue}
+            <p className="text-sm font-mono text-[#5a8a5a]">
+              Value: <span className="text-[#8aca8a]">{sliderValue}</span>
             </p>
           </div>
         </Section>
@@ -349,15 +366,15 @@ export default function StyleguidePage() {
         >
           <div className="space-y-4 max-w-sm">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">25%</p>
+              <p className="text-sm font-mono text-[#5a8a5a] mb-2">25%</p>
               <Progress value={25} />
             </div>
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">50%</p>
+              <p className="text-sm font-mono text-[#5a8a5a] mb-2">50%</p>
               <Progress value={50} />
             </div>
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">75%</p>
+              <p className="text-sm font-mono text-[#5a8a5a] mb-2">75%</p>
               <Progress value={75} />
             </div>
           </div>
@@ -403,14 +420,14 @@ export default function StyleguidePage() {
               <TabsTrigger value="tab2">Settings</TabsTrigger>
               <TabsTrigger value="tab3">Notifications</TabsTrigger>
             </TabsList>
-            <TabsPanel value="tab1" className="mt-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-              <p className="text-slate-600 dark:text-slate-400">Account settings and profile information.</p>
+            <TabsPanel value="tab1" className="mt-4">
+              <p>Account settings and profile information.</p>
             </TabsPanel>
-            <TabsPanel value="tab2" className="mt-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-              <p className="text-slate-600 dark:text-slate-400">Application preferences and configuration.</p>
+            <TabsPanel value="tab2" className="mt-4">
+              <p>Application preferences and configuration.</p>
             </TabsPanel>
-            <TabsPanel value="tab3" className="mt-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-              <p className="text-slate-600 dark:text-slate-400">Notification preferences and alerts.</p>
+            <TabsPanel value="tab3" className="mt-4">
+              <p>Notification preferences and alerts.</p>
             </TabsPanel>
           </Tabs>
         </Section>
@@ -490,9 +507,9 @@ export default function StyleguidePage() {
               </Button>
             </MenuTrigger>
             <MenuContent>
-              <MenuItem onSelect={() => alert("Edit clicked")}>Edit</MenuItem>
-              <MenuItem onSelect={() => alert("Duplicate clicked")}>Duplicate</MenuItem>
-              <MenuItem onSelect={() => alert("Delete clicked")}>Delete</MenuItem>
+              <MenuItem onSelect={() => console.log("Edit clicked")}>Edit</MenuItem>
+              <MenuItem onSelect={() => console.log("Duplicate clicked")}>Duplicate</MenuItem>
+              <MenuItem onSelect={() => console.log("Delete clicked")}>Delete</MenuItem>
             </MenuContent>
           </Menu>
         </Section>
@@ -509,8 +526,8 @@ export default function StyleguidePage() {
             </PopoverTrigger>
             <PopoverContent>
               <div className="space-y-2">
-                <h4 className="font-medium text-slate-900 dark:text-white">Popover Title</h4>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <h4 className="font-mono font-medium text-[#cadd6a]">Popover Title</h4>
+                <p className="text-sm text-[#6a8a6a]">
                   This is a popover with some content. It can contain any elements.
                 </p>
               </div>
@@ -581,20 +598,20 @@ export default function StyleguidePage() {
           <div className="space-y-6">
             <div className="flex items-center gap-8">
               <div>
-                <p className="text-sm text-slate-500 mb-2">Small</p>
+                <p className="text-xs font-mono uppercase text-[#5a8a5a] mb-2">Small</p>
                 <LoadingDots size="sm" />
               </div>
               <div>
-                <p className="text-sm text-slate-500 mb-2">Medium</p>
+                <p className="text-xs font-mono uppercase text-[#5a8a5a] mb-2">Medium</p>
                 <LoadingDots size="md" />
               </div>
               <div>
-                <p className="text-sm text-slate-500 mb-2">Large</p>
+                <p className="text-xs font-mono uppercase text-[#5a8a5a] mb-2">Large</p>
                 <LoadingDots size="lg" />
               </div>
             </div>
             <div>
-              <p className="text-sm text-slate-500 mb-2">With Label</p>
+              <p className="text-xs font-mono uppercase text-[#5a8a5a] mb-2">With Label</p>
               <LoadingDots label="Loading..." />
             </div>
           </div>
@@ -606,8 +623,8 @@ export default function StyleguidePage() {
           description="Click to copy text to clipboard."
           isBaseUI={false}
         >
-          <div className="flex items-center gap-4 p-4 bg-slate-100 dark:bg-slate-800 rounded-lg max-w-md">
-            <code className="flex-1 text-sm">npm install @blocksai/cli</code>
+          <div className="flex items-center gap-4 p-4 bg-[#080c08] border border-[#2a3a2a] rounded-sm max-w-md">
+            <code className="flex-1 text-sm text-[#8aca8a]">npm install @blocksai/cli</code>
             <CopyButton text="npm install @blocksai/cli" />
           </div>
         </Section>
@@ -629,9 +646,20 @@ export function MyComponent() {
   );
 }`}
             language="tsx"
+            filename="example.tsx"
           />
         </Section>
 
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[#2a3a2a] bg-[#080c08] py-8">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-2 text-[#5a8a5a] text-sm">
+            <div className="w-2 h-2 rounded-full bg-[#5a8a5a] animate-pulse" />
+            <span className="font-mono uppercase tracking-wider">Terminal Blueprint Theme</span>
+          </div>
+        </div>
       </div>
     </div>
   );

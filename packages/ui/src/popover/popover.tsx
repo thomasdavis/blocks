@@ -38,11 +38,12 @@ export const PopoverContent = React.forwardRef<
       <BasePopover.Popup
         ref={ref}
         className={cn(
-          "z-50 w-72 rounded-md",
-          "border border-slate-200",
-          "bg-white",
-          "p-4 text-slate-900",
-          "shadow-lg outline-none",
+          "z-50 w-72 rounded-sm",
+          "border border-[#3a5a3a]",
+          "bg-[#0a120a]",
+          "p-4 text-[#a0b0a0] font-mono",
+          "shadow-[0_8px_24px_rgba(0,0,0,0.5),0_0_15px_rgba(90,138,90,0.1)]",
+          "outline-none",
           "animate-in fade-in-0 zoom-in-95",
           className
         )}
@@ -61,7 +62,7 @@ export const PopoverArrow = React.forwardRef<HTMLDivElement, PopoverArrowProps>(
   ({ className, ...props }, ref) => (
     <BasePopover.Arrow
       ref={ref}
-      className={cn("fill-white", className)}
+      className={cn("fill-[#0a120a]", className)}
       {...props}
     />
   )

@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "../utils/cn";
 
 export type LoadingDotsSize = "sm" | "md" | "lg";
-export type LoadingDotsColor = "primary" | "secondary" | "muted" | "current";
+export type LoadingDotsColor = "primary" | "secondary" | "muted" | "current" | "accent";
 
 export interface LoadingDotsProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: LoadingDotsSize;
@@ -19,10 +19,11 @@ const sizeStyles: Record<LoadingDotsSize, { dot: string; gap: string }> = {
 };
 
 const colorStyles: Record<LoadingDotsColor, string> = {
-  primary: "bg-blue-600",
-  secondary: "bg-slate-600",
-  muted: "bg-slate-400",
+  primary: "bg-[#8aca8a]",
+  secondary: "bg-[#5a8a5a]",
+  muted: "bg-[#4a6a4a]",
   current: "bg-current",
+  accent: "bg-[#cadd6a]",
 };
 
 export const LoadingDots = React.forwardRef<HTMLDivElement, LoadingDotsProps>(
@@ -40,20 +41,20 @@ export const LoadingDots = React.forwardRef<HTMLDivElement, LoadingDotsProps>(
       >
         <div className={cn("flex items-center", gap)}>
           <div
-            className={cn(dot, colorClass, "rounded-full animate-bounce")}
+            className={cn(dot, colorClass, "rounded-sm animate-bounce shadow-[0_0_6px_rgba(138,202,138,0.4)]")}
             style={{ animationDelay: "0ms", animationDuration: "0.6s" }}
           />
           <div
-            className={cn(dot, colorClass, "rounded-full animate-bounce")}
+            className={cn(dot, colorClass, "rounded-sm animate-bounce shadow-[0_0_6px_rgba(138,202,138,0.4)]")}
             style={{ animationDelay: "150ms", animationDuration: "0.6s" }}
           />
           <div
-            className={cn(dot, colorClass, "rounded-full animate-bounce")}
+            className={cn(dot, colorClass, "rounded-sm animate-bounce shadow-[0_0_6px_rgba(138,202,138,0.4)]")}
             style={{ animationDelay: "300ms", animationDuration: "0.6s" }}
           />
         </div>
         {label && (
-          <span className="ml-2 text-sm text-slate-500">{label}</span>
+          <span className="ml-2 text-sm font-mono text-[#6a8a6a]">{label}</span>
         )}
       </div>
     );

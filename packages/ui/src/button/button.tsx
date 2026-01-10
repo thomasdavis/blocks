@@ -10,7 +10,8 @@ export type ButtonVariant =
   | "destructive"
   | "outline"
   | "ghost"
-  | "link";
+  | "link"
+  | "accent";
 
 export type ButtonSize = "sm" | "md" | "lg" | "icon";
 
@@ -23,25 +24,28 @@ export interface ButtonProps
 
 const variantStyles: Record<ButtonVariant, string> = {
   default:
-    "bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-sm hover:shadow-md",
+    "bg-[#0a120a] text-[#8aca8a] border border-[#3a5a3a] hover:bg-[#0f1a0f] hover:border-[#5a8a5a] hover:text-[#9ada9a] hover:shadow-[0_0_10px_rgba(138,202,138,0.2)]",
   primary:
-    "bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-sm hover:shadow-md",
+    "bg-[#5a8a5a] text-[#050805] border border-[#5a8a5a] hover:bg-[#8aca8a] hover:border-[#8aca8a] hover:shadow-[0_0_15px_rgba(138,202,138,0.3)]",
   secondary:
-    "bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300 border border-slate-200",
+    "bg-[#0a120a] text-[#6a9a6a] border border-[#2a3a2a] hover:bg-[#0f1a0f] hover:border-[#3a5a3a] hover:text-[#8aca8a]",
   destructive:
-    "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 shadow-sm hover:shadow-md",
+    "bg-[#2a1515] text-[#ca6a6a] border border-[#5a2a2a] hover:bg-[#3a1a1a] hover:border-[#8a4a4a] hover:text-[#ea8a8a]",
   outline:
-    "border-2 border-slate-300 bg-white text-slate-900 hover:bg-slate-50 hover:border-slate-400 active:bg-slate-100",
+    "bg-transparent text-[#6a9a6a] border border-[#3a5a3a] hover:bg-[#0a120a] hover:border-[#5a8a5a] hover:text-[#8aca8a]",
   ghost:
-    "text-slate-700 hover:bg-slate-100 active:bg-slate-200",
-  link: "text-blue-600 hover:text-blue-700 underline-offset-4 hover:underline p-0 h-auto font-medium",
+    "bg-transparent text-[#6a9a6a] hover:bg-[#0a120a] hover:text-[#8aca8a]",
+  link:
+    "bg-transparent text-[#8aca8a] hover:text-[#cadd6a] underline-offset-4 hover:underline p-0 h-auto",
+  accent:
+    "bg-[#1a1a08] text-[#cadd6a] border border-[#8aaa4a] hover:bg-[#252510] hover:border-[#cadd6a] hover:shadow-[0_0_15px_rgba(202,221,106,0.3)]",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-sm rounded-md gap-1.5",
-  md: "h-10 px-4 py-2 text-sm rounded-md gap-2",
-  lg: "h-12 px-6 text-base rounded-lg gap-2",
-  icon: "h-10 w-10 rounded-md",
+  sm: "h-8 px-3 text-xs rounded-sm gap-1.5",
+  md: "h-10 px-4 py-2 text-sm rounded-sm gap-2",
+  lg: "h-12 px-6 text-base rounded-sm gap-2",
+  icon: "h-10 w-10 rounded-sm",
 };
 
 const buttonClassName = (
@@ -51,13 +55,13 @@ const buttonClassName = (
 ) =>
   cn(
     // Base styles
-    "inline-flex items-center justify-center whitespace-nowrap font-medium",
+    "inline-flex items-center justify-center whitespace-nowrap font-mono font-medium uppercase tracking-wider",
     "transition-all duration-150 ease-out",
     "active:scale-[0.98]",
-    // Focus styles
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+    // Focus styles - green glow
+    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#5a8a5a] focus-visible:ring-offset-1 focus-visible:ring-offset-[#050805]",
     // Disabled styles
-    "disabled:pointer-events-none disabled:opacity-50",
+    "disabled:pointer-events-none disabled:opacity-40 disabled:grayscale",
     // Variant and size
     variantStyles[variant],
     sizeStyles[size],

@@ -19,19 +19,19 @@ export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
         ref={ref}
         className={cn(
           "peer inline-flex items-center justify-center",
-          "h-5 w-5 shrink-0 rounded",
-          "border-2 border-slate-300 bg-white",
+          "h-5 w-5 shrink-0 rounded-sm",
+          "border border-[#3a5a3a] bg-[#0a120a]",
           "cursor-pointer",
-          "transition-colors duration-150",
-          "hover:border-blue-500",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-          "disabled:cursor-not-allowed disabled:opacity-50",
-          "data-[checked]:bg-blue-600 data-[checked]:border-blue-600",
+          "transition-all duration-150",
+          "hover:border-[#5a8a5a]",
+          "focus-visible:outline-none focus-visible:border-[#8aca8a] focus-visible:shadow-[0_0_10px_rgba(138,202,138,0.2)]",
+          "disabled:cursor-not-allowed disabled:opacity-40",
+          "data-[checked]:bg-[#5a8a5a] data-[checked]:border-[#8aca8a]",
           className
         )}
         {...props}
       >
-        <BaseCheckbox.Indicator className="flex items-center justify-center text-white">
+        <BaseCheckbox.Indicator className="flex items-center justify-center text-[#050805]">
           <svg
             className="h-3.5 w-3.5"
             fill="none"
@@ -48,7 +48,7 @@ export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
         </BaseCheckbox.Indicator>
       </BaseCheckbox.Root>
       {label && (
-        <label className="text-sm font-medium leading-none text-slate-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label className="text-sm font-mono leading-none text-[#8a9a8a] peer-disabled:cursor-not-allowed peer-disabled:opacity-40">
           {label}
         </label>
       )}

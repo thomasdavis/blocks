@@ -14,7 +14,8 @@ export type BadgeVariant =
   | "info"
   | "major"
   | "minor"
-  | "patch";
+  | "patch"
+  | "accent";
 
 export type BadgeSize = "sm" | "md" | "lg";
 
@@ -24,21 +25,22 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  default: "bg-slate-100 text-slate-700",
-  primary: "bg-blue-600 text-white",
-  secondary: "bg-slate-200 text-slate-800",
-  destructive: "bg-red-600 text-white",
-  outline: "border border-slate-300 bg-transparent text-slate-700",
-  success: "bg-green-600 text-white",
-  warning: "bg-amber-500 text-white",
-  info: "bg-blue-500 text-white",
-  major: "bg-red-100 text-red-700",
-  minor: "bg-blue-100 text-blue-700",
-  patch: "bg-green-100 text-green-700",
+  default: "bg-[#0a120a] text-[#8a9a8a] border border-[#2a3a2a]",
+  primary: "bg-[#0f1a0f] text-[#8aca8a] border border-[#3a5a3a]",
+  secondary: "bg-[#080c08] text-[#6a8a6a] border border-[#2a3a2a]",
+  destructive: "bg-[#1a0808] text-[#ca6a6a] border border-[#5a2a2a]",
+  outline: "bg-transparent text-[#6a9a6a] border border-[#3a5a3a]",
+  success: "bg-[#081a08] text-[#6aca6a] border border-[#2a5a2a]",
+  warning: "bg-[#1a1808] text-[#caaa6a] border border-[#5a4a2a]",
+  info: "bg-[#081818] text-[#6aaaca] border border-[#2a4a5a]",
+  major: "bg-[#1a0808] text-[#ea6a6a] border border-[#6a2a2a]",
+  minor: "bg-[#081018] text-[#6a8aca] border border-[#2a3a5a]",
+  patch: "bg-[#081a08] text-[#6aca6a] border border-[#2a5a2a]",
+  accent: "bg-[#1a1a08] text-[#cadd6a] border border-[#5a5a2a]",
 };
 
 const sizeStyles: Record<BadgeSize, string> = {
-  sm: "px-2 py-0.5 text-xs",
+  sm: "px-2 py-0.5 text-[10px]",
   md: "px-2.5 py-0.5 text-xs",
   lg: "px-3 py-1 text-sm",
 };
@@ -48,8 +50,8 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     <span
       ref={ref}
       className={cn(
-        "inline-flex items-center font-semibold",
-        "rounded-full",
+        "inline-flex items-center font-mono font-medium uppercase tracking-wider",
+        "rounded-sm",
         "transition-colors",
         variantStyles[variant],
         sizeStyles[size],

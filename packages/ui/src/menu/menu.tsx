@@ -32,11 +32,11 @@ export const MenuContent = React.forwardRef<HTMLDivElement, MenuContentProps>(
         <BaseMenu.Popup
           ref={ref}
           className={cn(
-            "z-50 min-w-[8rem] overflow-hidden rounded-md",
-            "border border-slate-200",
-            "bg-white",
-            "p-1 text-slate-900",
-            "shadow-lg",
+            "z-50 min-w-[8rem] overflow-hidden rounded-sm",
+            "border border-[#3a5a3a]",
+            "bg-[#0a120a]",
+            "p-1 text-[#a0b0a0] font-mono",
+            "shadow-[0_8px_24px_rgba(0,0,0,0.5),0_0_15px_rgba(90,138,90,0.1)]",
             "animate-in fade-in-0 zoom-in-95",
             className
           )}
@@ -58,12 +58,12 @@ export const MenuItem = React.forwardRef<HTMLDivElement, MenuItemProps>(
       ref={ref}
       className={cn(
         "relative flex cursor-pointer select-none items-center",
-        "rounded-sm px-2 py-1.5 text-sm",
-        "outline-none transition-colors",
-        "text-slate-700",
-        "hover:bg-blue-50 hover:text-blue-900",
-        "focus:bg-blue-50 focus:text-blue-900",
-        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "rounded-sm px-2 py-1.5 text-sm font-mono",
+        "outline-none transition-all duration-150",
+        "text-[#8a9a8a]",
+        "hover:bg-[#0f1a0f] hover:text-[#8aca8a]",
+        "focus:bg-[#0f1a0f] focus:text-[#8aca8a]",
+        "data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
         className
       )}
       {...props}
@@ -82,7 +82,7 @@ export const MenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <BaseMenu.Separator
     ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-slate-200", className)}
+    className={cn("-mx-1 my-1 h-px bg-[#2a3a2a]", className)}
     {...props}
   />
 ));

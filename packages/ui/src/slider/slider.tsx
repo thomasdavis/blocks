@@ -23,22 +23,22 @@ export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
       <BaseSlider.Control className="relative flex w-full items-center">
         <BaseSlider.Track
           className={cn(
-            "relative h-2 w-full grow overflow-hidden rounded-full",
-            "bg-slate-200"
+            "relative h-2 w-full grow overflow-hidden rounded-sm",
+            "bg-[#0a120a] border border-[#2a3a2a]"
           )}
         >
-          <BaseSlider.Indicator className="absolute h-full bg-blue-600 rounded-full" />
+          <BaseSlider.Indicator className="absolute h-full bg-gradient-to-r from-[#3a5a3a] to-[#5a8a5a] rounded-sm" />
         </BaseSlider.Track>
         <BaseSlider.Thumb
           className={cn(
-            "absolute block h-5 w-5 rounded-full",
-            "border-2 border-blue-600",
-            "bg-white shadow-md",
+            "absolute block h-5 w-5 rounded-sm",
+            "border border-[#5a8a5a]",
+            "bg-[#0a120a]",
             "cursor-grab active:cursor-grabbing",
-            "transition-colors",
-            "hover:bg-blue-50",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-            "disabled:pointer-events-none disabled:opacity-50"
+            "transition-all duration-150",
+            "hover:border-[#8aca8a] hover:shadow-[0_0_10px_rgba(138,202,138,0.3)]",
+            "focus-visible:outline-none focus-visible:border-[#8aca8a] focus-visible:shadow-[0_0_10px_rgba(138,202,138,0.3)]",
+            "disabled:pointer-events-none disabled:opacity-40"
           )}
         />
       </BaseSlider.Control>

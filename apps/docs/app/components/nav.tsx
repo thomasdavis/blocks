@@ -14,18 +14,18 @@ export function Nav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm">
+    <nav className="sticky top-0 z-50 border-b border-[#2a3a2a] bg-[#050805]/95 backdrop-blur-sm">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 font-bold text-xl text-slate-900 dark:text-white"
+            className="flex items-center gap-2 font-mono font-bold text-xl text-[#8aca8a]"
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">B</span>
+            <div className="w-8 h-8 rounded-sm bg-[#0a120a] border border-[#5a8a5a] flex items-center justify-center shadow-[0_0_10px_rgba(138,202,138,0.2)]">
+              <span className="text-[#cadd6a] text-sm font-bold">B</span>
             </div>
-            Blocks
+            <span className="tracking-wide">Blocks</span>
           </Link>
 
           {/* Navigation Links */}
@@ -36,10 +36,10 @@ export function Nav() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-sm text-sm font-mono uppercase tracking-wider transition-all duration-150 ${
                     isActive
-                      ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                      ? "bg-[#0a120a] border border-[#3a5a3a] text-[#cadd6a] shadow-[0_0_8px_rgba(138,202,138,0.15)]"
+                      : "text-[#5a8a5a] hover:text-[#8aca8a] hover:bg-[#0a120a]/50"
                   }`}
                 >
                   {item.label}
@@ -50,7 +50,7 @@ export function Nav() {
               href="https://github.com/anthropics/blocks"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-2 p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+              className="ml-2 p-2 rounded-sm text-[#5a8a5a] hover:text-[#8aca8a] hover:bg-[#0a120a]/50 transition-all duration-150"
               aria-label="GitHub"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

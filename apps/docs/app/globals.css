@@ -3,3 +3,321 @@
 @import "@blocksai/ui/styles.css";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
+
+/* Terminal Blueprint Theme for Fumadocs */
+:root {
+  /* Force dark mode colors */
+  --background: 5 8 5;
+  --foreground: 160 176 160;
+  --muted: 8 12 8;
+  --muted-foreground: 106 138 106;
+  --popover: 10 18 10;
+  --popover-foreground: 160 176 160;
+  --card: 10 18 10;
+  --card-foreground: 160 176 160;
+  --border: 42 58 42;
+  --input: 42 58 42;
+  --primary: 90 138 90;
+  --primary-foreground: 5 8 5;
+  --secondary: 8 12 8;
+  --secondary-foreground: 138 202 138;
+  --accent: 202 221 106;
+  --accent-foreground: 5 8 5;
+  --ring: 90 138 90;
+
+  /* Fumadocs specific */
+  --fd-background: 5 8 5;
+  --fd-foreground: 160 176 160;
+  --fd-muted: 8 12 8;
+  --fd-muted-foreground: 106 138 106;
+  --fd-popover: 10 18 10;
+  --fd-popover-foreground: 160 176 160;
+  --fd-card: 10 18 10;
+  --fd-card-foreground: 160 176 160;
+  --fd-border: 42 58 42;
+  --fd-input: 42 58 42;
+  --fd-primary: 138 202 138;
+  --fd-primary-foreground: 5 8 5;
+  --fd-secondary: 8 12 8;
+  --fd-secondary-foreground: 138 202 138;
+  --fd-accent: 15 26 15;
+  --fd-accent-foreground: 138 202 138;
+  --fd-ring: 90 138 90;
+}
+
+.dark {
+  --background: 5 8 5;
+  --foreground: 160 176 160;
+  --muted: 8 12 8;
+  --muted-foreground: 106 138 106;
+  --popover: 10 18 10;
+  --popover-foreground: 160 176 160;
+  --card: 10 18 10;
+  --card-foreground: 160 176 160;
+  --border: 42 58 42;
+  --input: 42 58 42;
+  --primary: 90 138 90;
+  --primary-foreground: 5 8 5;
+  --secondary: 8 12 8;
+  --secondary-foreground: 138 202 138;
+  --accent: 202 221 106;
+  --accent-foreground: 5 8 5;
+  --ring: 90 138 90;
+
+  /* Fumadocs specific */
+  --fd-background: 5 8 5;
+  --fd-foreground: 160 176 160;
+  --fd-muted: 8 12 8;
+  --fd-muted-foreground: 106 138 106;
+  --fd-popover: 10 18 10;
+  --fd-popover-foreground: 160 176 160;
+  --fd-card: 10 18 10;
+  --fd-card-foreground: 160 176 160;
+  --fd-border: 42 58 42;
+  --fd-input: 42 58 42;
+  --fd-primary: 138 202 138;
+  --fd-primary-foreground: 5 8 5;
+  --fd-secondary: 8 12 8;
+  --fd-secondary-foreground: 138 202 138;
+  --fd-accent: 15 26 15;
+  --fd-accent-foreground: 138 202 138;
+  --fd-ring: 90 138 90;
+}
+
+/* Override Fumadocs components */
+[data-theme="light"] {
+  color-scheme: dark !important;
+}
+
+/* Terminal styling for docs */
+.fd-sidebar {
+  background-color: rgb(5 8 5) !important;
+  border-color: rgb(42 58 42) !important;
+}
+
+.fd-nav {
+  background-color: rgb(5 8 5 / 0.95) !important;
+  border-color: rgb(42 58 42) !important;
+}
+
+/* Code blocks in docs */
+[data-rehype-pretty-code-fragment] pre {
+  background-color: rgb(8 12 8) !important;
+  border: 1px solid rgb(42 58 42) !important;
+  border-radius: 2px !important;
+}
+
+/* Links */
+.prose a {
+  color: rgb(138 202 138) !important;
+}
+
+.prose a:hover {
+  color: rgb(202 221 106) !important;
+}
+
+/* Headings in docs */
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  color: rgb(202 221 106) !important;
+}
+
+/* Body background */
+body {
+  background-color: rgb(5 8 5) !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace !important;
+}
+
+/* Sidebar items */
+[data-active="true"] {
+  background-color: rgb(10 18 10) !important;
+  color: rgb(202 221 106) !important;
+  border-color: rgb(58 90 58) !important;
+}
+
+/* Force dark background on main content area */
+main,
+article,
+.prose,
+[class*="fd-page"],
+[class*="fd-content"],
+[class*="fd-article"],
+[class*="fd-prose"],
+[class*="fd-body"],
+[class*="fd-main"],
+.fd-layout > div,
+[role="main"] {
+  background-color: rgb(5 8 5) !important;
+  color: rgb(160 176 160) !important;
+}
+
+/* Fix prose text colors */
+.prose p,
+.prose li,
+.prose span,
+.prose td,
+.prose th {
+  color: rgb(138 158 138) !important;
+}
+
+.prose strong {
+  color: rgb(202 221 106) !important;
+}
+
+.prose code {
+  color: rgb(138 202 138) !important;
+  background-color: rgb(10 18 10) !important;
+  border: 1px solid rgb(42 58 42) !important;
+  border-radius: 2px !important;
+  padding: 0.125rem 0.25rem !important;
+}
+
+/* Code blocks - override all pre/code styling */
+pre,
+pre code,
+code[class*="language-"],
+pre[class*="language-"],
+figure pre,
+[data-rehype-pretty-code-figure] pre,
+.shiki,
+.shiki span {
+  background-color: rgb(8 12 8) !important;
+  border-color: rgb(42 58 42) !important;
+}
+
+figure[data-rehype-pretty-code-figure] {
+  background-color: rgb(8 12 8) !important;
+  border: 1px solid rgb(42 58 42) !important;
+  border-radius: 2px !important;
+}
+
+/* Callouts and info boxes */
+.fd-callout,
+[class*="callout"],
+[class*="Callout"],
+.admonition,
+[role="note"],
+[class*="note"],
+[class*="info"],
+[class*="warning"],
+[class*="tip"] {
+  background-color: rgb(10 18 10) !important;
+  border-color: rgb(42 58 42) !important;
+  color: rgb(138 158 138) !important;
+}
+
+/* Tables */
+.prose table {
+  border-color: rgb(42 58 42) !important;
+}
+
+.prose th {
+  background-color: rgb(10 18 10) !important;
+  border-color: rgb(42 58 42) !important;
+  color: rgb(202 221 106) !important;
+}
+
+.prose td {
+  border-color: rgb(42 58 42) !important;
+}
+
+.prose tr:nth-child(even) {
+  background-color: rgb(8 12 8) !important;
+}
+
+/* Inline code in headings */
+.prose h1 code,
+.prose h2 code,
+.prose h3 code,
+.prose h4 code {
+  color: rgb(138 202 138) !important;
+  background-color: rgb(10 18 10) !important;
+}
+
+/* Blockquotes */
+.prose blockquote {
+  border-left-color: rgb(90 138 90) !important;
+  color: rgb(106 138 106) !important;
+  background-color: rgb(8 12 8) !important;
+}
+
+/* Lists */
+.prose ul > li::marker,
+.prose ol > li::marker {
+  color: rgb(90 138 90) !important;
+}
+
+/* Copy button on code blocks */
+button[class*="copy"],
+[class*="copy-button"] {
+  background-color: rgb(10 18 10) !important;
+  border-color: rgb(42 58 42) !important;
+  color: rgb(138 202 138) !important;
+}
+
+/* Search and other inputs */
+input,
+[class*="search"] input {
+  background-color: rgb(10 18 10) !important;
+  border-color: rgb(42 58 42) !important;
+  color: rgb(160 176 160) !important;
+}
+
+input::placeholder {
+  color: rgb(74 106 74) !important;
+}
+
+/* Cards and boxes */
+[class*="card"],
+[class*="Card"] {
+  background-color: rgb(10 18 10) !important;
+  border-color: rgb(42 58 42) !important;
+}
+
+/* TOC on the right */
+[class*="toc"],
+[class*="Toc"],
+nav[aria-label*="table of contents"] {
+  background-color: rgb(5 8 5) !important;
+}
+
+[class*="toc"] a,
+[class*="Toc"] a {
+  color: rgb(106 138 106) !important;
+}
+
+[class*="toc"] a:hover,
+[class*="Toc"] a:hover {
+  color: rgb(138 202 138) !important;
+}
+
+/* Pagination/nav links */
+[class*="pagination"],
+[class*="Pagination"],
+a[rel="prev"],
+a[rel="next"] {
+  background-color: rgb(10 18 10) !important;
+  border-color: rgb(42 58 42) !important;
+  color: rgb(138 202 138) !important;
+}
+
+/* Breadcrumbs */
+[class*="breadcrumb"],
+[class*="Breadcrumb"] {
+  color: rgb(106 138 106) !important;
+}
+
+/* Force html dark mode */
+html {
+  color-scheme: dark !important;
+  background-color: rgb(5 8 5) !important;
+}
+
+/* Override any light mode classes */
+.light,
+[data-theme="light"],
+[class*="light"] {
+  --background: 5 8 5 !important;
+  --foreground: 160 176 160 !important;
+  background-color: rgb(5 8 5) !important;
+  color: rgb(160 176 160) !important;
+}

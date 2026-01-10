@@ -9,20 +9,31 @@ import { cn } from "../utils/cn";
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
-   * Enable hover shadow effect.
+   * Enable hover glow effect.
    */
   hover?: boolean;
+  /**
+   * Card variant for different visual styles.
+   */
+  variant?: "default" | "elevated" | "outline" | "muted";
 }
 
+const cardVariants = {
+  default: "bg-[#0a120a]/80 border-[#3a5a3a]",
+  elevated: "bg-[#0f1a0f]/90 border-[#5a8a5a]",
+  outline: "bg-transparent border-[#3a5a3a]",
+  muted: "bg-[#080c08]/60 border-[#2a3a2a]",
+};
+
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, hover = false, ...props }, ref) => (
+  ({ className, hover = false, variant = "default", ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        "rounded-xl border border-[var(--ui-border)]",
-        "bg-[var(--ui-background)] text-[var(--ui-foreground)]",
-        "shadow-sm",
-        hover && "transition-shadow hover:shadow-lg",
+        "rounded-sm border",
+        cardVariants[variant],
+        "text-[#a0b0a0]",
+        hover && "transition-all duration-200 hover:border-[#8aca8a] hover:shadow-[0_0_20px_rgba(138,202,138,0.15)]",
         className
       )}
       {...props}
@@ -55,24 +66,24 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ className, icon, title, subtitle, children, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("flex flex-col space-y-1.5 p-6", className)}
+      className={cn("flex flex-col space-y-1.5 p-4", className)}
       {...props}
     >
       {(icon || title || subtitle) ? (
         <div className="flex items-center gap-3">
           {icon && (
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 text-[#5a8a5a]">
               {icon}
             </div>
           )}
           <div className="flex flex-col">
             {title && (
-              <h3 className="text-lg font-semibold leading-none tracking-tight">
+              <h3 className="text-sm font-mono font-semibold leading-none tracking-wide uppercase text-[#8aca8a]">
                 {title}
               </h3>
             )}
             {subtitle && (
-              <p className="text-sm text-[var(--ui-foreground-muted)]">
+              <p className="text-xs font-mono text-[#5a8a5a] mt-1">
                 {subtitle}
               </p>
             )}
@@ -99,7 +110,7 @@ export const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
     <h3
       ref={ref}
       className={cn(
-        "text-xl font-semibold leading-none tracking-tight",
+        "text-lg font-mono font-semibold leading-none tracking-wide text-[#cadd6a]",
         className
       )}
       {...props}
@@ -122,7 +133,7 @@ export const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-[var(--ui-foreground-muted)]", className)}
+    className={cn("text-sm font-mono text-[#6a8a6a]", className)}
     {...props}
   />
 ));
@@ -138,7 +149,7 @@ export interface CardContentProps
 
 export const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+    <div ref={ref} className={cn("p-4 pt-0 font-mono text-sm text-[#8a9a8a]", className)} {...props} />
   )
 );
 
@@ -154,7 +165,7 @@ export const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("flex items-center p-6 pt-0", className)}
+      className={cn("flex items-center p-4 pt-0 border-t border-[#2a3a2a] mt-4", className)}
       {...props}
     />
   )

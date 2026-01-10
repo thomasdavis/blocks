@@ -52,9 +52,10 @@ export const CopyButton = React.forwardRef<HTMLButtonElement, CopyButtonProps>(
         type="button"
         onClick={handleCopy}
         className={cn(
-          "text-[var(--ui-foreground-muted)] hover:text-[var(--ui-foreground)]",
-          "transition-colors duration-[var(--ui-duration-fast)]",
-          "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ui-ring)]",
+          "text-[#5a8a5a] hover:text-[#8aca8a]",
+          "transition-all duration-150",
+          "focus:outline-none focus-visible:ring-1 focus-visible:ring-[#5a8a5a]",
+          copied && "text-[#8aca8a]",
           className
         )}
         title={copied ? "Copied!" : "Copy to clipboard"}
@@ -63,7 +64,7 @@ export const CopyButton = React.forwardRef<HTMLButtonElement, CopyButtonProps>(
       >
         {copied ? (
           <svg
-            className="w-5 h-5 text-[var(--ui-success)]"
+            className="w-5 h-5 text-[#8aca8a] drop-shadow-[0_0_4px_rgba(138,202,138,0.5)]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

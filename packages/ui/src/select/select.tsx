@@ -21,20 +21,20 @@ export const SelectTrigger = React.forwardRef<
   <BaseSelect.Trigger
     ref={ref}
     className={cn(
-      "flex h-10 w-full items-center justify-between rounded-md",
-      "border border-slate-300 bg-white",
-      "px-3 py-2 text-sm text-slate-900",
-      "transition-colors duration-150",
-      "hover:border-slate-400",
-      "placeholder:text-slate-400",
-      "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-      "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-50",
+      "flex h-10 w-full items-center justify-between rounded-sm",
+      "border border-[#3a5a3a] bg-[#0a120a]",
+      "px-3 py-2 text-sm font-mono text-[#a0b0a0]",
+      "transition-all duration-150",
+      "hover:border-[#5a8a5a]",
+      "placeholder:text-[#4a6a4a]",
+      "focus:outline-none focus:border-[#8aca8a] focus:shadow-[0_0_10px_rgba(138,202,138,0.2)]",
+      "disabled:cursor-not-allowed disabled:opacity-40 disabled:bg-[#080c08]",
       className
     )}
     {...props}
   >
     {children}
-    <BaseSelect.Icon className="h-4 w-4 text-slate-500">
+    <BaseSelect.Icon className="h-4 w-4 text-[#5a8a5a]">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           strokeLinecap="round"
@@ -54,7 +54,7 @@ export interface SelectValueProps
 
 export const SelectValue = React.forwardRef<HTMLSpanElement, SelectValueProps>(
   ({ className, ...props }, ref) => (
-    <BaseSelect.Value ref={ref} className={cn("text-slate-900", className)} {...props} />
+    <BaseSelect.Value ref={ref} className={cn("text-[#a0b0a0]", className)} {...props} />
   )
 );
 
@@ -72,10 +72,10 @@ export const SelectContent = React.forwardRef<
       <BaseSelect.Popup
         ref={ref}
         className={cn(
-          "relative z-50 min-w-[8rem] overflow-hidden rounded-lg",
-          "border border-slate-200",
-          "bg-white text-slate-900",
-          "shadow-xl",
+          "relative z-50 min-w-[8rem] overflow-hidden rounded-sm",
+          "border border-[#3a5a3a]",
+          "bg-[#0a120a] text-[#a0b0a0]",
+          "shadow-[0_4px_20px_rgba(0,0,0,0.5),0_0_15px_rgba(90,138,90,0.1)]",
           "p-1",
           "animate-in fade-in-0 zoom-in-95",
           className
@@ -99,12 +99,12 @@ export const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
       ref={ref}
       className={cn(
         "relative flex w-full cursor-pointer select-none items-center",
-        "rounded-sm py-2 pl-8 pr-2 text-sm",
+        "rounded-sm py-2 pl-8 pr-2 text-sm font-mono",
         "outline-none",
-        "text-slate-700",
-        "hover:bg-blue-50 hover:text-blue-900",
-        "focus:bg-blue-50 focus:text-blue-900",
-        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "text-[#8a9a8a]",
+        "hover:bg-[#0f1a0f] hover:text-[#8aca8a]",
+        "focus:bg-[#0f1a0f] focus:text-[#8aca8a]",
+        "data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
         className
       )}
       {...props}
@@ -112,7 +112,7 @@ export const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
       <span className="absolute left-2 flex h-4 w-4 items-center justify-center">
         <BaseSelect.ItemIndicator>
           <svg
-            className="h-4 w-4 text-blue-600"
+            className="h-4 w-4 text-[#8aca8a]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

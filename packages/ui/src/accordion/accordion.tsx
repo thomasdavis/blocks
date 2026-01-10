@@ -28,7 +28,7 @@ export const AccordionItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <BaseAccordion.Item
     ref={ref}
-    className={cn("border-b border-slate-200", className)}
+    className={cn("border-b border-[#2a3a2a]", className)}
     {...props}
   />
 ));
@@ -46,17 +46,18 @@ export const AccordionTrigger = React.forwardRef<
     <BaseAccordion.Trigger
       ref={ref}
       className={cn(
-        "flex flex-1 items-center justify-between py-4 font-medium",
-        "text-slate-900",
-        "transition-all hover:text-blue-600",
+        "flex flex-1 items-center justify-between py-4 font-mono font-medium text-sm",
+        "text-[#8a9a8a]",
+        "transition-all hover:text-[#8aca8a]",
         "[&[data-panel-open]>svg]:rotate-180",
+        "[&[data-panel-open]]:text-[#cadd6a]",
         className
       )}
       {...props}
     >
       {children}
       <svg
-        className="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200"
+        className="h-4 w-4 shrink-0 text-[#5a8a5a] transition-transform duration-200"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -84,7 +85,7 @@ export const AccordionContent = React.forwardRef<
   <BaseAccordion.Panel
     ref={ref}
     className={cn(
-      "overflow-hidden text-sm text-slate-600 transition-all",
+      "overflow-hidden text-sm font-mono text-[#6a8a6a] transition-all",
       className
     )}
     {...props}

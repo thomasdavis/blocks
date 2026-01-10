@@ -38,8 +38,9 @@ export const TabsList = React.forwardRef<HTMLDivElement, TabsListProps>(
       ref={ref}
       className={cn(
         "inline-flex items-center justify-center",
-        "rounded-lg p-1",
-        "bg-slate-100 text-slate-600",
+        "rounded-sm p-1",
+        "bg-[#080c08] border border-[#2a3a2a]",
+        "text-[#5a8a5a]",
         "data-[orientation=vertical]:flex-col data-[orientation=vertical]:h-auto",
         className
       )}
@@ -59,14 +60,14 @@ export const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>
       ref={ref}
       className={cn(
         "inline-flex items-center justify-center whitespace-nowrap",
-        "rounded-md px-3 py-1.5",
-        "text-sm font-medium",
+        "rounded-sm px-3 py-1.5",
+        "text-sm font-mono uppercase tracking-wider",
         "transition-all duration-150",
-        "text-slate-500",
-        "hover:text-slate-900 hover:bg-slate-200/50",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-        "disabled:pointer-events-none disabled:opacity-50",
-        "aria-selected:bg-white aria-selected:text-slate-900 aria-selected:shadow-md aria-selected:font-semibold",
+        "text-[#5a8a5a]",
+        "hover:text-[#8aca8a] hover:bg-[#0a120a]",
+        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#5a8a5a]",
+        "disabled:pointer-events-none disabled:opacity-40",
+        "aria-selected:bg-[#0a120a] aria-selected:text-[#cadd6a] aria-selected:border aria-selected:border-[#3a5a3a]",
         className
       )}
       {...props}
@@ -86,7 +87,7 @@ export const TabsIndicator = React.forwardRef<
   <BaseTabs.Indicator
     ref={ref}
     className={cn(
-      "absolute bg-blue-600",
+      "absolute bg-[#8aca8a]",
       "transition-all duration-150",
       "data-[orientation=horizontal]:bottom-0 data-[orientation=horizontal]:h-0.5",
       "data-[orientation=horizontal]:left-[var(--active-tab-left)] data-[orientation=horizontal]:w-[var(--active-tab-width)]",
@@ -109,8 +110,9 @@ export const TabsPanel = React.forwardRef<HTMLDivElement, TabsPanelProps>(
       ref={ref}
       className={cn(
         "mt-2 p-4",
-        "rounded-lg bg-slate-50",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+        "rounded-sm bg-[#080c08] border border-[#2a3a2a]",
+        "text-[#8a9a8a] font-mono text-sm",
+        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#5a8a5a]",
         "data-[hidden]:hidden",
         className
       )}

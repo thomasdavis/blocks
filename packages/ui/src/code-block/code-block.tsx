@@ -64,34 +64,39 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
       <div
         ref={ref}
         className={cn(
-          "rounded-xl overflow-hidden",
-          "bg-slate-900 dark:bg-slate-950",
-          "border border-slate-800",
-          "shadow-lg",
+          "rounded-sm overflow-hidden",
+          "bg-[#050805]",
+          "border border-[#2a3a2a]",
+          "shadow-[0_4px_20px_rgba(0,0,0,0.4)]",
           className
         )}
         {...props}
       >
         {/* Header */}
         {(filename || copyable) && (
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-800/50 border-b border-slate-700">
+          <div className="flex items-center justify-between px-4 py-3 bg-[#0a120a] border-b border-[#2a3a2a]">
             <div className="flex items-center gap-2">
-              {/* Traffic lights */}
+              {/* Terminal dots */}
               <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-500" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                <div className="w-3 h-3 rounded-full bg-green-500" />
+                <div className="w-2.5 h-2.5 rounded-sm bg-[#aa4a4a]" />
+                <div className="w-2.5 h-2.5 rounded-sm bg-[#aa8a4a]" />
+                <div className="w-2.5 h-2.5 rounded-sm bg-[#4aaa4a]" />
               </div>
               {filename && (
-                <span className="ml-3 text-sm text-slate-400 font-mono">
+                <span className="ml-3 text-xs text-[#5a8a5a] font-mono uppercase tracking-wider">
                   {filename}
+                </span>
+              )}
+              {language && !filename && (
+                <span className="ml-3 text-xs text-[#4a6a4a] font-mono uppercase tracking-wider">
+                  {language}
                 </span>
               )}
             </div>
             {copyable && (
               <CopyButton
                 text={code}
-                className="text-slate-400 hover:text-slate-200"
+                className="text-[#4a6a4a] hover:text-[#8aca8a]"
               />
             )}
           </div>
@@ -100,7 +105,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
         {/* Code content */}
         <div className="p-4 overflow-x-auto">
           <pre className="text-sm font-mono">
-            <code className="text-slate-300">
+            <code className="text-[#8a9a8a]">
               {showLineNumbers ? (
                 lines.map((line, index) => {
                   const lineNumber = index + 1;
@@ -110,13 +115,13 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                       key={index}
                       className={cn(
                         "flex",
-                        isHighlighted && "bg-blue-500/10 -mx-4 px-4"
+                        isHighlighted && "bg-[#0f1a0f] -mx-4 px-4 border-l-2 border-[#5a8a5a]"
                       )}
                     >
-                      <span className="w-8 text-slate-600 text-right mr-4 select-none">
+                      <span className="w-8 text-[#3a5a3a] text-right mr-4 select-none">
                         {lineNumber}
                       </span>
-                      <span>{line}</span>
+                      <span className={isHighlighted ? "text-[#8aca8a]" : ""}>{line}</span>
                     </div>
                   );
                 })

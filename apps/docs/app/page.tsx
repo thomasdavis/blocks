@@ -6,7 +6,15 @@ import { Nav } from './components/nav';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen bg-[#050805] text-[#a0b0a0] font-mono">
+      {/* Scanline overlay effect */}
+      <div
+        className="fixed inset-0 pointer-events-none z-40 opacity-[0.015]"
+        style={{
+          backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.3) 1px, rgba(0,0,0,0.3) 2px)",
+        }}
+      />
+
       <Nav />
       <main>
       {/* Hero Section */}
@@ -14,16 +22,14 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto text-center">
           {/* Logo */}
           <div className="mb-8">
-            <img
-              src="/logo.png"
-              alt="Blocks Logo"
-              className="w-24 h-24 mx-auto"
-            />
+            <div className="w-24 h-24 mx-auto rounded-sm bg-[#0a120a] border-2 border-[#3a5a3a] flex items-center justify-center shadow-[0_0_30px_rgba(138,202,138,0.2)]">
+              <div className="text-[#cadd6a] text-4xl font-bold">B</div>
+            </div>
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 text-[#8aca8a] uppercase">
             Guardrails That Keep Your
             <br />
-            Agentic Code Generation
+            <span className="text-[#cadd6a]">Agentic Code Generation</span>
             <br />
             Aligned With Your Domain
           </h1>
@@ -34,13 +40,13 @@ export default function HomePage() {
           </div>
 
           {/* Quick Start */}
-          <div className="bg-slate-900 dark:bg-slate-950 rounded-lg p-6 mb-8 max-w-2xl mx-auto border border-slate-800">
-            <p className="text-slate-400 text-sm mb-3">Get started in seconds:</p>
-            <div className="bg-slate-800 rounded px-4 py-3 font-mono text-sm text-left text-slate-200 flex items-center justify-between">
+          <div className="bg-[#0a120a] rounded-sm p-6 mb-8 max-w-2xl mx-auto border border-[#3a5a3a] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+            <p className="text-[#5a8a5a] text-sm mb-3 uppercase tracking-wider">Get started in seconds:</p>
+            <div className="bg-[#080c08] border border-[#2a3a2a] rounded-sm px-4 py-3 text-sm text-left text-[#8aca8a] flex items-center justify-between">
               <code>npm install -g @blocksai/cli</code>
               <CopyButton text="npm install -g @blocksai/cli" />
             </div>
-            <div className="mt-3 bg-slate-800 rounded px-4 py-3 font-mono text-sm text-left text-slate-200">
+            <div className="mt-3 bg-[#080c08] border border-[#2a3a2a] rounded-sm px-4 py-3 text-sm text-left text-[#8aca8a]">
               <code>blocks run my-block</code>
             </div>
           </div>
@@ -48,7 +54,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/docs"
-              className={getButtonClassName("primary", "lg", "shadow-lg shadow-blue-500/30")}
+              className={getButtonClassName("primary", "lg")}
             >
               Get Started
             </Link>
@@ -69,17 +75,17 @@ export default function HomePage() {
 
         {/* Code Example */}
         <div className="mt-16 max-w-3xl mx-auto">
-          <div className="bg-slate-900 dark:bg-slate-950 rounded-xl shadow-2xl overflow-hidden border border-slate-800">
-            <div className="px-6 py-4 bg-slate-800/50 border-b border-slate-700">
+          <div className="bg-[#0a120a] rounded-sm shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden border border-[#3a5a3a]">
+            <div className="px-6 py-4 bg-[#080c08] border-b border-[#2a3a2a]">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span className="ml-3 text-slate-400 text-sm">blocks.yml</span>
+                <div className="w-2.5 h-2.5 rounded-sm bg-[#aa4a4a]"></div>
+                <div className="w-2.5 h-2.5 rounded-sm bg-[#aa8a4a]"></div>
+                <div className="w-2.5 h-2.5 rounded-sm bg-[#4aaa4a]"></div>
+                <span className="ml-3 text-[#5a8a5a] text-xs uppercase tracking-wider">blocks.yml</span>
               </div>
             </div>
             <pre className="p-6 overflow-x-auto text-sm">
-              <code className="text-slate-300">
+              <code className="text-[#8a9a8a]">
 {`$schema: "blocks/v2"
 
 philosophy:
@@ -109,65 +115,65 @@ blocks:
       </div>
 
       {/* Human-AI Collaboration */}
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 py-20">
+      <div className="bg-[#080c08] border-y border-[#2a3a2a] py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-[#cadd6a] uppercase tracking-wide">
                 Not Locking Down Code—Giving You a Semantic Compass
               </h2>
-              <p className="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
+              <p className="text-[#6a8a6a] max-w-3xl mx-auto">
                 Blocks doesn't restrict who can edit code. Instead, it detects when either humans or AI introduce drift from the spec.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-                <div className="text-3xl mb-3">✅</div>
-                <h3 className="text-lg font-semibold mb-2">Humans Write Code</h3>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-[#0a120a] rounded-sm p-6 border border-[#2a3a2a] hover:border-[#3a5a3a] transition-colors">
+                <div className="text-2xl mb-3 text-[#8aca8a]">[✓]</div>
+                <h3 className="text-lg font-semibold mb-2 text-[#8aca8a]">Humans Write Code</h3>
+                <p className="text-[#6a8a6a] text-sm">
                   You're free to modify any block. Write, refactor, experiment—Blocks won't stop you.
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-                <div className="text-3xl mb-3">🤖</div>
-                <h3 className="text-lg font-semibold mb-2">AI Agents Write Code</h3>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">
+              <div className="bg-[#0a120a] rounded-sm p-6 border border-[#2a3a2a] hover:border-[#3a5a3a] transition-colors">
+                <div className="text-2xl mb-3 text-[#8aca8a]">[&gt;_]</div>
+                <h3 className="text-lg font-semibold mb-2 text-[#8aca8a]">AI Agents Write Code</h3>
+                <p className="text-[#6a8a6a] text-sm">
                   Claude Code (and other AI assistants) can modify blocks too. No restrictions.
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-                <div className="text-3xl mb-3">🔍</div>
-                <h3 className="text-lg font-semibold mb-2">Blocks Detects Drift</h3>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">
+              <div className="bg-[#0a120a] rounded-sm p-6 border border-[#2a3a2a] hover:border-[#3a5a3a] transition-colors">
+                <div className="text-2xl mb-3 text-[#cadd6a]">[~]</div>
+                <h3 className="text-lg font-semibold mb-2 text-[#8aca8a]">Blocks Detects Drift</h3>
+                <p className="text-[#6a8a6a] text-sm">
                   Run validation. Blocks reports drift and helps you decide: fix code or update spec.
                 </p>
               </div>
             </div>
 
-            <div className="mt-12 bg-white dark:bg-slate-800 rounded-xl p-8 border border-slate-200 dark:border-slate-700">
-              <h3 className="text-xl font-semibold mb-4">The Validation Loop</h3>
-              <div className="space-y-3 text-slate-600 dark:text-slate-400">
+            <div className="mt-12 bg-[#0a120a] rounded-sm p-8 border border-[#3a5a3a]">
+              <h3 className="text-lg font-semibold mb-4 text-[#cadd6a] uppercase tracking-wide">The Validation Loop</h3>
+              <div className="space-y-3 text-[#8a9a8a]">
                 <div className="flex items-start gap-3">
-                  <span className="text-blue-600 dark:text-blue-400 font-semibold">1.</span>
+                  <span className="text-[#8aca8a] font-semibold font-mono">01.</span>
                   <p>Human or AI writes code</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-blue-600 dark:text-blue-400 font-semibold">2.</span>
-                  <p>Run <code className="bg-slate-100 dark:bg-slate-900 px-2 py-1 rounded text-sm">blocks run &lt;name&gt;</code></p>
+                  <span className="text-[#8aca8a] font-semibold font-mono">02.</span>
+                  <p>Run <code className="bg-[#080c08] border border-[#2a3a2a] px-2 py-1 rounded-sm text-sm text-[#8aca8a]">blocks run &lt;name&gt;</code></p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-blue-600 dark:text-blue-400 font-semibold">3.</span>
+                  <span className="text-[#8aca8a] font-semibold font-mono">03.</span>
                   <p>Blocks validates: schema (types), shape (structure), domain (semantics)</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-blue-600 dark:text-blue-400 font-semibold">4.</span>
-                  <p><strong>Drift detected?</strong> You decide: fix code or update spec</p>
+                  <span className="text-[#8aca8a] font-semibold font-mono">04.</span>
+                  <p><span className="text-[#cadd6a]">Drift detected?</span> You decide: fix code or update spec</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-blue-600 dark:text-blue-400 font-semibold">5.</span>
+                  <span className="text-[#8aca8a] font-semibold font-mono">05.</span>
                   <p>Iterate until both code and spec align</p>
                 </div>
               </div>
@@ -179,78 +185,78 @@ blocks:
       {/* Multi-Layer Validation */}
       <div className="container mx-auto px-4 py-20">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-4 text-[#cadd6a] uppercase tracking-wide">
             Multi-Layer Validation
           </h2>
-          <p className="text-center text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto">
+          <p className="text-center text-[#6a8a6a] mb-12 max-w-2xl mx-auto">
             Catch issues at every level: from schema validation to semantic analysis with AI.
           </p>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6">
             {/* Schema Validation */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-8 border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-[#0a120a] rounded-sm p-8 border border-[#2a3a2a] hover:border-[#5a8a5a] hover:shadow-[0_0_20px_rgba(138,202,138,0.1)] transition-all">
+              <div className="w-12 h-12 bg-[#080c08] border border-[#3a5a3a] rounded-sm flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#8aca8a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3">Schema</h3>
-              <p className="text-slate-600 dark:text-slate-400">
+              <h3 className="text-lg font-semibold mb-3 text-[#8aca8a]">Schema</h3>
+              <p className="text-[#6a8a6a] text-sm">
                 Fast, deterministic validation of inputs, outputs, and data types using Zod schemas.
               </p>
             </div>
 
             {/* Shape Validation */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-8 border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-[#0a120a] rounded-sm p-8 border border-[#2a3a2a] hover:border-[#5a8a5a] hover:shadow-[0_0_20px_rgba(138,202,138,0.1)] transition-all">
+              <div className="w-12 h-12 bg-[#080c08] border border-[#3a5a3a] rounded-sm flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#8aca8a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3">Shape</h3>
-              <p className="text-slate-600 dark:text-slate-400">
+              <h3 className="text-lg font-semibold mb-3 text-[#8aca8a]">Shape</h3>
+              <p className="text-[#6a8a6a] text-sm">
                 Verify file structure, exports, and conventions to maintain consistent block organization.
               </p>
             </div>
 
             {/* Domain Validation */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-8 border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-[#0a120a] rounded-sm p-8 border border-[#2a3a2a] hover:border-[#5a8a5a] hover:shadow-[0_0_20px_rgba(138,202,138,0.1)] transition-all">
+              <div className="w-12 h-12 bg-[#080c08] border border-[#3a5a3a] rounded-sm flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#cadd6a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3">Domain</h3>
-              <p className="text-slate-600 dark:text-slate-400">
+              <h3 className="text-lg font-semibold mb-3 text-[#8aca8a]">Domain</h3>
+              <p className="text-[#6a8a6a] text-sm">
                 AI-powered semantic analysis that understands your domain concepts and validates against them.
               </p>
             </div>
           </div>
 
           {/* Extensible Validators Note */}
-          <div className="mt-12 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-700">
+          <div className="mt-12 bg-[#0a120a] rounded-sm p-8 border border-[#3a5a3a]">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 bg-[#080c08] border border-[#5a8a5a] rounded-sm flex items-center justify-center flex-shrink-0 shadow-[0_0_10px_rgba(138,202,138,0.2)]">
+                <svg className="w-5 h-5 text-[#cadd6a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold mb-2">Fully Extensible Validator System</h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-3">
-                  <strong>schema</strong>, <strong>shape</strong>, and <strong>domain</strong> are just the built-in validators we recommend.
+                <h3 className="text-lg font-semibold mb-2 text-[#cadd6a]">Fully Extensible Validator System</h3>
+                <p className="text-[#6a8a6a] mb-3">
+                  <span className="text-[#8aca8a]">schema</span>, <span className="text-[#8aca8a]">shape</span>, and <span className="text-[#8aca8a]">domain</span> are just the built-in validators we recommend.
                   You can add any number of custom validators, override the defaults, or build your own validation pipeline.
                 </p>
-                <div className="bg-slate-900 dark:bg-slate-950 rounded-lg p-4 mt-4">
-                  <code className="text-sm text-slate-300 font-mono">
-                    <div className="text-slate-500"># Mix built-in and custom validators</div>
+                <div className="bg-[#080c08] border border-[#2a3a2a] rounded-sm p-4 mt-4">
+                  <code className="text-sm text-[#8a9a8a]">
+                    <div className="text-[#4a6a4a]"># Mix built-in and custom validators</div>
                     <div className="mt-2">validators:</div>
-                    <div className="ml-4">- <span className="text-blue-400">schema</span></div>
-                    <div className="ml-4">- <span className="text-blue-400">domain</span></div>
-                    <div className="ml-4">- name: <span className="text-green-400">security_scan</span></div>
-                    <div className="ml-6">run: <span className="text-green-400">"security.audit"</span></div>
-                    <div className="ml-4">- name: <span className="text-purple-400">perf_check</span></div>
-                    <div className="ml-6">run: <span className="text-green-400">"perf.benchmark"</span></div>
+                    <div className="ml-4">- <span className="text-[#8aca8a]">schema</span></div>
+                    <div className="ml-4">- <span className="text-[#8aca8a]">domain</span></div>
+                    <div className="ml-4">- name: <span className="text-[#cadd6a]">security_scan</span></div>
+                    <div className="ml-6">run: <span className="text-[#cadd6a]">"security.audit"</span></div>
+                    <div className="ml-4">- name: <span className="text-[#cadd6a]">perf_check</span></div>
+                    <div className="ml-6">run: <span className="text-[#cadd6a]">"perf.benchmark"</span></div>
                   </code>
                 </div>
               </div>
@@ -260,43 +266,43 @@ blocks:
       </div>
 
       {/* Live Examples */}
-      <div id="examples" className="bg-slate-50 dark:bg-slate-900 py-20">
+      <div id="examples" className="bg-[#080c08] border-y border-[#2a3a2a] py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-[#cadd6a] uppercase tracking-wide">
                 Live Examples
               </h2>
-              <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              <p className="text-[#6a8a6a] max-w-2xl mx-auto">
                 Explore real-world examples built to discover what Blocks should be. Each example explores different domain patterns.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-6">
               {/* JSON Resume Themes Example */}
-              <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow">
+              <div className="bg-[#0a120a] rounded-sm overflow-hidden border border-[#2a3a2a] hover:border-[#5a8a5a] hover:shadow-[0_0_20px_rgba(138,202,138,0.1)] transition-all">
                 <div className="p-8">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 bg-[#080c08] border border-[#3a5a3a] rounded-sm flex items-center justify-center">
+                      <svg className="w-6 h-6 text-[#8aca8a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold">Resume Themes</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Template Rendering</p>
+                      <h3 className="text-lg font-semibold text-[#8aca8a]">Resume Themes</h3>
+                      <p className="text-xs text-[#5a8a5a] uppercase tracking-wider">Template Rendering</p>
                     </div>
                   </div>
-                  <p className="text-slate-600 dark:text-slate-400 mb-4">
+                  <p className="text-[#6a8a6a] text-sm mb-4">
                     Validates resume themes for semantic HTML, accessibility, and responsive design using DRY domain rules.
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs">Handlebars</span>
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs">WCAG</span>
+                    <span className="px-2 py-1 bg-[#080c08] border border-[#2a3a2a] text-[#5a8a5a] rounded-sm text-xs uppercase">Handlebars</span>
+                    <span className="px-2 py-1 bg-[#080c08] border border-[#2a3a2a] text-[#5a8a5a] rounded-sm text-xs uppercase">WCAG</span>
                   </div>
                   <Link
                     href="/docs/examples/json-resume-themes"
-                    className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                    className="inline-flex items-center gap-2 text-[#8aca8a] hover:text-[#cadd6a] transition-colors text-sm"
                   >
                     View Example
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -307,29 +313,29 @@ blocks:
               </div>
 
               {/* Blog Content Validator Example */}
-              <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow">
+              <div className="bg-[#0a120a] rounded-sm overflow-hidden border border-[#2a3a2a] hover:border-[#5a8a5a] hover:shadow-[0_0_20px_rgba(138,202,138,0.1)] transition-all">
                 <div className="p-8">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 bg-[#080c08] border border-[#3a5a3a] rounded-sm flex items-center justify-center">
+                      <svg className="w-6 h-6 text-[#cadd6a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold">Blog Validator</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Content Quality</p>
+                      <h3 className="text-lg font-semibold text-[#8aca8a]">Blog Validator</h3>
+                      <p className="text-xs text-[#5a8a5a] uppercase tracking-wider">Content Quality</p>
                     </div>
                   </div>
-                  <p className="text-slate-600 dark:text-slate-400 mb-4">
+                  <p className="text-[#6a8a6a] text-sm mb-4">
                     Validates markdown posts for humor and conversational tone using AI-powered semantic analysis.
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs">Markdown</span>
-                    <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs">Tone Analysis</span>
+                    <span className="px-2 py-1 bg-[#080c08] border border-[#2a3a2a] text-[#5a8a5a] rounded-sm text-xs uppercase">Markdown</span>
+                    <span className="px-2 py-1 bg-[#080c08] border border-[#2a3a2a] text-[#5a8a5a] rounded-sm text-xs uppercase">Tone Analysis</span>
                   </div>
                   <Link
                     href="/docs/examples/blog-content-validator"
-                    className="inline-flex items-center gap-2 text-purple-600 dark:text-purple-400 hover:underline font-medium"
+                    className="inline-flex items-center gap-2 text-[#8aca8a] hover:text-[#cadd6a] transition-colors text-sm"
                   >
                     View Example
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -340,29 +346,29 @@ blocks:
               </div>
 
               {/* HR Recommendation Engine Example */}
-              <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow">
+              <div className="bg-[#0a120a] rounded-sm overflow-hidden border border-[#2a3a2a] hover:border-[#5a8a5a] hover:shadow-[0_0_20px_rgba(138,202,138,0.1)] transition-all">
                 <div className="p-8">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 bg-[#080c08] border border-[#3a5a3a] rounded-sm flex items-center justify-center">
+                      <svg className="w-6 h-6 text-[#8aca8a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold">HR Engine</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Production-Ready</p>
+                      <h3 className="text-lg font-semibold text-[#8aca8a]">HR Engine</h3>
+                      <p className="text-xs text-[#5a8a5a] uppercase tracking-wider">Production-Ready</p>
                     </div>
                   </div>
-                  <p className="text-slate-600 dark:text-slate-400 mb-4">
+                  <p className="text-[#6a8a6a] text-sm mb-4">
                     Complete recommendation system with scoring, ranking, and filtering. Shows multi-block composition.
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs">Scoring</span>
-                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs">Ranking</span>
+                    <span className="px-2 py-1 bg-[#080c08] border border-[#2a3a2a] text-[#5a8a5a] rounded-sm text-xs uppercase">Scoring</span>
+                    <span className="px-2 py-1 bg-[#080c08] border border-[#2a3a2a] text-[#5a8a5a] rounded-sm text-xs uppercase">Ranking</span>
                   </div>
                   <Link
                     href="/docs/examples/hr-recommendation-engine"
-                    className="inline-flex items-center gap-2 text-green-600 dark:text-green-400 hover:underline font-medium"
+                    className="inline-flex items-center gap-2 text-[#8aca8a] hover:text-[#cadd6a] transition-colors text-sm"
                   >
                     View Example
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -374,12 +380,12 @@ blocks:
             </div>
 
             <div className="mt-8 text-center">
-              <p className="text-slate-600 dark:text-slate-400 mb-4">
+              <p className="text-[#6a8a6a] mb-4">
                 Each example helped shape the Blocks specification through practical discovery.
               </p>
               <Link
                 href="/docs/examples"
-                className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                className="inline-flex items-center gap-2 text-[#8aca8a] hover:text-[#cadd6a] transition-colors"
               >
                 Explore All Examples
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -394,16 +400,16 @@ blocks:
       {/* CTA Section */}
       <div className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-[#cadd6a] uppercase tracking-wide">
             Ready to Add Guardrails to Your AI Codebase?
           </h2>
-          <p className="text-xl text-slate-600 dark:text-slate-400 mb-8">
+          <p className="text-[#6a8a6a] mb-8 max-w-2xl mx-auto">
             Create a feedback loop where AI agents run validation until all code aligns with your domain requirements.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/docs/getting-started/installation"
-              className={getButtonClassName("primary", "lg", "shadow-lg shadow-blue-500/30")}
+              className={getButtonClassName("primary", "lg")}
             >
               Get Started
             </Link>
@@ -413,6 +419,16 @@ blocks:
             >
               View on GitHub
             </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[#2a3a2a] bg-[#080c08] py-8">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-2 text-[#5a8a5a] text-sm">
+            <div className="w-2 h-2 rounded-full bg-[#5a8a5a] animate-pulse" />
+            <span className="uppercase tracking-wider">Terminal Blueprint Theme</span>
           </div>
         </div>
       </div>

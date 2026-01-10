@@ -206,10 +206,10 @@ export function AISlogan() {
       {isGenerating && !isTyping ? (
         <LoadingDots size="md" color="primary" label="Generating next pitch..." />
       ) : (
-        <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl mx-auto text-center">
+        <p className="text-xl md:text-2xl text-[#6a8a6a] leading-relaxed max-w-3xl mx-auto text-center font-mono">
           {displayedText}
           {isTyping && displayedText.length > 0 && (
-            <span className="inline-block w-0.5 h-6 ml-1 bg-blue-600 dark:bg-blue-400 animate-pulse" />
+            <span className="inline-block w-0.5 h-6 ml-1 bg-[#8aca8a] animate-pulse shadow-[0_0_8px_rgba(138,202,138,0.5)]" />
           )}
         </p>
       )}

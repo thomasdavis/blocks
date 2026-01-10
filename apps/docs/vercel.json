@@ -1,6 +1,4 @@
 {
-  "buildCommand": "cd ../.. && pnpm build --filter=@blocks/docs...",
-  "installCommand": "cd ../.. && pnpm install",
-  "framework": "nextjs",
-  "outputDirectory": ".next"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs"
 }

@@ -73,10 +73,10 @@ export const TooltipContent = React.forwardRef<
       <BaseTooltip.Popup
         ref={ref}
         className={cn(
-          "z-50 overflow-hidden rounded-md px-3 py-1.5",
-          "bg-slate-900 text-white",
-          "text-xs font-medium",
-          "shadow-md",
+          "z-50 overflow-hidden rounded-sm px-3 py-1.5",
+          "bg-[#0f1a0f] border border-[#3a5a3a] text-[#8aca8a]",
+          "text-xs font-mono",
+          "shadow-[0_4px_12px_rgba(0,0,0,0.5),0_0_10px_rgba(90,138,90,0.15)]",
           "animate-in fade-in-0 zoom-in-95",
           className
         )}
@@ -97,7 +97,7 @@ export const TooltipArrow = React.forwardRef<HTMLDivElement, TooltipArrowProps>(
   ({ className, ...props }, ref) => (
     <BaseTooltip.Arrow
       ref={ref}
-      className={cn("fill-slate-900", className)}
+      className={cn("fill-[#0f1a0f]", className)}
       {...props}
     />
   )

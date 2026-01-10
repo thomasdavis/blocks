@@ -29,6 +29,12 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel
 
+      - name: Link Vercel project
+        run: |
+          mkdir -p .vercel
+          echo '{"projectId":"'$VERCEL_PROJECT_ID'","orgId":"'$VERCEL_ORG_ID'"}' > .vercel/project.json
+          cat .vercel/project.json
+
       - name: Deploy to Vercel
         id: deploy
         run: |

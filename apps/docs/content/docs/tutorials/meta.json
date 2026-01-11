@@ -1,0 +1,9 @@
+{
+  "title": "Tutorials",
+  "pages": [
+    "index",
+    "first-block",
+    "visual-testing",
+    "ci-cd-integration"
+  ]
+}

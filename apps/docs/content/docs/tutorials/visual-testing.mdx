@@ -1,0 +1,387 @@
+---
+title: Screenshot-Based Visual Testing
+description: Build a custom validator that captures screenshots and checks UI consistency
+---
+
+# Screenshot-Based Visual Testing
+
+Build a custom validator that renders your blocks, captures screenshots, and uses AI to verify visual consistency. This demonstrates the power of custom validators that can literally validate anything.
+
+## Prerequisites
+
+- Completed the [First Block tutorial](/docs/tutorials/first-block)
+- Node.js 20+
+- Playwright installed (`npm install playwright`)
+- 30 minutes
+
+## What You'll Build
+
+A custom `visual.screenshot` validator that:
+- Renders block output in a headless browser
+- Captures a screenshot
+- Uses AI to check contrast, accessibility, and design consistency
+- Reports issues with visual evidence
+
+## Step 1: Project Setup
+
+Start with an existing blocks project or create one:
+
+```bash
+mkdir visual-blocks && cd visual-blocks
+npm init -y
+npm install playwright @blocksai/cli
+npx playwright install chromium
+```
+
+Create the structure:
+
+```bash
+mkdir -p blocks/card-component validators
+```
+
+## Step 2: Create a Component Block
+
+Create `blocks/card-component/block.ts`:
+
+```typescript
+export interface CardInput {
+  title: string;
+  description: string;
+  variant: 'light' | 'dark';
+}
+
+export interface CardOutput {
+  html: string;
+}
+
+export function render(input: CardInput): CardOutput {
+  const { title, description, variant } = input;
+
+  const styles = variant === 'dark'
+    ? 'background: #1a1a1a; color: #ffffff;'
+    : 'background: #ffffff; color: #1a1a1a;';
+
+  return {
+    html: `
+      <div style="${styles} padding: 24px; border-radius: 8px; max-width: 300px; font-family: system-ui;">
+        <h2 style="margin: 0 0 12px 0; font-size: 18px;">${title}</h2>
+        <p style="margin: 0; font-size: 14px; opacity: 0.8;">${description}</p>
+      </div>
+    `,
+  };
+}
+```
+
+Create `blocks/card-component/index.ts`:
+
+```typescript
+export { render } from './block';
+export type { CardInput, CardOutput } from './block';
+```
+
+## Step 3: Build the Custom Validator
+
+Create `validators/visual-screenshot.ts`:
+
+```typescript
+import { chromium } from 'playwright';
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { join } from 'path';
+import OpenAI from 'openai';
+
+interface ValidatorContext {
+  blockName: string;
+  blockPath: string;
+  config: any;
+}
+
+interface ValidationIssue {
+  type: 'error' | 'warning' | 'info';
+  code: string;
+  message: string;
+  file?: string;
+}
+
+interface ValidationResult {
+  valid: boolean;
+  issues: ValidationIssue[];
+  context?: {
+    screenshotPath?: string;
+    analysis?: string;
+  };
+}
+
+export const id = 'visual.screenshot';
+
+export async function validate(ctx: ValidatorContext): Promise<ValidationResult> {
+  const issues: ValidationIssue[] = [];
+
+  // 1. Import and render the block
+  const blockModule = await import(join(process.cwd(), ctx.blockPath, 'index.ts'));
+  const renderFn = blockModule.render || blockModule.default;
+
+  if (!renderFn) {
+    return {
+      valid: false,
+      issues: [{
+        type: 'error',
+        code: 'NO_RENDER_FUNCTION',
+        message: 'Block must export a render function',
+      }],
+    };
+  }
+
+  // 2. Render with test data
+  const testData = {
+    title: 'Test Card Title',
+    description: 'This is a test description for visual validation.',
+    variant: 'dark',
+  };
+
+  const output = renderFn(testData);
+  const html = output.html;
+
+  // 3. Capture screenshot with Playwright
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+
+  await page.setContent(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body {
+            margin: 0;
+            padding: 40px;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+          }
+        </style>
+      </head>
+      <body>${html}</body>
+    </html>
+  `);
+
+  // Ensure screenshots directory exists
+  const screenshotsDir = join(process.cwd(), '.blocks', 'screenshots');
+  mkdirSync(screenshotsDir, { recursive: true });
+
+  const screenshotPath = join(screenshotsDir, `${ctx.blockName.replace(/\./g, '-')}.png`);
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+  await browser.close();
+
+  // 4. Analyze with AI
+  const openai = new OpenAI();
+
+  const imageBuffer = readFileSync(screenshotPath);
+  const base64Image = imageBuffer.toString('base64');
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: `Analyze this UI component screenshot for visual quality issues.
+
+Check for:
+1. Color contrast (WCAG AA compliance - 4.5:1 for text)
+2. Text readability (font size, spacing)
+3. Visual hierarchy (clear title vs description)
+4. Consistency (padding, alignment)
+5. Accessibility concerns
+
+Respond with JSON:
+{
+  "passed": boolean,
+  "contrastRatio": "estimated ratio",
+  "issues": [
+    { "severity": "error|warning", "description": "..." }
+  ],
+  "summary": "one sentence summary"
+}`,
+          },
+          {
+            type: 'image_url',
+            image_url: {
+              url: `data:image/png;base64,${base64Image}`,
+            },
+          },
+        ],
+      },
+    ],
+    max_tokens: 500,
+  });
+
+  const analysisText = response.choices[0]?.message?.content || '{}';
+
+  // Parse AI response
+  let analysis;
+  try {
+    // Extract JSON from response
+    const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+    analysis = jsonMatch ? JSON.parse(jsonMatch[0]) : { passed: true, issues: [] };
+  } catch {
+    analysis = { passed: true, issues: [], summary: analysisText };
+  }
+
+  // 5. Convert AI findings to validation issues
+  if (!analysis.passed) {
+    for (const issue of analysis.issues || []) {
+      issues.push({
+        type: issue.severity === 'error' ? 'error' : 'warning',
+        code: 'VISUAL_ISSUE',
+        message: issue.description,
+      });
+    }
+  }
+
+  return {
+    valid: issues.filter(i => i.type === 'error').length === 0,
+    issues,
+    context: {
+      screenshotPath,
+      analysis: analysis.summary,
+    },
+  };
+}
+```
+
+## Step 4: Configure blocks.yml
+
+Update your `blocks.yml` to use the custom validator:
+
+```yaml
+$schema: "blocks/v2"
+name: "Visual Components"
+
+philosophy:
+  - "All components must meet WCAG AA contrast requirements"
+  - "Text must be readable at standard viewing distances"
+  - "Visual hierarchy should be clear and consistent"
+
+domain:
+  entities:
+    card:
+      fields: [title, description, variant]
+
+  semantics:
+    accessible_html:
+      description: "HTML that meets accessibility standards"
+
+ai:
+  provider: openai
+  model: gpt-4o-mini
+
+validators:
+  - schema
+  - shape
+  - name: visual.screenshot
+    run: validators/visual-screenshot.ts
+
+blocks:
+  ui.card:
+    description: "A card component for displaying content"
+    path: blocks/card-component
+    inputs:
+      - name: card
+        type: entity.card
+    outputs:
+      - name: html
+        type: string
+        semantics: [accessible_html]
+```
+
+## Step 5: Run Visual Validation
+
+```bash
+blocks run ui.card
+```
+
+Example output:
+
+```
+✓ ui.card
+  ✓ schema.io
+  ✓ shape.exports.ts
+  ✓ visual.screenshot
+    Screenshot saved: .blocks/screenshots/ui-card.png
+    Analysis: Component has good contrast and clear hierarchy.
+
+All blocks passed validation.
+```
+
+## Step 6: Test with Poor Contrast
+
+Edit your block to use low contrast colors:
+
+```typescript
+const styles = variant === 'dark'
+  ? 'background: #333333; color: #555555;'  // Poor contrast!
+  : 'background: #ffffff; color: #cccccc;';  // Also poor!
+```
+
+Run validation:
+
+```bash
+blocks run ui.card
+```
+
+```
+✗ ui.card
+  ✓ schema.io
+  ✓ shape.exports.ts
+  ✗ visual.screenshot
+    Screenshot saved: .blocks/screenshots/ui-card.png
+
+    VISUAL_ISSUE: Text contrast ratio (~1.8:1) fails WCAG AA
+    requirement of 4.5:1. The gray text (#555555) on dark
+    background (#333333) is difficult to read.
+
+    VISUAL_ISSUE: Description text opacity makes it nearly
+    invisible against the background.
+```
+
+## Key Concepts
+
+### Custom Validators Can Do Anything
+
+This tutorial demonstrates that validators aren't limited to static analysis:
+- **Render output** with real browsers
+- **Capture screenshots** for visual evidence
+- **Use AI vision** to analyze images
+- **Check accessibility** with real contrast calculations
+
+### Validation Context
+
+Your validator receives:
+- `blockName` - The block being validated
+- `blockPath` - Path to block files
+- `config` - Full blocks.yml configuration
+
+### Rich Results
+
+Return detailed context for debugging:
+- Screenshot paths for evidence
+- AI analysis summaries
+- Specific, actionable issues
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="CI/CD Integration"
+    description="Run visual tests on every PR"
+    href="/docs/tutorials/ci-cd-integration"
+  />
+  <Card
+    title="Custom Validators Reference"
+    description="Full validator API documentation"
+    href="/docs/specification/validators"
+  />
+</Cards>

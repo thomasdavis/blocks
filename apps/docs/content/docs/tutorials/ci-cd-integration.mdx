@@ -1,0 +1,336 @@
+---
+title: CI/CD Integration with GitHub Actions
+description: Run Blocks validation on every pull request
+---
+
+# CI/CD Integration with GitHub Actions
+
+Set up automated Blocks validation that runs on every pull request. Failed validation blocks merging, keeping your codebase aligned with domain specifications.
+
+## Prerequisites
+
+- A GitHub repository with a Blocks project
+- Completed the [First Block tutorial](/docs/tutorials/first-block)
+- OpenAI API key (or other AI provider)
+- 20 minutes
+
+## What You'll Build
+
+A GitHub Actions workflow that:
+- Runs on every PR to main
+- Validates all blocks against your domain spec
+- Posts validation results as PR comments
+- Blocks merging if validation fails
+
+## Step 1: Add the Workflow File
+
+Create `.github/workflows/blocks-validation.yml`:
+
+```yaml
+name: Blocks Validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate Blocks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Blocks CLI
+        run: npm install -g @blocksai/cli
+
+      - name: Run Blocks Validation
+        id: validation
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          # Run validation and capture output
+          set +e
+          OUTPUT=$(blocks run --all --json 2>&1)
+          EXIT_CODE=$?
+          set -e
+
+          # Save output for later steps
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+          echo "$OUTPUT" > validation-results.json
+
+          # Also print to logs
+          echo "$OUTPUT" | jq '.' || echo "$OUTPUT"
+
+          exit $EXIT_CODE
+
+      - name: Upload Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-results
+          path: validation-results.json
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let results;
+            try {
+              const raw = fs.readFileSync('validation-results.json', 'utf8');
+              results = JSON.parse(raw);
+            } catch (e) {
+              results = { error: 'Failed to parse validation results' };
+            }
+
+            const passed = results.summary?.passed ?? false;
+            const blocks = results.blocks || [];
+
+            let body = passed
+              ? '## ✅ Blocks Validation Passed\n\n'
+              : '## ❌ Blocks Validation Failed\n\n';
+
+            body += '| Block | Status | Issues |\n';
+            body += '|-------|--------|--------|\n';
+
+            for (const block of blocks) {
+              const status = block.valid ? '✅' : '❌';
+              const issueCount = block.issues?.length || 0;
+              body += `| \`${block.name}\` | ${status} | ${issueCount} |\n`;
+            }
+
+            if (!passed) {
+              body += '\n### Issues Found\n\n';
+              for (const block of blocks) {
+                if (block.issues?.length > 0) {
+                  body += `#### ${block.name}\n\n`;
+                  for (const issue of block.issues) {
+                    const icon = issue.type === 'error' ? '🔴' : '🟡';
+                    body += `- ${icon} **${issue.code}**: ${issue.message}\n`;
+                  }
+                  body += '\n';
+                }
+              }
+            }
+
+            body += '\n---\n*Validated with [Blocks](https://blocksai.dev)*';
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Blocks Validation')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+```
+
+## Step 2: Add Your API Key as a Secret
+
+1. Go to your GitHub repository
+2. Click **Settings** → **Secrets and variables** → **Actions**
+3. Click **New repository secret**
+4. Name: `OPENAI_API_KEY`
+5. Value: Your OpenAI API key
+6. Click **Add secret**
+
+<Callout type="info">
+For Anthropic, use `ANTHROPIC_API_KEY`. For Google, use `GOOGLE_API_KEY`. Update the workflow env vars accordingly.
+</Callout>
+
+## Step 3: Configure Branch Protection
+
+To block merging when validation fails:
+
+1. Go to **Settings** → **Branches**
+2. Click **Add branch protection rule**
+3. Branch name pattern: `main`
+4. Enable **Require status checks to pass before merging**
+5. Search and select **Validate Blocks**
+6. Click **Create**
+
+## Step 4: Test the Integration
+
+Create a test PR to verify it works:
+
+```bash
+git checkout -b test-blocks-ci
+echo "// test change" >> blocks/my-block/block.ts
+git add .
+git commit -m "test: verify blocks CI"
+git push origin test-blocks-ci
+```
+
+Open a PR and watch the validation run. You should see:
+- A new check appears: "Validate Blocks"
+- After completion, a comment with results
+- Merge blocked if validation fails
+
+## Advanced: Matrix Validation
+
+Validate blocks in parallel for faster CI:
+
+```yaml
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      blocks: ${{ steps.find.outputs.blocks }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find
+        run: |
+          BLOCKS=$(grep -E "^  [a-z]" blocks.yml | sed 's/:.*//' | sed 's/^ *//' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "blocks=$BLOCKS" >> $GITHUB_OUTPUT
+
+  validate:
+    needs: discover
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        block: ${{ fromJson(needs.discover.outputs.blocks) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm install -g @blocksai/cli
+      - name: Validate ${{ matrix.block }}
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: blocks run ${{ matrix.block }}
+```
+
+## Advanced: Cache AI Responses
+
+Reduce API costs by caching validation results:
+
+```yaml
+- name: Cache Blocks Results
+  uses: actions/cache@v4
+  with:
+    path: .blocks/cache
+    key: blocks-${{ hashFiles('blocks/**', 'blocks.yml') }}
+    restore-keys: |
+      blocks-
+
+- name: Run Blocks Validation
+  env:
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    BLOCKS_CACHE_DIR: .blocks/cache
+  run: blocks run --all
+```
+
+## Advanced: Slack Notifications
+
+Add Slack alerts for failed validations:
+
+```yaml
+- name: Notify Slack on Failure
+  if: failure()
+  uses: slackapi/slack-github-action@v1
+  with:
+    payload: |
+      {
+        "text": "❌ Blocks validation failed on ${{ github.repository }}",
+        "blocks": [
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "*<${{ github.event.pull_request.html_url }}|PR #${{ github.event.pull_request.number }}>*: Blocks validation failed"
+            }
+          }
+        ]
+      }
+  env:
+    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+```
+
+## Workflow Summary
+
+Your CI pipeline now:
+
+1. **Triggers** on PRs and pushes to main
+2. **Installs** dependencies and Blocks CLI
+3. **Validates** all blocks against domain spec
+4. **Comments** results on PRs
+5. **Blocks** merging if validation fails
+6. **Uploads** results as artifacts
+
+## Troubleshooting
+
+### Validation times out
+
+Domain validation uses AI which can be slow. Increase the timeout:
+
+```yaml
+- name: Run Blocks Validation
+  timeout-minutes: 10
+  run: blocks run --all
+```
+
+### Rate limits
+
+If you hit OpenAI rate limits:
+1. Use caching (shown above)
+2. Use a faster model: `gpt-4o-mini`
+3. Run blocks in sequence, not parallel
+
+### Missing blocks.yml
+
+Ensure your `blocks.yml` is in the repository root, or specify the path:
+
+```yaml
+run: blocks run --all --config path/to/blocks.yml
+```
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Devtools"
+    description="Debug validation results locally"
+    href="/docs/devtools"
+  />
+  <Card
+    title="Examples"
+    description="See complete project configurations"
+    href="/docs/examples"
+  />
+</Cards>

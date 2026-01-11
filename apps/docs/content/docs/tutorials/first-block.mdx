@@ -1,0 +1,248 @@
+---
+title: Build Your First Validated Block
+description: Create a block from scratch with domain validation in 15 minutes
+---
+
+# Build Your First Validated Block
+
+Create a price calculator block with domain-driven validation. You'll define the domain model, write the implementation, and run AI-powered validation.
+
+## Prerequisites
+
+- Node.js 20+
+- An OpenAI API key (or Anthropic/Google)
+- 15 minutes
+
+## What You'll Build
+
+A `pricing.calculator` block that:
+- Takes a product and quantity as input
+- Returns a price breakdown with subtotal, tax, and total
+- Validates that the implementation follows your domain rules
+
+## Step 1: Create Project Structure
+
+```bash
+mkdir pricing-blocks && cd pricing-blocks
+npm init -y
+```
+
+Create the folder structure:
+
+```bash
+mkdir -p blocks/pricing-calculator
+```
+
+## Step 2: Define Your Domain in blocks.yml
+
+Create `blocks.yml` in your project root:
+
+```yaml
+$schema: "blocks/v2"
+name: "Pricing System"
+
+philosophy:
+  - "All monetary values must be in cents to avoid floating point errors"
+  - "Tax calculations must be explicit and auditable"
+  - "Never expose internal pricing logic in outputs"
+
+domain:
+  entities:
+    product:
+      fields: [id, name, price_cents, tax_rate]
+
+    price_breakdown:
+      fields: [subtotal_cents, tax_cents, total_cents]
+      optional: [discount_cents]
+
+  semantics:
+    money_cents:
+      description: "Monetary value in cents (integer)"
+      schema:
+        type: integer
+        minimum: 0
+
+    tax_rate:
+      description: "Tax rate as decimal (0.0 to 1.0)"
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
+
+ai:
+  provider: openai
+  model: gpt-4o-mini
+
+validators:
+  - schema
+  - shape
+  - domain
+
+blocks:
+  pricing.calculator:
+    description: "Calculates price breakdown for a product order"
+    path: blocks/pricing-calculator
+    inputs:
+      - name: product
+        type: entity.product
+      - name: quantity
+        type: integer
+    outputs:
+      - name: breakdown
+        type: entity.price_breakdown
+```
+
+## Step 3: Write the Block Implementation
+
+Create `blocks/pricing-calculator/block.ts`:
+
+```typescript
+import type { Product, PriceBreakdown } from './types';
+
+export interface CalculatorInput {
+  product: Product;
+  quantity: number;
+}
+
+export interface CalculatorOutput {
+  breakdown: PriceBreakdown;
+}
+
+export function calculate(input: CalculatorInput): CalculatorOutput {
+  const { product, quantity } = input;
+
+  // Calculate in cents to avoid floating point errors
+  const subtotal_cents = product.price_cents * quantity;
+  const tax_cents = Math.round(subtotal_cents * product.tax_rate);
+  const total_cents = subtotal_cents + tax_cents;
+
+  return {
+    breakdown: {
+      subtotal_cents,
+      tax_cents,
+      total_cents,
+    },
+  };
+}
+```
+
+Create `blocks/pricing-calculator/types.ts`:
+
+```typescript
+export interface Product {
+  id: string;
+  name: string;
+  price_cents: number;
+  tax_rate: number;
+}
+
+export interface PriceBreakdown {
+  subtotal_cents: number;
+  tax_cents: number;
+  total_cents: number;
+  discount_cents?: number;
+}
+```
+
+Create `blocks/pricing-calculator/index.ts`:
+
+```typescript
+export { calculate } from './block';
+export type { CalculatorInput, CalculatorOutput } from './block';
+export type { Product, PriceBreakdown } from './types';
+```
+
+## Step 4: Install and Run Blocks
+
+Install the CLI:
+
+```bash
+npm install -g @blocksai/cli
+```
+
+Set your API key:
+
+```bash
+export OPENAI_API_KEY="your-key-here"
+```
+
+Run validation:
+
+```bash
+blocks run pricing.calculator
+```
+
+## Step 5: See the Results
+
+If everything is correct, you'll see:
+
+```
+✓ pricing.calculator
+  ✓ schema.io
+  ✓ shape.exports.ts
+  ✓ domain.validation
+
+All blocks passed validation.
+```
+
+## Step 6: Try Breaking It
+
+Let's see what happens when code violates domain rules. Edit `block.ts` to use floating point:
+
+```typescript
+// BAD: Using dollars instead of cents
+const subtotal = product.price_cents / 100 * quantity;
+const tax = subtotal * product.tax_rate;
+const total = subtotal + tax;
+
+return {
+  breakdown: {
+    subtotal_cents: subtotal,  // Wrong! This is dollars
+    tax_cents: tax,
+    total_cents: total,
+  },
+};
+```
+
+Run validation again:
+
+```bash
+blocks run pricing.calculator
+```
+
+The domain validator will flag this:
+
+```
+✗ pricing.calculator
+  ✓ schema.io
+  ✓ shape.exports.ts
+  ✗ domain.validation
+
+    DOMAIN_SEMANTIC_ISSUE: Implementation converts price_cents to dollars
+    before calculation, violating the philosophy "All monetary values
+    must be in cents to avoid floating point errors". The subtotal, tax,
+    and total are calculated as floating point dollars but stored in
+    fields named *_cents.
+```
+
+## What You Learned
+
+1. **Domain modeling** - Define entities and semantics in `blocks.yml`
+2. **Philosophy** - Guide AI validation with design principles
+3. **Validation pipeline** - Schema, shape, and domain validators work together
+4. **Feedback loop** - AI catches semantic violations humans might miss
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Visual Testing Tutorial"
+    description="Build a custom validator with screenshots"
+    href="/docs/tutorials/visual-testing"
+  />
+  <Card
+    title="Domain Modeling"
+    description="Deep dive into entities and semantics"
+    href="/docs/core-concepts"
+  />
+</Cards>

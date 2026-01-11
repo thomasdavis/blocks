@@ -1,0 +1,57 @@
+---
+title: Examples
+description: Real-world Blocks configurations in action
+---
+
+# Examples
+
+Learn from complete, working examples that demonstrate Blocks patterns in real projects.
+
+## Available Examples
+
+<Cards>
+  <Card
+    title="JSON Resume Themes"
+    description="Theme blocks for rendering resume data with validation"
+    href="/docs/examples/json-resume-themes"
+  />
+  <Card
+    title="Blog Content Validator"
+    description="Content validation for blog posts with SEO checks"
+    href="/docs/examples/blog-content-validator"
+  />
+  <Card
+    title="HR Recommendation Engine"
+    description="Scorer modules for job candidate matching"
+    href="/docs/examples/hr-recommendation-engine"
+  />
+</Cards>
+
+## Example Structure
+
+Each example includes:
+
+- **blocks.yml** - Complete configuration with domain modeling
+- **Block implementations** - Working code with validation
+- **Test data** - Sample inputs for running validation
+- **Expected outputs** - What correct results look like
+
+## Running Examples
+
+Clone and run any example:
+
+```bash
+git clone https://github.com/thomasdavis/blocks
+cd blocks/examples/json-resume-themes
+pnpm install
+blocks run --all
+```
+
+## Contributing Examples
+
+Have a use case that would help others? Examples are welcome:
+
+1. Fork the repository
+2. Create your example in `examples/`
+3. Include a README with context
+4. Submit a pull request

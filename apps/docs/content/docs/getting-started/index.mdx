@@ -1,0 +1,77 @@
+---
+title: Getting Started
+description: Set up Blocks validation in your project
+---
+
+# Getting Started
+
+Get Blocks running in your project in under 5 minutes.
+
+## Quick Path
+
+<Cards>
+  <Card
+    title="Installation"
+    description="Install the CLI and dependencies"
+    href="/docs/getting-started/installation"
+  />
+  <Card
+    title="Quick Start"
+    description="Create your first blocks.yml and run validation"
+    href="/docs/getting-started/quick-start"
+  />
+  <Card
+    title="Configuration"
+    description="Customize validators and block definitions"
+    href="/docs/getting-started/configuration"
+  />
+  <Card
+    title="AI Configuration"
+    description="Set up AI providers for semantic validation"
+    href="/docs/getting-started/ai-configuration"
+  />
+</Cards>
+
+## Prerequisites
+
+- **Node.js 20+** - Required runtime
+- **pnpm, npm, or yarn** - Package manager
+- **AI API key** - OpenAI, Anthropic, or Google (for domain validation)
+
+## The 3-Step Setup
+
+```bash
+# 1. Install globally
+npm install -g @blocksai/cli
+
+# 2. Create blocks.yml in your project
+blocks init
+
+# 3. Run validation
+blocks run --all
+```
+
+## What Happens Next
+
+After running `blocks run --all`:
+
+1. **Schema validation** - Checks your blocks.yml syntax
+2. **Shape validation** - Verifies file structure
+3. **Domain validation** - AI analyzes semantic compliance
+
+Results show pass/fail for each block with actionable feedback.
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Using AI Effectively"
+    description="Best practices for AI-powered validation"
+    href="/docs/getting-started/using-ai-effectively"
+  />
+  <Card
+    title="Examples"
+    description="See real-world configurations"
+    href="/docs/examples"
+  />
+</Cards>

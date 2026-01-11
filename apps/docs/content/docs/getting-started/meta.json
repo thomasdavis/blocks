@@ -1,4 +1,4 @@
 {
   "title": "Getting Started",
-  "pages": ["installation", "quick-start", "configuration", "ai-configuration", "using-ai-effectively"]
+  "pages": ["index", "installation", "quick-start", "configuration", "ai-configuration", "using-ai-effectively"]
 }

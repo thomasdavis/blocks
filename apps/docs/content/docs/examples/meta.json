@@ -1,6 +1,7 @@
 {
   "title": "Examples",
   "pages": [
+    "index",
     "json-resume-themes",
     "blog-content-validator",
     "hr-recommendation-engine"

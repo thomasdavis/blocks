@@ -4,6 +4,9 @@ import { useState } from "react";
 import { Nav } from "../components/nav";
 import { CopyButton } from "../copy-button";
 
+// Note: Metadata must be in a separate layout.tsx for client components
+// See getting-started/layout.tsx for OG metadata
+
 const agentPrompt = `Set up Blocks validation for this project. Blocks creates a feedback loop between your domain spec and AI agents—it validates code semantically so AI-generated code stays aligned with your requirements.
 
 Docs: https://blocksai.dev

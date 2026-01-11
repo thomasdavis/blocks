@@ -8,13 +8,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "fumadocs-mdx"
+    "postinstall": "fumadocs-mdx",
+    "generate-og": "tsx scripts/generate-og-images.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.0",
     "@blocksai/ui": "workspace:*",
     "@vercel/analytics": "^1.6.1",
     "ai": "^6.0.0",
+    "openai": "^4.77.0",
     "fumadocs-core": "16.0.14",
     "fumadocs-mdx": "14.0.2",
     "fumadocs-ui": "16.0.14",
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "@blocks/tsconfig": "workspace:*",
+    "tsx": "^4.19.0",
     "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.6",

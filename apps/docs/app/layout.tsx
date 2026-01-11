@@ -10,21 +10,32 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: {
     template: '%s | Blocks',
-    default: 'Blocks - AI-Powered Semantic Validation',
+    default: 'Blocks - Guardrails for Agentic Code Generation',
   },
   description:
-    'Teach AI coding assistants your domain rules. Define entities, semantics, and philosophy in YAML. Get AI-powered validation at development time.',
-  metadataBase: new URL('https://blocks.dev'),
+    'Create a feedback loop between your domain spec and AI agents. Define rules, validate semantically, ship with confidence.',
+  metadataBase: new URL('https://blocksai.dev'),
   openGraph: {
-    title: 'Blocks - AI-Powered Semantic Validation',
-    description: 'Teach AI coding assistants your domain rules. Development-time validation with AI guardrails.',
-    images: ['/og-image.png'],
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://blocksai.dev',
+    siteName: 'Blocks',
+    title: 'Blocks - Guardrails for Agentic Code Generation',
+    description: 'Create a feedback loop between your domain spec and AI agents. Spec → Validate → Ship.',
+    images: [
+      {
+        url: '/api/og/home',
+        width: 1200,
+        height: 630,
+        alt: 'Blocks - Guardrails for Agentic Code Generation',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Blocks - AI-Powered Semantic Validation',
-    description: 'Teach AI coding assistants your domain rules. Development-time validation with AI guardrails.',
-    images: ['/og-image.png'],
+    title: 'Blocks - Guardrails for Agentic Code Generation',
+    description: 'Create a feedback loop between your domain spec and AI agents. Spec → Validate → Ship.',
+    images: ['/api/og/home'],
   },
 };
 

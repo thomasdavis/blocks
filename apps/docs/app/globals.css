@@ -4,48 +4,69 @@
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 
-/* Terminal Blueprint Theme for Fumadocs */
-:root {
-  /* Force dark mode colors */
-  --background: 5 8 5;
-  --foreground: 160 176 160;
-  --muted: 8 12 8;
-  --muted-foreground: 106 138 106;
-  --popover: 10 18 10;
-  --popover-foreground: 160 176 160;
-  --card: 10 18 10;
-  --card-foreground: 160 176 160;
-  --border: 42 58 42;
-  --input: 42 58 42;
-  --primary: 90 138 90;
-  --primary-foreground: 5 8 5;
-  --secondary: 8 12 8;
-  --secondary-foreground: 138 202 138;
-  --accent: 202 221 106;
-  --accent-foreground: 5 8 5;
-  --ring: 90 138 90;
+/*
+ * Terminal Blueprint Theme - Light & Dark Modes
+ * Light: Clean paper with green accents
+ * Dark: Deep terminal green
+ */
 
-  /* Fumadocs specific */
-  --fd-background: 5 8 5;
-  --fd-foreground: 160 176 160;
-  --fd-muted: 8 12 8;
-  --fd-muted-foreground: 106 138 106;
-  --fd-popover: 10 18 10;
-  --fd-popover-foreground: 160 176 160;
-  --fd-card: 10 18 10;
-  --fd-card-foreground: 160 176 160;
-  --fd-border: 42 58 42;
-  --fd-input: 42 58 42;
-  --fd-primary: 138 202 138;
-  --fd-primary-foreground: 5 8 5;
-  --fd-secondary: 8 12 8;
-  --fd-secondary-foreground: 138 202 138;
-  --fd-accent: 15 26 15;
-  --fd-accent-foreground: 138 202 138;
-  --fd-ring: 90 138 90;
+:root {
+  /* Light mode - clean paper with green ink */
+  --background: 250 252 250;
+  --foreground: 30 40 30;
+  --muted: 240 245 240;
+  --muted-foreground: 80 100 80;
+  --popover: 255 255 255;
+  --popover-foreground: 30 40 30;
+  --card: 245 250 245;
+  --card-foreground: 30 40 30;
+  --border: 200 220 200;
+  --input: 200 220 200;
+  --primary: 60 120 60;
+  --primary-foreground: 255 255 255;
+  --secondary: 235 245 235;
+  --secondary-foreground: 40 80 40;
+  --accent: 140 180 60;
+  --accent-foreground: 255 255 255;
+  --ring: 60 120 60;
+
+  /* Fumadocs specific - light mode */
+  --fd-background: 250 252 250;
+  --fd-foreground: 30 40 30;
+  --fd-muted: 240 245 240;
+  --fd-muted-foreground: 80 100 80;
+  --fd-popover: 255 255 255;
+  --fd-popover-foreground: 30 40 30;
+  --fd-card: 245 250 245;
+  --fd-card-foreground: 30 40 30;
+  --fd-border: 200 220 200;
+  --fd-input: 200 220 200;
+  --fd-primary: 60 120 60;
+  --fd-primary-foreground: 255 255 255;
+  --fd-secondary: 235 245 235;
+  --fd-secondary-foreground: 40 80 40;
+  --fd-accent: 235 245 235;
+  --fd-accent-foreground: 40 80 40;
+  --fd-ring: 60 120 60;
+
+  /* Theme colors as direct values for custom styling */
+  --theme-bg: #fafcfa;
+  --theme-bg-secondary: #f5faf5;
+  --theme-bg-tertiary: #ebf5eb;
+  --theme-text: #1e281e;
+  --theme-text-muted: #506450;
+  --theme-text-subtle: #708070;
+  --theme-border: #c8dcc8;
+  --theme-border-strong: #a0c0a0;
+  --theme-accent: #3c783c;
+  --theme-accent-bright: #8cb43c;
+  --theme-accent-text: #2a5a2a;
+  --theme-code-bg: #ebf5eb;
+  --theme-code-border: #c8dcc8;
 }
 
 .dark {
+  /* Dark mode - terminal green */
   --background: 5 8 5;
   --foreground: 160 176 160;
   --muted: 8 12 8;
@@ -64,7 +85,7 @@
   --accent-foreground: 5 8 5;
   --ring: 90 138 90;
 
-  /* Fumadocs specific */
+  /* Fumadocs specific - dark mode */
   --fd-background: 5 8 5;
   --fd-foreground: 160 176 160;
   --fd-muted: 8 12 8;
@@ -82,72 +103,72 @@
   --fd-accent: 15 26 15;
   --fd-accent-foreground: 138 202 138;
   --fd-ring: 90 138 90;
+
+  /* Theme colors as direct values for custom styling */
+  --theme-bg: #050805;
+  --theme-bg-secondary: #0a120a;
+  --theme-bg-tertiary: #080c08;
+  --theme-text: #a0b0a0;
+  --theme-text-muted: #6a8a6a;
+  --theme-text-subtle: #5a8a5a;
+  --theme-border: #2a3a2a;
+  --theme-border-strong: #3a5a3a;
+  --theme-accent: #8aca8a;
+  --theme-accent-bright: #cadd6a;
+  --theme-accent-text: #cadd6a;
+  --theme-code-bg: #080c08;
+  --theme-code-border: #2a3a2a;
 }
 
-/* Override Fumadocs components */
-[data-theme="light"] {
-  color-scheme: dark !important;
+/* Base styles */
+html {
+  color-scheme: light dark;
 }
 
-/* Terminal styling for docs */
+body {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
+}
+
+/* Terminal styling for docs sidebar */
 .fd-sidebar {
-  background-color: rgb(5 8 5) !important;
-  border-color: rgb(42 58 42) !important;
+  background-color: var(--theme-bg);
+  border-color: var(--theme-border);
 }
 
 .fd-nav {
-  background-color: rgb(5 8 5 / 0.95) !important;
-  border-color: rgb(42 58 42) !important;
+  background-color: color-mix(in srgb, var(--theme-bg) 95%, transparent);
+  border-color: var(--theme-border);
+  backdrop-filter: blur(8px);
 }
 
 /* Code blocks in docs */
 [data-rehype-pretty-code-fragment] pre {
-  background-color: rgb(8 12 8) !important;
-  border: 1px solid rgb(42 58 42) !important;
-  border-radius: 2px !important;
+  background-color: var(--theme-code-bg);
+  border: 1px solid var(--theme-code-border);
+  border-radius: 2px;
 }
 
 /* Links */
 .prose a {
-  color: rgb(138 202 138) !important;
+  color: var(--theme-accent);
 }
 
 .prose a:hover {
-  color: rgb(202 221 106) !important;
+  color: var(--theme-accent-bright);
 }
 
 /* Headings in docs */
 .prose h1, .prose h2, .prose h3, .prose h4 {
-  color: rgb(202 221 106) !important;
-}
-
-/* Body background */
-body {
-  background-color: rgb(5 8 5) !important;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace !important;
+  color: var(--theme-accent-text);
 }
 
 /* Sidebar items */
 [data-active="true"] {
-  background-color: rgb(10 18 10) !important;
-  color: rgb(202 221 106) !important;
-  border-color: rgb(58 90 58) !important;
-}
-
-/* Force dark background on main content area */
-main,
-article,
-.prose,
-[class*="fd-page"],
-[class*="fd-content"],
-[class*="fd-article"],
-[class*="fd-prose"],
-[class*="fd-body"],
-[class*="fd-main"],
-.fd-layout > div,
-[role="main"] {
-  background-color: rgb(5 8 5) !important;
-  color: rgb(160 176 160) !important;
+  background-color: var(--theme-bg-secondary);
+  color: var(--theme-accent-bright);
+  border-color: var(--theme-border-strong);
 }
 
 /* Fix prose text colors */
@@ -156,19 +177,19 @@ article,
 .prose span,
 .prose td,
 .prose th {
-  color: rgb(138 158 138) !important;
+  color: var(--theme-text);
 }
 
 .prose strong {
-  color: rgb(202 221 106) !important;
+  color: var(--theme-accent-text);
 }
 
 .prose code {
-  color: rgb(138 202 138) !important;
-  background-color: rgb(10 18 10) !important;
-  border: 1px solid rgb(42 58 42) !important;
-  border-radius: 2px !important;
-  padding: 0.125rem 0.25rem !important;
+  color: var(--theme-accent);
+  background-color: var(--theme-code-bg);
+  border: 1px solid var(--theme-code-border);
+  border-radius: 2px;
+  padding: 0.125rem 0.25rem;
 }
 
 /* Code blocks - override all pre/code styling */
@@ -180,14 +201,14 @@ figure pre,
 [data-rehype-pretty-code-figure] pre,
 .shiki,
 .shiki span {
-  background-color: rgb(8 12 8) !important;
-  border-color: rgb(42 58 42) !important;
+  background-color: var(--theme-code-bg);
+  border-color: var(--theme-code-border);
 }
 
 figure[data-rehype-pretty-code-figure] {
-  background-color: rgb(8 12 8) !important;
-  border: 1px solid rgb(42 58 42) !important;
-  border-radius: 2px !important;
+  background-color: var(--theme-code-bg);
+  border: 1px solid var(--theme-code-border);
+  border-radius: 2px;
 }
 
 /* Callouts and info boxes */
@@ -200,28 +221,28 @@ figure[data-rehype-pretty-code-figure] {
 [class*="info"],
 [class*="warning"],
 [class*="tip"] {
-  background-color: rgb(10 18 10) !important;
-  border-color: rgb(42 58 42) !important;
-  color: rgb(138 158 138) !important;
+  background-color: var(--theme-bg-secondary);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
 }
 
 /* Tables */
 .prose table {
-  border-color: rgb(42 58 42) !important;
+  border-color: var(--theme-border);
 }
 
 .prose th {
-  background-color: rgb(10 18 10) !important;
-  border-color: rgb(42 58 42) !important;
-  color: rgb(202 221 106) !important;
+  background-color: var(--theme-bg-secondary);
+  border-color: var(--theme-border);
+  color: var(--theme-accent-text);
 }
 
 .prose td {
-  border-color: rgb(42 58 42) !important;
+  border-color: var(--theme-border);
 }
 
 .prose tr:nth-child(even) {
-  background-color: rgb(8 12 8) !important;
+  background-color: var(--theme-bg-tertiary);
 }
 
 /* Inline code in headings */
@@ -229,65 +250,65 @@ figure[data-rehype-pretty-code-figure] {
 .prose h2 code,
 .prose h3 code,
 .prose h4 code {
-  color: rgb(138 202 138) !important;
-  background-color: rgb(10 18 10) !important;
+  color: var(--theme-accent);
+  background-color: var(--theme-code-bg);
 }
 
 /* Blockquotes */
 .prose blockquote {
-  border-left-color: rgb(90 138 90) !important;
-  color: rgb(106 138 106) !important;
-  background-color: rgb(8 12 8) !important;
+  border-left-color: var(--theme-accent);
+  color: var(--theme-text-muted);
+  background-color: var(--theme-bg-tertiary);
 }
 
 /* Lists */
 .prose ul > li::marker,
 .prose ol > li::marker {
-  color: rgb(90 138 90) !important;
+  color: var(--theme-accent);
 }
 
 /* Copy button on code blocks */
 button[class*="copy"],
 [class*="copy-button"] {
-  background-color: rgb(10 18 10) !important;
-  border-color: rgb(42 58 42) !important;
-  color: rgb(138 202 138) !important;
+  background-color: var(--theme-bg-secondary);
+  border-color: var(--theme-border);
+  color: var(--theme-accent);
 }
 
 /* Search and other inputs */
 input,
 [class*="search"] input {
-  background-color: rgb(10 18 10) !important;
-  border-color: rgb(42 58 42) !important;
-  color: rgb(160 176 160) !important;
+  background-color: var(--theme-bg-secondary);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
 }
 
 input::placeholder {
-  color: rgb(74 106 74) !important;
+  color: var(--theme-text-muted);
 }
 
 /* Cards and boxes */
 [class*="card"],
 [class*="Card"] {
-  background-color: rgb(10 18 10) !important;
-  border-color: rgb(42 58 42) !important;
+  background-color: var(--theme-bg-secondary);
+  border-color: var(--theme-border);
 }
 
 /* TOC on the right */
 [class*="toc"],
 [class*="Toc"],
 nav[aria-label*="table of contents"] {
-  background-color: rgb(5 8 5) !important;
+  background-color: var(--theme-bg);
 }
 
 [class*="toc"] a,
 [class*="Toc"] a {
-  color: rgb(106 138 106) !important;
+  color: var(--theme-text-muted);
 }
 
 [class*="toc"] a:hover,
 [class*="Toc"] a:hover {
-  color: rgb(138 202 138) !important;
+  color: var(--theme-accent);
 }
 
 /* Pagination/nav links */
@@ -295,29 +316,68 @@ nav[aria-label*="table of contents"] {
 [class*="Pagination"],
 a[rel="prev"],
 a[rel="next"] {
-  background-color: rgb(10 18 10) !important;
-  border-color: rgb(42 58 42) !important;
-  color: rgb(138 202 138) !important;
+  background-color: var(--theme-bg-secondary);
+  border-color: var(--theme-border);
+  color: var(--theme-accent);
 }
 
 /* Breadcrumbs */
 [class*="breadcrumb"],
 [class*="Breadcrumb"] {
-  color: rgb(106 138 106) !important;
+  color: var(--theme-text-muted);
 }
 
-/* Force html dark mode */
-html {
-  color-scheme: dark !important;
-  background-color: rgb(5 8 5) !important;
+/* Custom utility classes for theme-aware styling */
+.theme-bg {
+  background-color: var(--theme-bg);
 }
 
-/* Override any light mode classes */
-.light,
-[data-theme="light"],
-[class*="light"] {
-  --background: 5 8 5 !important;
-  --foreground: 160 176 160 !important;
-  background-color: rgb(5 8 5) !important;
-  color: rgb(160 176 160) !important;
+.theme-bg-secondary {
+  background-color: var(--theme-bg-secondary);
+}
+
+.theme-bg-tertiary {
+  background-color: var(--theme-bg-tertiary);
+}
+
+.theme-text {
+  color: var(--theme-text);
+}
+
+.theme-text-muted {
+  color: var(--theme-text-muted);
+}
+
+.theme-text-subtle {
+  color: var(--theme-text-subtle);
+}
+
+.theme-border {
+  border-color: var(--theme-border);
+}
+
+.theme-border-strong {
+  border-color: var(--theme-border-strong);
+}
+
+.theme-accent {
+  color: var(--theme-accent);
+}
+
+.theme-accent-bright {
+  color: var(--theme-accent-bright);
+}
+
+.theme-accent-text {
+  color: var(--theme-accent-text);
+}
+
+/* Scanline effect - subtle in both modes */
+.scanline-overlay {
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.03) 1px, rgba(0,0,0,0.03) 2px);
+}
+
+.dark .scanline-overlay {
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.3) 1px, rgba(0,0,0,0.3) 2px);
+  opacity: 0.015;
 }

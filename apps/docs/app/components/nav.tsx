@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -13,18 +15,28 @@ const navItems = [
 
 export function Nav() {
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-[#2a3a2a] bg-[#050805]/95 backdrop-blur-sm">
+    <nav className="sticky top-0 z-50 border-b border-[#c8dcc8] dark:border-[#2a3a2a] bg-[#fafcfa]/95 dark:bg-[#050805]/95 backdrop-blur-sm">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 font-mono font-bold text-xl text-[#8aca8a]"
+            className="flex items-center gap-2 font-mono font-bold text-xl text-[#3c783c] dark:text-[#8aca8a]"
           >
-            <div className="w-8 h-8 rounded-sm bg-[#0a120a] border border-[#5a8a5a] flex items-center justify-center shadow-[0_0_10px_rgba(138,202,138,0.2)]">
-              <span className="text-[#cadd6a] text-sm font-bold">B</span>
+            <div className="w-8 h-8 rounded-sm bg-[#f5faf5] dark:bg-[#0a120a] border border-[#a0c0a0] dark:border-[#5a8a5a] flex items-center justify-center shadow-[0_0_10px_rgba(60,120,60,0.2)] dark:shadow-[0_0_10px_rgba(138,202,138,0.2)]">
+              <span className="text-[#8cb43c] dark:text-[#cadd6a] text-sm font-bold">B</span>
             </div>
             <span className="tracking-wide">Blocks</span>
           </Link>
@@ -39,8 +51,8 @@ export function Nav() {
                   href={item.href}
                   className={`px-4 py-2 rounded-sm text-sm font-mono uppercase tracking-wider transition-all duration-150 ${
                     isActive
-                      ? "bg-[#0a120a] border border-[#3a5a3a] text-[#cadd6a] shadow-[0_0_8px_rgba(138,202,138,0.15)]"
-                      : "text-[#5a8a5a] hover:text-[#8aca8a] hover:bg-[#0a120a]/50"
+                      ? "bg-[#f5faf5] dark:bg-[#0a120a] border border-[#a0c0a0] dark:border-[#3a5a3a] text-[#8cb43c] dark:text-[#cadd6a] shadow-[0_0_8px_rgba(60,120,60,0.15)] dark:shadow-[0_0_8px_rgba(138,202,138,0.15)]"
+                      : "text-[#506450] dark:text-[#5a8a5a] hover:text-[#3c783c] dark:hover:text-[#8aca8a] hover:bg-[#f5faf5]/50 dark:hover:bg-[#0a120a]/50"
                   }`}
                 >
                   {item.label}
@@ -51,7 +63,7 @@ export function Nav() {
               href="https://github.com/thomasdavis/blocks"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-2 p-2 rounded-sm text-[#5a8a5a] hover:text-[#8aca8a] hover:bg-[#0a120a]/50 transition-all duration-150"
+              className="ml-2 p-2 rounded-sm text-[#506450] dark:text-[#5a8a5a] hover:text-[#3c783c] dark:hover:text-[#8aca8a] hover:bg-[#f5faf5]/50 dark:hover:bg-[#0a120a]/50 transition-all duration-150"
               aria-label="GitHub"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -62,6 +74,26 @@ export function Nav() {
                 />
               </svg>
             </a>
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="ml-2 p-2 rounded-sm text-[#506450] dark:text-[#5a8a5a] hover:text-[#3c783c] dark:hover:text-[#8aca8a] hover:bg-[#f5faf5]/50 dark:hover:bg-[#0a120a]/50 transition-all duration-150"
+              aria-label="Toggle theme"
+            >
+              {mounted ? (
+                theme === "dark" ? (
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                )
+              ) : (
+                <div className="w-5 h-5" />
+              )}
+            </button>
           </div>
         </div>
       </div>

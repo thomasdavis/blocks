@@ -268,6 +268,20 @@ blocks:
           <p className="text-center text-[#708070] dark:text-[#5a8a5a] mt-6 text-sm">
             The agent sees validation output, understands the issues, and fixes them autonomously.
           </p>
+
+          {/* Link to Example */}
+          <div className="mt-8 text-center">
+            <Link
+              href="/example"
+              className="inline-flex items-center gap-3 px-6 py-3 bg-[#ebf5eb] dark:bg-[#080c08] border border-[#a0c0a0] dark:border-[#3a5a3a] hover:border-[#3c783c] dark:hover:border-[#5a8a5a] rounded-sm text-[#3c783c] dark:text-[#8aca8a] hover:text-[#8cb43c] dark:hover:text-[#cadd6a] transition-all hover:shadow-[0_0_20px_rgba(60,120,60,0.2)] dark:hover:shadow-[0_0_20px_rgba(138,202,138,0.2)]"
+            >
+              <span className="w-2 h-2 bg-[#3c783c] dark:bg-[#8aca8a] rounded-sm" />
+              Watch the Example
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </Link>
+          </div>
         </div>
       </div>
 

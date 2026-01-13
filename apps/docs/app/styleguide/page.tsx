@@ -76,15 +76,15 @@ function Section({
   return (
     <section className="mb-16">
       <div className="flex items-center gap-3 mb-2">
-        <h2 className="text-lg font-mono font-semibold text-[#cadd6a] uppercase tracking-wide">
+        <h2 className="text-lg font-mono font-semibold text-[#8cb43c] dark:text-[#8cb43c] dark:text-[#cadd6a] uppercase tracking-wide">
           {title}
         </h2>
         <Badge variant={isBaseUI ? "info" : "primary"} size="sm">
           {isBaseUI ? "Base UI" : "Custom"}
         </Badge>
       </div>
-      <p className="text-[#6a8a6a] font-mono text-sm mb-6">{description}</p>
-      <div className="bg-[#0a120a] border border-[#2a3a2a] rounded-sm p-6">
+      <p className="text-[#506450] dark:text-[#506450] dark:text-[#6a8a6a] font-mono text-sm mb-6">{description}</p>
+      <div className="bg-[#f5faf5] dark:bg-[#0a120a] border border-[#c8dcc8] dark:border-[#c8dcc8] dark:border-[#2a3a2a] rounded-sm p-6">
         {children}
       </div>
     </section>
@@ -100,7 +100,7 @@ export default function StyleguidePage() {
   const [inputValue, setInputValue] = useState("");
 
   return (
-    <div className="min-h-screen bg-[#050805] text-[#a0b0a0] font-mono">
+    <div className="min-h-screen bg-[#fafcfa] dark:bg-[#050805] text-[#1e281e] dark:text-[#a0b0a0] font-mono">
       {/* Scanline overlay effect */}
       <div
         className="fixed inset-0 pointer-events-none z-50 opacity-[0.015]"
@@ -112,29 +112,29 @@ export default function StyleguidePage() {
       <Nav />
 
       {/* Header */}
-      <div className="border-b border-[#2a3a2a] bg-[#080c08]">
+      <div className="border-b border-[#c8dcc8] dark:border-[#c8dcc8] dark:border-[#2a3a2a] bg-[#ebf5eb] dark:bg-[#ebf5eb] dark:bg-[#080c08]">
         <div className="container mx-auto px-4 py-12">
           <div className="flex items-center gap-4 mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 border border-[#5a8a5a] rotate-45" />
-              <span className="text-xs uppercase tracking-[0.2em] text-[#5a8a5a]">Component Library</span>
-              <div className="w-3 h-3 border border-[#5a8a5a] rotate-45" />
+              <div className="w-3 h-3 border border-[#5a7a5a] dark:border-[#5a8a5a] rotate-45" />
+              <span className="text-xs uppercase tracking-[0.2em] text-[#5a7a5a] dark:text-[#5a7a5a] dark:text-[#5a8a5a]">Component Library</span>
+              <div className="w-3 h-3 border border-[#5a7a5a] dark:border-[#5a8a5a] rotate-45" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-[#cadd6a] mb-2 uppercase tracking-wide">
+          <h1 className="text-4xl font-bold text-[#8cb43c] dark:text-[#8cb43c] dark:text-[#cadd6a] mb-2 uppercase tracking-wide">
             Styleguide
           </h1>
-          <p className="text-[#6a8a6a] mb-4">
-            All components from <code className="px-2 py-1 bg-[#0a120a] border border-[#2a3a2a] rounded-sm text-[#8aca8a] text-sm">@blocksai/ui</code>
+          <p className="text-[#506450] dark:text-[#506450] dark:text-[#6a8a6a] mb-4">
+            All components from <code className="px-2 py-1 bg-[#f5faf5] dark:bg-[#0a120a] border border-[#c8dcc8] dark:border-[#c8dcc8] dark:border-[#2a3a2a] rounded-sm text-[#3c783c] dark:text-[#3c783c] dark:text-[#8aca8a] text-sm">@blocksai/ui</code>
           </p>
           <div className="flex gap-4 text-sm">
             <div className="flex items-center gap-2">
               <Badge variant="info" size="sm">Base UI</Badge>
-              <span className="text-[#5a8a5a]">Built on Base UI primitives</span>
+              <span className="text-[#5a7a5a] dark:text-[#5a7a5a] dark:text-[#5a8a5a]">Built on Base UI primitives</span>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="primary" size="sm">Custom</Badge>
-              <span className="text-[#5a8a5a]">Custom styled components</span>
+              <span className="text-[#5a7a5a] dark:text-[#5a7a5a] dark:text-[#5a8a5a]">Custom styled components</span>
             </div>
           </div>
         </div>
@@ -152,7 +152,7 @@ export default function StyleguidePage() {
           <div className="space-y-8">
             {/* Variants */}
             <div>
-              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-4">Variants</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a7a5a] dark:text-[#5a8a5a] mb-4">Variants</h3>
               <div className="flex flex-wrap gap-3">
                 <Button variant="default">Default</Button>
                 <Button variant="primary">Primary</Button>
@@ -167,7 +167,7 @@ export default function StyleguidePage() {
 
             {/* Sizes */}
             <div>
-              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-4">Sizes</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a7a5a] dark:text-[#5a8a5a] mb-4">Sizes</h3>
               <div className="flex flex-wrap items-center gap-3">
                 <Button size="sm">Small</Button>
                 <Button size="md">Medium</Button>
@@ -182,7 +182,7 @@ export default function StyleguidePage() {
 
             {/* States */}
             <div>
-              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-4">States</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a7a5a] dark:text-[#5a8a5a] mb-4">States</h3>
               <div className="flex flex-wrap gap-3">
                 <Button variant="primary">Enabled</Button>
                 <Button variant="primary" disabled>Disabled</Button>
@@ -199,7 +199,7 @@ export default function StyleguidePage() {
         >
           <div className="space-y-6">
             <div>
-              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-4">Status Variants</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a7a5a] dark:text-[#5a8a5a] mb-4">Status Variants</h3>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="default">Default</Badge>
                 <Badge variant="primary">Primary</Badge>
@@ -213,7 +213,7 @@ export default function StyleguidePage() {
               </div>
             </div>
             <div>
-              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-4">Version Variants</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a7a5a] dark:text-[#5a8a5a] mb-4">Version Variants</h3>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="major">major</Badge>
                 <Badge variant="minor">minor</Badge>
@@ -221,7 +221,7 @@ export default function StyleguidePage() {
               </div>
             </div>
             <div>
-              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-4">Sizes</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-[#5a7a5a] dark:text-[#5a8a5a] mb-4">Sizes</h3>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="primary" size="sm">Small</Badge>
                 <Badge variant="primary" size="md">Medium</Badge>
@@ -239,7 +239,7 @@ export default function StyleguidePage() {
         >
           <div className="space-y-6 max-w-md">
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-2">
+              <label className="block text-xs font-mono uppercase tracking-wider text-[#5a7a5a] dark:text-[#5a8a5a] mb-2">
                 Text Input
               </label>
               <Input
@@ -249,13 +249,13 @@ export default function StyleguidePage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-2">
+              <label className="block text-xs font-mono uppercase tracking-wider text-[#5a7a5a] dark:text-[#5a8a5a] mb-2">
                 Disabled Input
               </label>
               <Input placeholder="Disabled" disabled />
             </div>
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-[#5a8a5a] mb-2">
+              <label className="block text-xs font-mono uppercase tracking-wider text-[#5a7a5a] dark:text-[#5a8a5a] mb-2">
                 Textarea
               </label>
               <Textarea placeholder="Write something..." rows={3} />
@@ -274,7 +274,7 @@ export default function StyleguidePage() {
               checked={checkboxChecked}
               onCheckedChange={(checked) => setCheckboxChecked(checked === true)}
             />
-            <span className="text-[#8a9a8a] font-mono text-sm">
+            <span className="text-[#4a6a4a] dark:text-[#8a9a8a] font-mono text-sm">
               {checkboxChecked ? "Checked" : "Unchecked"}
             </span>
           </div>
@@ -291,7 +291,7 @@ export default function StyleguidePage() {
               checked={switchChecked}
               onCheckedChange={setSwitchChecked}
             />
-            <span className="text-[#8a9a8a] font-mono text-sm">
+            <span className="text-[#4a6a4a] dark:text-[#8a9a8a] font-mono text-sm">
               {switchChecked ? "On" : "Off"}
             </span>
           </div>
@@ -327,15 +327,15 @@ export default function StyleguidePage() {
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
                 <RadioItem value="option1" />
-                <span className="text-[#8a9a8a] font-mono text-sm">Option 1</span>
+                <span className="text-[#4a6a4a] dark:text-[#8a9a8a] font-mono text-sm">Option 1</span>
               </div>
               <div className="flex items-center gap-3">
                 <RadioItem value="option2" />
-                <span className="text-[#8a9a8a] font-mono text-sm">Option 2</span>
+                <span className="text-[#4a6a4a] dark:text-[#8a9a8a] font-mono text-sm">Option 2</span>
               </div>
               <div className="flex items-center gap-3">
                 <RadioItem value="option3" />
-                <span className="text-[#8a9a8a] font-mono text-sm">Option 3</span>
+                <span className="text-[#4a6a4a] dark:text-[#8a9a8a] font-mono text-sm">Option 3</span>
               </div>
             </div>
           </RadioGroup>
@@ -352,8 +352,8 @@ export default function StyleguidePage() {
               value={sliderValue}
               onValueChange={setSliderValue}
             />
-            <p className="text-sm font-mono text-[#5a8a5a]">
-              Value: <span className="text-[#8aca8a]">{sliderValue}</span>
+            <p className="text-sm font-mono text-[#5a7a5a] dark:text-[#5a8a5a]">
+              Value: <span className="text-[#3c783c] dark:text-[#8aca8a]">{sliderValue}</span>
             </p>
           </div>
         </Section>
@@ -366,15 +366,15 @@ export default function StyleguidePage() {
         >
           <div className="space-y-4 max-w-sm">
             <div>
-              <p className="text-sm font-mono text-[#5a8a5a] mb-2">25%</p>
+              <p className="text-sm font-mono text-[#5a7a5a] dark:text-[#5a8a5a] mb-2">25%</p>
               <Progress value={25} />
             </div>
             <div>
-              <p className="text-sm font-mono text-[#5a8a5a] mb-2">50%</p>
+              <p className="text-sm font-mono text-[#5a7a5a] dark:text-[#5a8a5a] mb-2">50%</p>
               <Progress value={50} />
             </div>
             <div>
-              <p className="text-sm font-mono text-[#5a8a5a] mb-2">75%</p>
+              <p className="text-sm font-mono text-[#5a7a5a] dark:text-[#5a8a5a] mb-2">75%</p>
               <Progress value={75} />
             </div>
           </div>
@@ -526,8 +526,8 @@ export default function StyleguidePage() {
             </PopoverTrigger>
             <PopoverContent>
               <div className="space-y-2">
-                <h4 className="font-mono font-medium text-[#cadd6a]">Popover Title</h4>
-                <p className="text-sm text-[#6a8a6a]">
+                <h4 className="font-mono font-medium text-[#8cb43c] dark:text-[#cadd6a]">Popover Title</h4>
+                <p className="text-sm text-[#506450] dark:text-[#6a8a6a]">
                   This is a popover with some content. It can contain any elements.
                 </p>
               </div>
@@ -598,20 +598,20 @@ export default function StyleguidePage() {
           <div className="space-y-6">
             <div className="flex items-center gap-8">
               <div>
-                <p className="text-xs font-mono uppercase text-[#5a8a5a] mb-2">Small</p>
+                <p className="text-xs font-mono uppercase text-[#5a7a5a] dark:text-[#5a8a5a] mb-2">Small</p>
                 <LoadingDots size="sm" />
               </div>
               <div>
-                <p className="text-xs font-mono uppercase text-[#5a8a5a] mb-2">Medium</p>
+                <p className="text-xs font-mono uppercase text-[#5a7a5a] dark:text-[#5a8a5a] mb-2">Medium</p>
                 <LoadingDots size="md" />
               </div>
               <div>
-                <p className="text-xs font-mono uppercase text-[#5a8a5a] mb-2">Large</p>
+                <p className="text-xs font-mono uppercase text-[#5a7a5a] dark:text-[#5a8a5a] mb-2">Large</p>
                 <LoadingDots size="lg" />
               </div>
             </div>
             <div>
-              <p className="text-xs font-mono uppercase text-[#5a8a5a] mb-2">With Label</p>
+              <p className="text-xs font-mono uppercase text-[#5a7a5a] dark:text-[#5a8a5a] mb-2">With Label</p>
               <LoadingDots label="Loading..." />
             </div>
           </div>
@@ -623,8 +623,8 @@ export default function StyleguidePage() {
           description="Click to copy text to clipboard."
           isBaseUI={false}
         >
-          <div className="flex items-center gap-4 p-4 bg-[#080c08] border border-[#2a3a2a] rounded-sm max-w-md">
-            <code className="flex-1 text-sm text-[#8aca8a]">npm install @blocksai/cli</code>
+          <div className="flex items-center gap-4 p-4 bg-[#ebf5eb] dark:bg-[#080c08] border border-[#c8dcc8] dark:border-[#2a3a2a] rounded-sm max-w-md">
+            <code className="flex-1 text-sm text-[#3c783c] dark:text-[#8aca8a]">npm install @blocksai/cli</code>
             <CopyButton text="npm install @blocksai/cli" />
           </div>
         </Section>
@@ -653,10 +653,10 @@ export function MyComponent() {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-[#2a3a2a] bg-[#080c08] py-8">
+      <div className="border-t border-[#c8dcc8] dark:border-[#2a3a2a] bg-[#ebf5eb] dark:bg-[#080c08] py-8">
         <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 text-[#5a8a5a] text-sm">
-            <div className="w-2 h-2 rounded-full bg-[#5a8a5a] animate-pulse" />
+          <div className="flex items-center justify-center gap-2 text-[#5a7a5a] dark:text-[#5a8a5a] text-sm">
+            <div className="w-2 h-2 rounded-full bg-[#5a7a5a] dark:bg-[#5a8a5a] animate-pulse" />
             <span className="font-mono uppercase tracking-wider">Terminal Blueprint Theme</span>
           </div>
         </div>

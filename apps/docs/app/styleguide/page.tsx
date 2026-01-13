@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Nav } from "../components/nav";
+import { Footer } from "../components/footer";
 
 // Import all components from @blocksai/ui
 import { Button, getButtonClassName } from "@blocksai/ui/button";
@@ -652,15 +653,7 @@ export function MyComponent() {
 
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-[#c8dcc8] dark:border-[#2a3a2a] bg-[#ebf5eb] dark:bg-[#080c08] py-8">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 text-[#5a7a5a] dark:text-[#5a8a5a] text-sm">
-            <div className="w-2 h-2 rounded-full bg-[#5a7a5a] dark:bg-[#5a8a5a] animate-pulse" />
-            <span className="font-mono uppercase tracking-wider">Terminal Blueprint Theme</span>
-          </div>
-        </div>
-      </div>
+      <Footer />
     </div>
   );
 }

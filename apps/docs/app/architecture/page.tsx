@@ -1,6 +1,7 @@
 "use client";
 
 import { Nav } from "../components/nav";
+import { Footer } from "../components/footer";
 
 export default function ArchitecturePage() {
   return (
@@ -412,22 +413,8 @@ export default function ArchitecturePage() {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="pt-8 border-t border-[#c8dcc8] dark:border-[#2a3a2a]">
-          <div className="flex items-center justify-between text-xs text-[#708070] dark:text-[#4a6a4a]">
-            <a
-              href="/docs"
-              className="hover:text-[#3c783c] dark:hover:text-[#8aca8a] transition-colors"
-            >
-              ← Back to Documentation
-            </a>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#3c783c] dark:bg-[#5a8a5a] animate-pulse" />
-              <span className="uppercase tracking-wider">Blocks Framework</span>
-            </div>
-          </div>
-        </footer>
       </div>
+      <Footer />
     </div>
   );
 }

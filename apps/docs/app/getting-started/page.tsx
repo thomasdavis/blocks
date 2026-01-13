@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Nav } from "../components/nav";
+import { Footer } from "../components/footer";
 import { CopyButton } from "../copy-button";
 
 // Note: Metadata must be in a separate layout.tsx for client components
@@ -294,15 +295,7 @@ export default function GettingStartedPage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <div className="border-t border-[#c8dcc8] dark:border-[#2a3a2a] bg-[#ebf5eb] dark:bg-[#080c08] py-8 mt-16">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 text-[#708070] dark:text-[#5a8a5a] text-sm">
-            <div className="w-2 h-2 rounded-full bg-[#3c783c] dark:bg-[#5a8a5a] animate-pulse" />
-            <span className="uppercase tracking-wider">Blocks</span>
-          </div>
-        </div>
-      </div>
+      <Footer />
     </div>
   );
 }

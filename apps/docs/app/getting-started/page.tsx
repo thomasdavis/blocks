@@ -107,7 +107,7 @@ export default function GettingStartedPage() {
 
       <Nav />
 
-      <main className="container mx-auto px-4 py-16 max-w-4xl">
+      <main id="main-content" className="container mx-auto px-4 py-16 max-w-4xl">
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-[#3c783c] dark:text-[#8aca8a] uppercase tracking-wide mb-4">

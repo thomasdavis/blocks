@@ -27,9 +27,17 @@ export function Nav() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-[#c8dcc8] dark:border-[#2a3a2a] bg-[#fafcfa]/95 dark:bg-[#050805]/95 backdrop-blur-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
+    <>
+      {/* Skip to main content link for accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[#3c783c] dark:focus:bg-[#8aca8a] focus:text-white dark:focus:text-[#050805] focus:rounded-sm focus:font-mono focus:text-sm focus:uppercase focus:tracking-wider focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8cb43c] dark:focus:ring-[#cadd6a]"
+      >
+        Skip to main content
+      </a>
+      <nav className="sticky top-0 z-50 border-b border-[#c8dcc8] dark:border-[#2a3a2a] bg-[#fafcfa]/95 dark:bg-[#050805]/95 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
@@ -94,9 +102,10 @@ export function Nav() {
                 <div className="w-5 h-5" />
               )}
             </button>
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 }

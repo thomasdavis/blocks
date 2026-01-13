@@ -17,7 +17,7 @@ export default function HomePage() {
       />
 
       <Nav />
-      <main>
+      <main id="main-content">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20">
         <div className="max-w-5xl mx-auto text-center">

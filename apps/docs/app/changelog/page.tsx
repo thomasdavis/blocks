@@ -119,8 +119,9 @@ export default function ChangelogPage() {
 
       <Nav />
 
-      {/* Header */}
-      <div className="border-b border-[#c8dcc8] dark:border-[#2a3a2a] bg-[#ebf5eb] dark:bg-[#080c08]">
+      <main id="main-content">
+        {/* Header */}
+        <div className="border-b border-[#c8dcc8] dark:border-[#2a3a2a] bg-[#ebf5eb] dark:bg-[#080c08]">
         <div className="container mx-auto px-4 py-12">
           <div className="flex items-center gap-4 mb-4">
             <div className="flex items-center gap-2">
@@ -319,7 +320,8 @@ export default function ChangelogPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </main>
 
       <Footer />
     </div>

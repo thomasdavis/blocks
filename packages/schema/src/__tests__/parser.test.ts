@@ -66,71 +66,57 @@ describe("isValidBlocksConfig", () => {
   });
 });
 
-describe("blocks.domain_rules", () => {
-  it("should parse default domain_rules at blocks level", () => {
-    const yamlWithDefaults = `
+describe("validators with domain rules", () => {
+  it("should parse domain validator with rules config", () => {
+    const yaml = `
 name: "Test Project"
 
 blocks:
-  domain_rules:
-    - id: rule1
-      description: "Default rule 1"
-    - id: rule2
-      description: "Default rule 2"
-
   test_block:
     description: "Test block"
-`;
-    const config = parseBlocksConfig(yamlWithDefaults);
-    expect(config.blocks.domain_rules).toBeDefined();
-    expect(config.blocks.domain_rules).toHaveLength(2);
-    expect(config.blocks.domain_rules[0].id).toBe("rule1");
-    expect(config.blocks.domain_rules[0].description).toBe("Default rule 1");
-  });
 
-  it("should support blocks with both default rules and block definitions", () => {
-    const yaml = `
-name: "Test"
-
-blocks:
-  domain_rules:
-    - id: default
-      description: "Default rule"
-
-  block1:
-    description: "Block 1"
-
-  block2:
-    description: "Block 2"
-    domain_rules:
-      - id: specific
-        description: "Block-specific rule"
+validators:
+  - schema
+  - name: domain
+    config:
+      rules:
+        - id: rule1
+          description: "Rule 1"
+        - id: rule2
+          description: "Rule 2"
 `;
     const config = parseBlocksConfig(yaml);
-    expect(config.blocks.domain_rules).toBeDefined();
-    expect(config.blocks.domain_rules).toHaveLength(1);
-    expect(config.blocks.block1).toBeDefined();
-    expect(config.blocks.block1.description).toBe("Block 1");
-    expect(config.blocks.block1.domain_rules).toBeUndefined();
-    expect(config.blocks.block2).toBeDefined();
-    expect(config.blocks.block2.domain_rules).toHaveLength(1);
-    expect(config.blocks.block2.domain_rules[0].id).toBe("specific");
+    expect(config.validators).toHaveLength(2);
+    const domainValidator = config.validators?.[1];
+    expect(domainValidator).toEqual({
+      name: "domain",
+      config: {
+        rules: [
+          { id: "rule1", description: "Rule 1" },
+          { id: "rule2", description: "Rule 2" },
+        ],
+      },
+    });
   });
 
-  it("should allow blocks without default domain_rules", () => {
+  it("should parse block-level validator config", () => {
     const yaml = `
 name: "Test"
 
 blocks:
   test_block:
     description: "Test block"
-    domain_rules:
-      - id: specific
-        description: "Specific rule"
+    validators:
+      domain:
+        rules:
+          - id: block_rule
+            description: "Block-specific rule"
 `;
     const config = parseBlocksConfig(yaml);
-    expect(config.blocks.domain_rules).toBeUndefined();
-    expect(config.blocks.test_block.domain_rules).toHaveLength(1);
+    expect(config.blocks.test_block.validators).toBeDefined();
+    expect(config.blocks.test_block.validators?.domain).toEqual({
+      rules: [{ id: "block_rule", description: "Block-specific rule" }],
+    });
   });
 });
 
@@ -197,14 +183,15 @@ validators:
   - name: strict_eslint
     run: lint.eslint
     config:
-      rules: ["error"]
+      severity: error
+      maxWarnings: 0
 `;
     const config = parseBlocksConfig(yaml);
     expect(config.validators).toHaveLength(2);
     expect(config.validators[1]).toEqual({
       name: "strict_eslint",
       run: "lint.eslint",
-      config: { rules: ["error"] }
+      config: { severity: "error", maxWarnings: 0 }
     });
   });
 

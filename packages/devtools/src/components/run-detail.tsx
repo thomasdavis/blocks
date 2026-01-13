@@ -16,7 +16,7 @@ import {
   Activity,
   Target,
 } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@blocksai/ui/card";
+import { Card, CardContent } from "@blocksai/ui/card";
 import { Badge } from "@blocksai/ui/badge";
 import { Button } from "@blocksai/ui/button";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@blocksai/ui/accordion";
@@ -50,7 +50,7 @@ export function RunDetail({ run }: RunDetailProps) {
     (sum, b) => sum + b.validators.filter((v) => v.passed).length,
     0
   );
-  const totalIssues = blocks.reduce(
+  const _totalIssues = blocks.reduce(
     (sum, b) => sum + b.validators.reduce((s, v) => s + v.issues.length, 0),
     0
   );

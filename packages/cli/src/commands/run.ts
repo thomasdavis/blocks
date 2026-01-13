@@ -18,9 +18,7 @@ import type {
 import {
   CacheManager,
   SkipLogic,
-  computeContentHash,
   type BlockCacheEntry,
-  type CachedValidatorResult,
 } from "../cache/index.js";
 
 // Load environment variables from .env file in current directory
@@ -66,7 +64,7 @@ async function loadCustomValidator(validatorPath: string): Promise<Validator | u
         if (ValidatorClass && typeof ValidatorClass === "function") {
           return new ValidatorClass();
         }
-      } catch (error) {
+      } catch {
         // Continue to next pattern
       }
     }
@@ -129,7 +127,7 @@ function cleanupOldRuns(): void {
 /**
  * Print colored console output (original behavior)
  */
-function printColoredOutput(output: ValidationRunOutput): void {
+function _printColoredOutput(output: ValidationRunOutput): void {
   console.log(chalk.bold.blue("\n🧱 Blocks Validator\n"));
 
   for (const block of output.blocks) {
@@ -367,7 +365,7 @@ export const runCommand = new Command("run")
       }
 
       // Prepare validator tasks
-      const validatorTasks = validatorsToRun.map((validatorEntry, index) => {
+      const validatorTasks = validatorsToRun.map((validatorEntry, _index) => {
         return limit(async (): Promise<ValidatorRunResult> => {
           let validatorId: string;
           let validatorLabel: string;

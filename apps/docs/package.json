@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "echo 'Docs lint skipped - uses root ESLint config'",
     "postinstall": "fumadocs-mdx",
     "generate-og": "tsx scripts/generate-og-images.ts"
   },

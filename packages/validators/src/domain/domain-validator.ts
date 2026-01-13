@@ -63,7 +63,7 @@ function readAllBlockFiles(
         ) {
           try {
             files[relPath] = readFileSync(fullPath, "utf-8");
-          } catch (error) {
+          } catch {
             // Skip files that can't be read (binary, permission issues, etc.)
             console.warn(`Could not read file: ${relPath}`);
           }
@@ -97,7 +97,7 @@ function resolveBlockFiles(
     try {
       const content = readFileSync(blockPath, "utf-8");
       return { [fileName]: content };
-    } catch (error) {
+    } catch {
       console.warn(`Could not read file: ${blockPath}`);
       return {};
     }

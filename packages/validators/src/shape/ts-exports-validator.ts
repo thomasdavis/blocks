@@ -1,6 +1,6 @@
 import type { Validator, ValidatorContext, ValidationResult, ValidationIssue } from "../types.js";
 import { readFileSync, readdirSync, statSync, existsSync } from "fs";
-import { join, extname } from "path";
+import { join } from "path";
 
 interface FileAnalysis {
   path: string;

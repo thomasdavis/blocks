@@ -5,7 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
-      "env": ["NODE_ENV"]
+      "env": ["NODE_ENV", "TURSO_DATABASE_URL", "TURSO_AUTH_TOKEN", "BETTER_AUTH_SECRET", "BETTER_AUTH_URL", "RESEND_API_KEY"]
     },
     "dev": {
       "cache": false,

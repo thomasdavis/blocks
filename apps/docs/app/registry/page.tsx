@@ -35,7 +35,7 @@ export default function RegistryPage() {
               </code>{" "}
               in your blocks.yml.
             </p>
-            <div className="bg-[#f5faf5] dark:bg-[#0a120a] border border-[#a0c0a0] dark:border-[#3a5a3a] rounded-sm p-4 max-w-lg mx-auto text-left">
+            <div className="bg-[#f5faf5] dark:bg-[#0a120a] border border-[#a0c0a0] dark:border-[#3a5a3a] rounded-sm p-4 max-w-lg mx-auto text-left mb-6">
               <div className="text-[10px] uppercase tracking-widest text-[#708070] dark:text-[#5a8a5a] mb-2">
                 Connect to this registry
               </div>
@@ -43,6 +43,12 @@ export default function RegistryPage() {
                 libsql://blocksai-thomasdavis.aws-ap-northeast-1.turso.io
               </code>
             </div>
+            <Link
+              href="/registry/submit"
+              className={getButtonClassName("primary", "lg")}
+            >
+              Submit a Block
+            </Link>
           </div>
         </div>
 

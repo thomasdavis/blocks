@@ -8,6 +8,7 @@ const config = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  serverExternalPackages: ['@libsql/client', '@libsql/kysely-libsql', 'libsql', 'better-auth'],
 };
 
 export default withMDX(config);

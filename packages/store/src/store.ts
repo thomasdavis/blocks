@@ -37,35 +37,36 @@ export class BlocksStore {
   private async connect(): Promise<void> {
     if (this.connection) return;
 
-    let url: URL;
-    try {
-      url = new URL(this.databaseUrl);
-    } catch {
-      throw new Error(
-        `Invalid database URL: "${this.databaseUrl}". Expected format: sqlite:///path/to/file.db or postgres://user:pass@host/db`
-      );
-    }
+    // Check protocol via string prefix first (libsql: is not a standard URL scheme)
+    const lowerUrl = this.databaseUrl.toLowerCase();
 
-    if (url.protocol === "sqlite:") {
-      // Handle sqlite:///path/to/file.db or sqlite://./relative.db
+    if (lowerUrl.startsWith("libsql:") || lowerUrl.startsWith("wss:")) {
+      const authToken = this.options?.authToken || process.env.TURSO_AUTH_TOKEN;
+      this.connection = await createLibSqlConnection(this.databaseUrl, authToken);
+      this.dialect = "libsql";
+    } else if (lowerUrl.startsWith("sqlite:")) {
+      let url: URL;
+      try {
+        url = new URL(this.databaseUrl);
+      } catch {
+        throw new Error(
+          `Invalid database URL: "${this.databaseUrl}". Expected format: sqlite:///path/to/file.db`
+        );
+      }
       let dbPath = url.pathname;
       if (url.hostname === ".") {
         dbPath = `.${url.pathname}`;
       } else if (url.hostname) {
         dbPath = url.hostname + url.pathname;
       }
-      this.connection = createSqliteConnection(dbPath);
+      this.connection = await createSqliteConnection(dbPath);
       this.dialect = "sqlite";
-    } else if (url.protocol === "postgres:" || url.protocol === "postgresql:") {
+    } else if (lowerUrl.startsWith("postgres:") || lowerUrl.startsWith("postgresql:")) {
       this.connection = await createPostgresConnection(this.databaseUrl);
       this.dialect = "postgres";
-    } else if (url.protocol === "libsql:" || url.protocol === "wss:") {
-      const authToken = this.options?.authToken || process.env.TURSO_AUTH_TOKEN;
-      this.connection = await createLibSqlConnection(this.databaseUrl, authToken);
-      this.dialect = "libsql";
     } else {
       throw new Error(
-        `Unsupported database protocol: ${url.protocol}. Use sqlite:, postgres:, postgresql:, or libsql:`
+        `Unsupported database protocol. Expected sqlite:, postgres:, postgresql:, or libsql: URL`
       );
     }
   }

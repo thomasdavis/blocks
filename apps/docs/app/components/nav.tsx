@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+
+const NavAuth = dynamic(
+  () => import("./nav-auth").then((m) => m.NavAuth),
+  { ssr: false },
+);
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -104,6 +110,9 @@ export function Nav() {
                 <div className="w-5 h-5" />
               )}
             </button>
+
+            {/* Auth */}
+            <NavAuth />
             </div>
           </div>
         </div>

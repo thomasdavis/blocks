@@ -16,8 +16,10 @@
     "@blocksai/store": "workspace:*",
     "@blocksai/ui": "workspace:*",
     "@libsql/client": ">=0.5.0",
+    "@libsql/kysely-libsql": "^0.4.1",
     "@vercel/analytics": "^1.6.1",
     "ai": "^6.0.0",
+    "better-auth": "^1.4.18",
     "fumadocs-core": "16.0.14",
     "fumadocs-mdx": "14.0.2",
     "fumadocs-ui": "16.0.14",
@@ -27,6 +29,7 @@
     "openai": "^4.77.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "resend": "^6.9.1",
     "shiki": "^3.15.0"
   },
   "devDependencies": {

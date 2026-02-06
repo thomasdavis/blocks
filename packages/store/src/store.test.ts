@@ -270,7 +270,7 @@ describe("BlocksStore", () => {
 
     it("should throw descriptive error on invalid database URL", async () => {
       const s = new BlocksStore("not-a-valid-url");
-      await expect(s.initialize()).rejects.toThrow("Invalid database URL");
+      await expect(s.initialize()).rejects.toThrow("Unsupported database protocol");
     });
   });
 

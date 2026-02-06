@@ -1,0 +1,63 @@
+$schema: "blocks/v2"
+
+name: "API Endpoint Validator"
+
+# Pull shared API standards from the team database.
+# The database provides: entities (api_request, api_response, error_response),
+# semantics (rest_compliance, error_handling), and philosophy statements.
+# Local config extends and overrides as needed.
+sources:
+  - type: file
+    path: "./shared-blocks.yml"
+  - type: database
+    url: "sqlite://./shared-api-standards.db"
+
+ai:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  on_failure: "warn"
+
+# Local philosophy extends what the database provides
+philosophy:
+  - "Endpoint handlers must be simple and focused on a single resource."
+
+# Local domain extensions — these merge with database-provided entities/semantics
+domain:
+  entities:
+    pagination:
+      fields: [page, per_page, total, total_pages]
+
+  semantics:
+    input_validation:
+      description: "Request inputs must be validated before processing"
+      extraction_hint: "Check for parameter validation, type checking, bounds checking"
+
+validators:
+  - schema
+  - shape
+  - name: domain
+    config:
+      rules:
+        - id: single_responsibility
+          description: "Each endpoint handler must do one thing: receive request, process, return response"
+        - id: error_responses
+          description: "Must return proper error responses with status codes and messages"
+
+blocks:
+  endpoint.get_users:
+    description: "GET /users endpoint handler — returns paginated list of users"
+    path: "blocks/endpoint-get-users"
+    inputs:
+      - name: request
+        type: entity.api_request
+      - name: options
+        type: entity.pagination
+        optional: true
+    outputs:
+      - name: response
+        type: entity.api_response
+        semantics: [rest_compliance, input_validation]
+        constraints:
+          - "Must return 200 with user array on success"
+          - "Must return 400 for invalid query parameters"
+          - "Must support pagination via query parameters"

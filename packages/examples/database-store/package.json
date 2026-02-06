@@ -1,0 +1,25 @@
+{
+  "name": "@blocks-examples/database-store",
+  "version": "0.1.0",
+  "description": "Example demonstrating database-backed shared domain specs with @blocksai/store",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "seed": "tsx seed.ts",
+    "validate": "blocks run endpoint.get_users",
+    "validate:all": "blocks run --all",
+    "store:init": "blocks store init sqlite://./shared-api-standards.db",
+    "store:push": "blocks store push sqlite://./shared-api-standards.db",
+    "store:pull": "blocks store pull sqlite://./shared-api-standards.db --json"
+  },
+  "dependencies": {
+    "@blocksai/store": "workspace:*"
+  },
+  "devDependencies": {
+    "@blocksai/cli": "workspace:*",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.2"
+  }
+}

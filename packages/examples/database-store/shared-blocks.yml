@@ -1,0 +1,18 @@
+# Shared API conventions distributed as a YAML file.
+# Demonstrates the "file" source type — useful for small teams
+# that keep shared config in a Git repo rather than a database.
+
+name: "Shared API File Standards"
+
+philosophy:
+  - "All API responses must include a top-level 'data' or 'error' key."
+
+domain:
+  entities:
+    rate_limit:
+      fields: [limit, remaining, reset]
+
+  semantics:
+    rate_limiting:
+      description: "Endpoints should respect and communicate rate limits"
+      extraction_hint: "Look for rate limit headers or response fields"

@@ -28,10 +28,14 @@
     "yaml": "^2.6.1"
   },
   "peerDependencies": {
-    "pg": "^8.0.0"
+    "pg": "^8.0.0",
+    "@libsql/client": ">=0.5.0"
   },
   "peerDependenciesMeta": {
     "pg": {
+      "optional": true
+    },
+    "@libsql/client": {
       "optional": true
     }
   },

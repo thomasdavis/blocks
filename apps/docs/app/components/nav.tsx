@@ -11,6 +11,7 @@ const navItems = [
   { href: "/getting-started", label: "Get Started" },
   { href: "/architecture", label: "Architecture" },
   { href: "/docs/devtools", label: "Devtools" },
+  { href: "/registry", label: "Registry" },
   { href: "/changelog", label: "Changelog" },
 ];
 

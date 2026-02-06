@@ -2,25 +2,34 @@ import { eq } from "drizzle-orm";
 import type { BlocksConfig, BlockDefinition, DomainEntity, DomainSemantic } from "@blocksai/schema";
 import { createSqliteConnection, type SqliteConnection } from "./adapters/sqlite.js";
 import { createPostgresConnection, type PostgresConnection } from "./adapters/postgres.js";
+import { createLibSqlConnection, type LibSqlConnection } from "./adapters/libsql.js";
 import * as schema from "./schema.js";
 
-type ConnectionType = SqliteConnection | PostgresConnection;
+type ConnectionType = SqliteConnection | PostgresConnection | LibSqlConnection;
+
+export interface BlocksStoreOptions {
+  authToken?: string;
+}
 
 /**
  * BlocksStore - Database adapter for storing and retrieving Blocks specifications
  *
- * Supports SQLite and PostgreSQL via Drizzle ORM.
+ * Supports SQLite, PostgreSQL, and libSQL/Turso via Drizzle ORM.
  *
  * URL formats:
  * - SQLite: sqlite:///absolute/path/to/file.db or sqlite://./relative/path.db
  * - PostgreSQL: postgres://user:pass@host:port/dbname or postgresql://...
+ * - libSQL/Turso: libsql://host or https://host (requires authToken for remote)
  */
 export class BlocksStore {
   private connection: ConnectionType | null = null;
-  private dialect: "sqlite" | "postgres" | null = null;
+  private dialect: "sqlite" | "postgres" | "libsql" | null = null;
   private initialized = false;
 
-  constructor(private readonly databaseUrl: string) {}
+  constructor(
+    private readonly databaseUrl: string,
+    private readonly options?: BlocksStoreOptions,
+  ) {}
 
   /**
    * Parse database URL and establish connection
@@ -50,9 +59,13 @@ export class BlocksStore {
     } else if (url.protocol === "postgres:" || url.protocol === "postgresql:") {
       this.connection = await createPostgresConnection(this.databaseUrl);
       this.dialect = "postgres";
+    } else if (url.protocol === "libsql:" || url.protocol === "wss:") {
+      const authToken = this.options?.authToken || process.env.TURSO_AUTH_TOKEN;
+      this.connection = await createLibSqlConnection(this.databaseUrl, authToken);
+      this.dialect = "libsql";
     } else {
       throw new Error(
-        `Unsupported database protocol: ${url.protocol}. Use sqlite:, postgres:, or postgresql:`
+        `Unsupported database protocol: ${url.protocol}. Use sqlite:, postgres:, postgresql:, or libsql:`
       );
     }
   }
@@ -151,6 +164,45 @@ export class BlocksStore {
           updated_at TEXT NOT NULL
         );
       `);
+    } else if (this.dialect === "libsql") {
+      const { client } = this.connection as LibSqlConnection;
+
+      // libSQL uses batch() for multiple statements
+      await client.batch([
+        `CREATE TABLE IF NOT EXISTS blocks (
+          name TEXT PRIMARY KEY,
+          description TEXT NOT NULL,
+          path TEXT,
+          inputs TEXT,
+          outputs TEXT,
+          exclude TEXT,
+          skip_validators TEXT,
+          validators TEXT,
+          test_data TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )`,
+        `CREATE TABLE IF NOT EXISTS entities (
+          name TEXT PRIMARY KEY,
+          fields TEXT NOT NULL,
+          optional TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )`,
+        `CREATE TABLE IF NOT EXISTS semantics (
+          name TEXT PRIMARY KEY,
+          description TEXT NOT NULL,
+          extraction_hint TEXT,
+          schema TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )`,
+        `CREATE TABLE IF NOT EXISTS config (
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )`,
+      ], "write");
     }
 
     this.initialized = true;
@@ -163,7 +215,7 @@ export class BlocksStore {
     await this.connect();
     if (!this.connection) throw new Error("Database connection not established");
 
-    const table = this.dialect === "sqlite" ? schema.sqliteBlocks : schema.pgBlocks;
+    const table = this.dialect === "postgres" ? schema.pgBlocks : schema.sqliteBlocks;
     const rows = await (this.connection.db as any).select().from(table);
 
     const blocks: Record<string, BlockDefinition> = {};
@@ -180,7 +232,7 @@ export class BlocksStore {
     await this.connect();
     if (!this.connection) throw new Error("Database connection not established");
 
-    const table = this.dialect === "sqlite" ? schema.sqliteBlocks : schema.pgBlocks;
+    const table = this.dialect === "postgres" ? schema.pgBlocks : schema.sqliteBlocks;
     const rows = await (this.connection.db as any).select().from(table).where(eq(table.name, name));
 
     if (rows.length === 0) return undefined;
@@ -195,7 +247,7 @@ export class BlocksStore {
     if (!this.connection) throw new Error("Database connection not established");
 
     const now = new Date().toISOString();
-    const table = this.dialect === "sqlite" ? schema.sqliteBlocks : schema.pgBlocks;
+    const table = this.dialect === "postgres" ? schema.pgBlocks : schema.sqliteBlocks;
 
     const data = this.blockDefinitionToRow(name, block, now);
 
@@ -216,7 +268,7 @@ export class BlocksStore {
     await this.connect();
     if (!this.connection) throw new Error("Database connection not established");
 
-    const table = this.dialect === "sqlite" ? schema.sqliteBlocks : schema.pgBlocks;
+    const table = this.dialect === "postgres" ? schema.pgBlocks : schema.sqliteBlocks;
     await (this.connection.db as any).delete(table).where(eq(table.name, name));
   }
 
@@ -227,7 +279,7 @@ export class BlocksStore {
     await this.connect();
     if (!this.connection) throw new Error("Database connection not established");
 
-    const table = this.dialect === "sqlite" ? schema.sqliteEntities : schema.pgEntities;
+    const table = this.dialect === "postgres" ? schema.pgEntities : schema.sqliteEntities;
     const rows = await (this.connection.db as any).select().from(table);
 
     const entities: Record<string, DomainEntity> = {};
@@ -245,7 +297,7 @@ export class BlocksStore {
     if (!this.connection) throw new Error("Database connection not established");
 
     const now = new Date().toISOString();
-    const table = this.dialect === "sqlite" ? schema.sqliteEntities : schema.pgEntities;
+    const table = this.dialect === "postgres" ? schema.pgEntities : schema.sqliteEntities;
 
     const data = this.entityToRow(name, entity, now);
 
@@ -266,7 +318,7 @@ export class BlocksStore {
     await this.connect();
     if (!this.connection) throw new Error("Database connection not established");
 
-    const table = this.dialect === "sqlite" ? schema.sqliteSemantics : schema.pgSemantics;
+    const table = this.dialect === "postgres" ? schema.pgSemantics : schema.sqliteSemantics;
     const rows = await (this.connection.db as any).select().from(table);
 
     const semantics: Record<string, DomainSemantic> = {};
@@ -284,7 +336,7 @@ export class BlocksStore {
     if (!this.connection) throw new Error("Database connection not established");
 
     const now = new Date().toISOString();
-    const table = this.dialect === "sqlite" ? schema.sqliteSemantics : schema.pgSemantics;
+    const table = this.dialect === "postgres" ? schema.pgSemantics : schema.sqliteSemantics;
 
     const data = this.semanticToRow(name, semantic, now);
 
@@ -305,12 +357,12 @@ export class BlocksStore {
     await this.connect();
     if (!this.connection) throw new Error("Database connection not established");
 
-    const table = this.dialect === "sqlite" ? schema.sqliteConfig : schema.pgConfig;
+    const table = this.dialect === "postgres" ? schema.pgConfig : schema.sqliteConfig;
     const rows = await (this.connection.db as any).select().from(table).where(eq(table.key, key));
 
     if (rows.length === 0) return undefined;
 
-    if (this.dialect === "sqlite") {
+    if (this.usesTextJson) {
       return this.safeJsonParse(rows[0].value as string, `config.${key}`);
     } else {
       return rows[0].value;
@@ -325,11 +377,11 @@ export class BlocksStore {
     if (!this.connection) throw new Error("Database connection not established");
 
     const now = new Date().toISOString();
-    const table = this.dialect === "sqlite" ? schema.sqliteConfig : schema.pgConfig;
+    const table = this.dialect === "postgres" ? schema.pgConfig : schema.sqliteConfig;
 
     const data = {
       key,
-      value: this.dialect === "sqlite" ? JSON.stringify(value) : value,
+      value: this.usesTextJson ? JSON.stringify(value) : value,
       updatedAt: now,
     };
 
@@ -447,6 +499,9 @@ export class BlocksStore {
     } else if (this.dialect === "postgres") {
       const { pool } = this.connection as PostgresConnection;
       await pool.end();
+    } else if (this.dialect === "libsql") {
+      const { client } = this.connection as LibSqlConnection;
+      client.close();
     }
 
     this.connection = null;
@@ -457,6 +512,11 @@ export class BlocksStore {
   // ——————————————————————————————————————————
   // Private Helper Methods
   // ——————————————————————————————————————————
+
+  /** Whether the current dialect stores JSON as text (SQLite, libSQL) vs native JSONB (Postgres) */
+  private get usesTextJson(): boolean {
+    return this.dialect === "sqlite" || this.dialect === "libsql";
+  }
 
   private safeJsonParse(value: string, context: string): unknown {
     try {
@@ -474,31 +534,31 @@ export class BlocksStore {
     if (row.path) block.path = row.path;
 
     if (row.inputs) {
-      block.inputs = this.dialect === "sqlite"
+      block.inputs = this.usesTextJson
         ? this.safeJsonParse(row.inputs, "blocks.inputs") as typeof block.inputs
         : row.inputs;
     }
 
     if (row.outputs) {
-      block.outputs = this.dialect === "sqlite"
+      block.outputs = this.usesTextJson
         ? this.safeJsonParse(row.outputs, "blocks.outputs") as typeof block.outputs
         : row.outputs;
     }
 
     if (row.exclude) {
-      block.exclude = this.dialect === "sqlite"
+      block.exclude = this.usesTextJson
         ? this.safeJsonParse(row.exclude, "blocks.exclude") as typeof block.exclude
         : row.exclude;
     }
 
     if (row.skipValidators) {
-      block.skip_validators = this.dialect === "sqlite"
+      block.skip_validators = this.usesTextJson
         ? this.safeJsonParse(row.skipValidators, "blocks.skip_validators") as typeof block.skip_validators
         : row.skipValidators;
     }
 
     if (row.validators) {
-      block.validators = this.dialect === "sqlite"
+      block.validators = this.usesTextJson
         ? this.safeJsonParse(row.validators, "blocks.validators") as typeof block.validators
         : row.validators;
     }
@@ -518,7 +578,7 @@ export class BlocksStore {
       updatedAt: now,
     };
 
-    if (this.dialect === "sqlite") {
+    if (this.usesTextJson) {
       row.inputs = block.inputs ? JSON.stringify(block.inputs) : null;
       row.outputs = block.outputs ? JSON.stringify(block.outputs) : null;
       row.exclude = block.exclude ? JSON.stringify(block.exclude) : null;
@@ -539,13 +599,13 @@ export class BlocksStore {
 
   private rowToEntity(row: any): DomainEntity {
     const entity: DomainEntity = {
-      fields: this.dialect === "sqlite"
+      fields: this.usesTextJson
         ? this.safeJsonParse(row.fields, "entities.fields") as string[]
         : row.fields,
     };
 
     if (row.optional) {
-      entity.optional = this.dialect === "sqlite"
+      entity.optional = this.usesTextJson
         ? this.safeJsonParse(row.optional, "entities.optional") as string[]
         : row.optional;
     }
@@ -559,7 +619,7 @@ export class BlocksStore {
       updatedAt: now,
     };
 
-    if (this.dialect === "sqlite") {
+    if (this.usesTextJson) {
       row.fields = JSON.stringify(entity.fields);
       row.optional = entity.optional ? JSON.stringify(entity.optional) : null;
     } else {
@@ -580,7 +640,7 @@ export class BlocksStore {
     }
 
     if (row.schema) {
-      semantic.schema = this.dialect === "sqlite"
+      semantic.schema = this.usesTextJson
         ? this.safeJsonParse(row.schema, "semantics.schema")
         : row.schema;
     }
@@ -596,7 +656,7 @@ export class BlocksStore {
       updatedAt: now,
     };
 
-    if (this.dialect === "sqlite") {
+    if (this.usesTextJson) {
       row.schema = semantic.schema ? JSON.stringify(semantic.schema) : null;
     } else {
       row.schema = semantic.schema || null;

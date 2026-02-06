@@ -45,5 +45,8 @@
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.0"
   }
 }

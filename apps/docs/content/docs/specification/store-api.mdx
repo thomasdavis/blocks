@@ -1,0 +1,622 @@
+---
+title: Store API Reference
+description: Programmatic access to Blocks database storage
+---
+
+The `@blocksai/store` package provides a TypeScript API for reading and writing Blocks configuration to SQLite or PostgreSQL databases. Use it to build tools, dashboards, or automated workflows.
+
+## Installation
+
+```bash
+pnpm add @blocksai/store
+```
+
+For PostgreSQL support, also install:
+
+```bash
+pnpm add pg
+```
+
+## Quick Example
+
+```typescript
+import { BlocksStore } from '@blocksai/store';
+
+const store = new BlocksStore('sqlite:///blocks.db');
+
+// Initialize database schema
+await store.initialize();
+
+// Store a block
+await store.putBlock('user_validator', {
+  description: 'Validates user data',
+  inputs: [{ name: 'user', type: 'entity.user' }],
+  outputs: [{ name: 'valid', type: 'boolean' }],
+});
+
+// Retrieve it
+const block = await store.getBlock('user_validator');
+console.log(block.description); // "Validates user data"
+
+// Close connection
+await store.close();
+```
+
+## BlocksStore Class
+
+### Constructor
+
+```typescript
+new BlocksStore(url: string)
+```
+
+Create a new store instance:
+
+```typescript
+// SQLite
+const store = new BlocksStore('sqlite:///blocks.db');
+const memoryStore = new BlocksStore('sqlite:///:memory:');
+
+// PostgreSQL
+const pgStore = new BlocksStore('postgres://user:pass@localhost/blocks');
+```
+
+**Parameters:**
+
+- `url` - Database connection string
+  - SQLite: `sqlite:///path/to/file.db`
+  - PostgreSQL: `postgres://user:pass@host:port/database`
+
+**Throws:**
+
+- `Error` if URL format is invalid
+
+### initialize()
+
+```typescript
+async initialize(): Promise<void>
+```
+
+Create database tables if they don't exist. Call this before first use:
+
+```typescript
+await store.initialize();
+```
+
+**Tables created:**
+
+- `blocks` - Block definitions
+- `entities` - Entity definitions
+- `semantics` - Semantic definitions
+- `config` - Key-value configuration (philosophy, project, etc.)
+
+**Safe to call multiple times** - uses `CREATE TABLE IF NOT EXISTS`.
+
+## Block Operations
+
+### getBlocks()
+
+```typescript
+async getBlocks(): Promise<Record<string, BlockDefinition>>
+```
+
+Retrieve all blocks:
+
+```typescript
+const blocks = await store.getBlocks();
+// {
+//   user_validator: { description: '...', inputs: [...], ... },
+//   email_sender: { description: '...', ... }
+// }
+```
+
+**Returns:** Object mapping block names to definitions.
+
+### getBlock()
+
+```typescript
+async getBlock(name: string): Promise<BlockDefinition | null>
+```
+
+Retrieve a single block by name:
+
+```typescript
+const block = await store.getBlock('user_validator');
+if (block) {
+  console.log(block.description);
+}
+```
+
+**Parameters:**
+
+- `name` - Block name (e.g., `"user_validator"`)
+
+**Returns:** Block definition or `null` if not found.
+
+### putBlock()
+
+```typescript
+async putBlock(name: string, block: BlockDefinition): Promise<void>
+```
+
+Store or update a block:
+
+```typescript
+await store.putBlock('user_validator', {
+  description: 'Validates user input',
+  inputs: [
+    { name: 'user', type: 'entity.user' }
+  ],
+  outputs: [
+    { name: 'valid', type: 'boolean' },
+    { name: 'errors', type: 'array', optional: true }
+  ],
+  domain_rules: [
+    { id: 'email_check', description: 'Must validate email format' }
+  ],
+});
+```
+
+**Parameters:**
+
+- `name` - Block name
+- `block` - Block definition object
+
+**Behavior:** Creates if doesn't exist, updates if it does (upsert).
+
+### deleteBlock()
+
+```typescript
+async deleteBlock(name: string): Promise<void>
+```
+
+Remove a block:
+
+```typescript
+await store.deleteBlock('old_block');
+```
+
+**Parameters:**
+
+- `name` - Block name to delete
+
+**Behavior:** Silent if block doesn't exist.
+
+## Entity Operations
+
+### getEntities()
+
+```typescript
+async getEntities(): Promise<Record<string, EntityDefinition>>
+```
+
+Retrieve all entities:
+
+```typescript
+const entities = await store.getEntities();
+// {
+//   user: { fields: ['id', 'name', 'email'] },
+//   product: { fields: ['id', 'title', 'price'] }
+// }
+```
+
+### putEntity()
+
+```typescript
+async putEntity(name: string, entity: EntityDefinition): Promise<void>
+```
+
+Store or update an entity:
+
+```typescript
+await store.putEntity('user', {
+  fields: ['id', 'name', 'email', 'created_at'],
+  optional: ['phone'],
+});
+```
+
+## Semantic Operations
+
+### getSemantics()
+
+```typescript
+async getSemantics(): Promise<Record<string, SemanticDefinition>>
+```
+
+Retrieve all semantic definitions:
+
+```typescript
+const semantics = await store.getSemantics();
+// {
+//   money_cents: {
+//     description: 'Monetary value in cents',
+//     schema: { type: 'integer', minimum: 0 }
+//   }
+// }
+```
+
+### putSemantic()
+
+```typescript
+async putSemantic(name: string, semantic: SemanticDefinition): Promise<void>
+```
+
+Store or update a semantic:
+
+```typescript
+await store.putSemantic('money_cents', {
+  description: 'Monetary value in cents (integer)',
+  schema: {
+    type: 'integer',
+    minimum: 0,
+  },
+});
+```
+
+## Configuration Operations
+
+### getConfig()
+
+```typescript
+async getConfig(key: string): Promise<any>
+```
+
+Retrieve a configuration value by key:
+
+```typescript
+const philosophy = await store.getConfig('philosophy');
+// ['Blocks must be composable', 'Validate everything']
+
+const project = await store.getConfig('project');
+// { name: 'my-project', domain: 'myproject.general' }
+```
+
+**Common keys:**
+
+- `philosophy` - Philosophy statements (string array)
+- `project` - Project metadata (object)
+- `validators` - Validator configuration (array)
+- `pipeline` - Pipeline configuration (object)
+- `agent` - Agent configuration (object)
+- `targets` - Targets configuration (object)
+- `ai` - AI provider configuration (object)
+
+**Returns:** `null` if key doesn't exist.
+
+### putConfig()
+
+```typescript
+async putConfig(key: string, value: any): Promise<void>
+```
+
+Store or update a configuration value:
+
+```typescript
+await store.putConfig('philosophy', [
+  'Blocks must be small and composable',
+  'All blocks must validate through multi-layer checks',
+]);
+
+await store.putConfig('project', {
+  name: 'my-project',
+  domain: 'myproject.general',
+});
+```
+
+**Parameters:**
+
+- `key` - Configuration key
+- `value` - Any JSON-serializable value
+
+## Conversion Methods
+
+### toBlocksConfig()
+
+```typescript
+async toBlocksConfig(): Promise<BlocksConfig>
+```
+
+Convert entire database to a BlocksConfig object:
+
+```typescript
+const config = await store.toBlocksConfig();
+// {
+//   project: { name: '...', domain: '...' },
+//   philosophy: [...],
+//   domain: {
+//     entities: {...},
+//     semantics: {...}
+//   },
+//   blocks: {...},
+//   ...
+// }
+```
+
+**Returns:** Complete configuration object matching `blocks.yml` schema.
+
+**Use case:** Export database to YAML file.
+
+### fromBlocksConfig()
+
+```typescript
+async fromBlocksConfig(config: BlocksConfig): Promise<void>
+```
+
+Import a complete BlocksConfig into the database:
+
+```typescript
+import { readFileSync } from 'fs';
+import { parse } from 'yaml';
+
+const yaml = readFileSync('blocks.yml', 'utf-8');
+const config = parse(yaml);
+
+await store.fromBlocksConfig(config);
+```
+
+**Parameters:**
+
+- `config` - Complete BlocksConfig object
+
+**Behavior:** Overwrites existing data with values from config. Missing fields are not deleted.
+
+**Use case:** Import from YAML file or another source.
+
+## Utility Functions
+
+### resolveConfig()
+
+```typescript
+import { resolveConfig } from '@blocksai/store';
+
+const resolved = await resolveConfig(localConfig, sources);
+```
+
+Merge a local config with sources according to the merge strategy:
+
+```typescript
+const localConfig = {
+  project: { name: 'my-project' },
+  blocks: {
+    my_block: { description: 'Local block' }
+  }
+};
+
+const sources = [
+  { type: 'database', url: 'sqlite:///shared.db', mode: 'pull' },
+  { type: 'file', path: './common.yml' }
+];
+
+const resolved = await resolveConfig(localConfig, sources);
+// Merged result with local overrides
+```
+
+**Parameters:**
+
+- `localConfig` - Base configuration object
+- `sources` - Array of source definitions
+
+**Returns:** Merged configuration object.
+
+**Use case:** Implement custom config loading logic.
+
+## Connection Management
+
+### close()
+
+```typescript
+async close(): Promise<void>
+```
+
+Close the database connection:
+
+```typescript
+await store.close();
+```
+
+**Best practice:** Always close connections when done, especially in long-running applications or scripts:
+
+```typescript
+const store = new BlocksStore('sqlite:///blocks.db');
+try {
+  await store.initialize();
+  // ... do work ...
+} finally {
+  await store.close();
+}
+```
+
+## TypeScript Types
+
+### BlockDefinition
+
+```typescript
+interface BlockDefinition {
+  description: string;
+  path?: string;
+  inputs?: Array<{
+    name: string;
+    type: string;
+    optional?: boolean;
+  }>;
+  outputs?: Array<{
+    name: string;
+    type: string;
+    measures?: string[];
+    constraints?: string[];
+    optional?: boolean;
+  }>;
+  domain_rules?: Array<{
+    id: string;
+    description: string;
+  }>;
+  test_data?: any;
+}
+```
+
+### EntityDefinition
+
+```typescript
+interface EntityDefinition {
+  fields: string[];
+  optional?: string[];
+}
+```
+
+### SemanticDefinition
+
+```typescript
+interface SemanticDefinition {
+  description: string;
+  schema?: any; // JSON Schema object
+}
+```
+
+### BlocksConfig
+
+```typescript
+interface BlocksConfig {
+  project?: {
+    name: string;
+    domain: string;
+  };
+  philosophy?: string[];
+  domain?: {
+    entities?: Record<string, EntityDefinition>;
+    semantics?: Record<string, SemanticDefinition>;
+    signals?: Record<string, any>;
+    measures?: Record<string, any>;
+  };
+  blocks?: Record<string, BlockDefinition>;
+  validators?: any[];
+  pipeline?: any;
+  agent?: any;
+  targets?: any;
+  ai?: any;
+  cache?: any;
+  sources?: Array<{
+    type: 'database' | 'file';
+    url?: string;
+    path?: string;
+    mode?: 'pull' | 'push' | 'sync';
+  }>;
+}
+```
+
+## Complete Example
+
+Here's a complete example showing common operations:
+
+```typescript
+import { BlocksStore } from '@blocksai/store';
+import { writeFileSync } from 'fs';
+import { stringify } from 'yaml';
+
+async function main() {
+  const store = new BlocksStore('postgres://localhost/blocks');
+
+  try {
+    // Initialize database
+    await store.initialize();
+
+    // Store project metadata
+    await store.putConfig('project', {
+      name: 'user-service',
+      domain: 'users.api',
+    });
+
+    // Store philosophy
+    await store.putConfig('philosophy', [
+      'All user data must be validated',
+      'Privacy is paramount',
+    ]);
+
+    // Store an entity
+    await store.putEntity('user', {
+      fields: ['id', 'email', 'name'],
+      optional: ['phone', 'avatar'],
+    });
+
+    // Store a block
+    await store.putBlock('user_validator', {
+      description: 'Validates user input',
+      inputs: [
+        { name: 'user', type: 'entity.user' }
+      ],
+      outputs: [
+        { name: 'valid', type: 'boolean' },
+        { name: 'errors', type: 'array', optional: true }
+      ],
+    });
+
+    // Retrieve and display a block
+    const block = await store.getBlock('user_validator');
+    console.log('Block:', block);
+
+    // Export entire config to YAML
+    const config = await store.toBlocksConfig();
+    const yaml = stringify(config);
+    writeFileSync('exported-blocks.yml', yaml);
+    console.log('Exported to exported-blocks.yml');
+
+    // Get all blocks
+    const allBlocks = await store.getBlocks();
+    console.log('Total blocks:', Object.keys(allBlocks).length);
+
+  } finally {
+    await store.close();
+  }
+}
+
+main().catch(console.error);
+```
+
+## Error Handling
+
+All async methods can throw errors. Common error cases:
+
+```typescript
+import { BlocksStore } from '@blocksai/store';
+
+const store = new BlocksStore('postgres://invalid-host/blocks');
+
+try {
+  await store.initialize();
+} catch (error) {
+  if (error.code === 'ECONNREFUSED') {
+    console.error('Database server is not running');
+  } else if (error.code === 'ENOTFOUND') {
+    console.error('Database host not found');
+  } else {
+    console.error('Database error:', error.message);
+  }
+}
+```
+
+**Common error scenarios:**
+
+- Connection refused (database not running)
+- Authentication failure (wrong credentials)
+- Network timeout (unreachable host)
+- Permission denied (insufficient privileges)
+- Invalid URL format (malformed connection string)
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Database Storage Guide"
+    description="Learn how to set up and use database storage"
+    href="/docs/getting-started/database-storage"
+  />
+  <Card
+    title="Sources Configuration"
+    description="Understand multi-source config merging"
+    href="/docs/specification/sources"
+  />
+  <Card
+    title="Migration Tutorial"
+    description="Migrate from YAML to database storage"
+    href="/docs/tutorials/database-migration"
+  />
+</Cards>

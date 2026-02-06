@@ -1,0 +1,420 @@
+---
+title: Sources Configuration
+description: Multi-source configuration merging with databases and files
+---
+
+The `sources` field in `blocks.yml` allows you to load and merge configuration from multiple databases and YAML files. This enables team collaboration, environment-specific overrides, and centralized configuration management.
+
+## Overview
+
+Sources are loaded and merged in order. Later sources override earlier ones, and local `blocks.yml` values always win:
+
+```yaml title="blocks.yml"
+sources:
+  - type: database
+    url: postgres://db.company.com/blocks-shared
+    mode: pull
+
+  - type: file
+    path: ./blocks-common.yml
+
+  - type: database
+    url: sqlite:///local-overrides.db
+    mode: pull
+
+# Local values override everything above
+project:
+  name: "My Local Project"
+```
+
+Load order: shared DB → common file → local DB → local YAML
+
+## Source Types
+
+### Database Source
+
+Load configuration from SQLite or PostgreSQL:
+
+```yaml
+sources:
+  - type: database
+    url: postgres://user:pass@host:port/database
+    mode: pull  # Options: pull, push, sync
+```
+
+**Fields:**
+
+- `type: "database"` (required)
+- `url` (required) - Database connection string
+  - SQLite: `sqlite:///path/to/file.db`
+  - PostgreSQL: `postgres://user:pass@host:port/db`
+- `mode` (optional) - Sync behavior: `pull`, `push`, or `sync` (default: `pull`)
+
+**Modes:**
+
+- `pull` - Load from database, merge with local config
+- `push` - Push local config to database after loading
+- `sync` - Bidirectional sync (pull before run, push after)
+
+### File Source
+
+Load configuration from another YAML file:
+
+```yaml
+sources:
+  - type: file
+    path: ../shared/blocks-common.yml
+```
+
+**Fields:**
+
+- `type: "file"` (required)
+- `path` (required) - File path, relative to current `blocks.yml` or absolute
+
+## Complete Example
+
+```yaml title="blocks.yml"
+sources:
+  # Load team-wide defaults from shared database
+  - type: database
+    url: postgres://team:secret@db.company.com/blocks-team
+    mode: pull
+
+  # Load common entity definitions
+  - type: file
+    path: ./config/entities.yml
+
+  # Load environment-specific overrides
+  - type: file
+    path: ./config/${BLOCKS_ENV}.yml
+
+# Local configuration (highest priority)
+project:
+  name: "my-project"
+  domain: "myproject.local"
+
+blocks:
+  # Override block from database
+  user_validator:
+    description: "Local override of shared block"
+    inputs:
+      - name: user
+        type: entity.user
+```
+
+With `BLOCKS_ENV=production`, this loads:
+1. Database config from PostgreSQL
+2. Common entities from `./config/entities.yml`
+3. Production overrides from `./config/production.yml`
+4. Local values from `blocks.yml`
+
+## Merge Strategy
+
+Sources are merged in order using a deep merge algorithm. The merge behavior depends on the field type:
+
+### Top-Level Fields
+
+| Field | Merge Behavior |
+|-------|----------------|
+| `project` | Override (last wins) |
+| `philosophy` | Concatenate + deduplicate |
+| `domain` | Deep merge by key |
+| `blocks` | Deep merge by block name |
+| `validators` | Override (last wins) |
+| `pipeline` | Override (last wins) |
+| `agent` | Override (last wins) |
+| `targets` | Override (last wins) |
+| `ai` | Override (last wins) |
+| `cache` | Override (last wins) |
+
+### Deep Merge Details
+
+#### Philosophy
+
+Philosophy statements are concatenated and deduplicated:
+
+```yaml
+# Source 1
+philosophy:
+  - "Blocks must be composable"
+  - "Validate everything"
+
+# Source 2
+philosophy:
+  - "Validate everything"  # Duplicate - removed
+  - "Fail fast"
+
+# Result
+philosophy:
+  - "Blocks must be composable"
+  - "Validate everything"
+  - "Fail fast"
+```
+
+#### Domain
+
+Entities, signals, and measures are merged by key:
+
+```yaml
+# Source 1
+domain:
+  entities:
+    user:
+      fields: [id, name]
+    product:
+      fields: [id, title]
+
+# Source 2
+domain:
+  entities:
+    user:
+      fields: [id, name, email]  # Extends user
+    order:
+      fields: [id, user_id]      # New entity
+
+# Result
+domain:
+  entities:
+    user:
+      fields: [id, name, email]
+    product:
+      fields: [id, title]
+    order:
+      fields: [id, user_id]
+```
+
+#### Blocks
+
+Blocks are merged by name. Within each block, fields are merged:
+
+```yaml
+# Source 1
+blocks:
+  user_validator:
+    description: "Validates users"
+    inputs:
+      - name: user
+        type: entity.user
+    outputs:
+      - name: valid
+        type: boolean
+
+  email_sender:
+    description: "Sends emails"
+
+# Source 2
+blocks:
+  user_validator:
+    description: "Validates users with enhanced rules"  # Override
+    outputs:
+      - name: valid
+        type: boolean
+      - name: errors
+        type: array  # Additional output
+
+# Result
+blocks:
+  user_validator:
+    description: "Validates users with enhanced rules"
+    inputs:
+      - name: user
+        type: entity.user
+    outputs:
+      - name: valid
+        type: boolean
+      - name: errors
+        type: array
+
+  email_sender:
+    description: "Sends emails"
+```
+
+#### Other Fields
+
+Fields like `validators`, `pipeline`, `agent`, `targets`, `ai`, and `cache` use **last-wins** override strategy:
+
+```yaml
+# Source 1
+ai:
+  provider: openai
+  model: gpt-4o-mini
+
+# Source 2
+ai:
+  provider: anthropic
+  model: claude-opus-4
+
+# Result (Source 2 wins completely)
+ai:
+  provider: anthropic
+  model: claude-opus-4
+```
+
+## Error Handling
+
+### Missing File
+
+If a file source cannot be found:
+
+```
+Error: Source file not found: ./config/missing.yml
+```
+
+The CLI will exit with an error. Use environment variables for optional includes:
+
+```yaml
+sources:
+  - type: file
+    path: ./config/${OPTIONAL_CONFIG:-default}.yml
+```
+
+### Database Connection Failure
+
+If a database source cannot be connected:
+
+```
+Error: Failed to connect to database: postgres://db.company.com/blocks
+Connection refused
+```
+
+The CLI will exit with an error. Ensure the database is running and accessible.
+
+### Invalid URL Format
+
+If a database URL is malformed:
+
+```
+Error: Invalid database URL: invalid://format
+Supported formats: sqlite:///path.db, postgres://host/db
+```
+
+### Permission Errors
+
+If you don't have read access to a file or database:
+
+```
+Error: Permission denied reading source: ./config/secrets.yml
+```
+
+Ensure your user has appropriate permissions.
+
+## Environment Variables in Sources
+
+You can use environment variables in source URLs and paths:
+
+```yaml
+sources:
+  - type: database
+    url: ${DATABASE_URL}
+
+  - type: file
+    path: ./config/${ENVIRONMENT}.yml
+```
+
+Set the variables before running:
+
+```bash
+export DATABASE_URL="postgres://localhost/blocks"
+export ENVIRONMENT="production"
+blocks run --all
+```
+
+## Use Cases
+
+### Team Collaboration
+
+Share common configuration via database, customize locally:
+
+```yaml
+sources:
+  - type: database
+    url: postgres://team@db.company.com/shared-blocks
+    mode: pull
+
+# Local customizations
+blocks:
+  my_custom_block:
+    description: "Only exists locally"
+```
+
+### Environment-Specific Config
+
+Load different configs for dev/staging/production:
+
+```yaml
+sources:
+  - type: file
+    path: ./blocks-base.yml
+
+  - type: file
+    path: ./blocks-${DEPLOY_ENV}.yml
+
+# Always load base, then overlay environment
+```
+
+### Shared Entity Library
+
+Multiple projects share entity definitions:
+
+```yaml
+# Project A: blocks.yml
+sources:
+  - type: file
+    path: ../shared/entities.yml
+
+blocks:
+  project_a_block:
+    inputs:
+      - name: user
+        type: entity.user  # From shared entities
+```
+
+```yaml
+# Project B: blocks.yml
+sources:
+  - type: file
+    path: ../shared/entities.yml
+
+blocks:
+  project_b_block:
+    inputs:
+      - name: user
+        type: entity.user  # Same shared entity
+```
+
+### Database-First Workflow
+
+Store everything in database, use minimal local YAML:
+
+```yaml
+sources:
+  - type: database
+    url: postgres://localhost/blocks
+    mode: pull
+
+# Tiny local config
+project:
+  name: "my-project"
+```
+
+Manage all blocks via API or `blocks store push/pull` commands.
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Database Storage"
+    description="Set up and use database storage"
+    href="/docs/getting-started/database-storage"
+  />
+  <Card
+    title="Store API"
+    description="Programmatic database access"
+    href="/docs/specification/store-api"
+  />
+  <Card
+    title="Configuration Reference"
+    description="Full blocks.yml schema"
+    href="/docs/getting-started/configuration"
+  />
+</Cards>

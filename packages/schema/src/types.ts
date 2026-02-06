@@ -126,6 +126,36 @@ export const AIConfigSchema = z.object({
 });
 
 // ——————————————————————————————————————————
+// Sources Configuration
+// ——————————————————————————————————————————
+
+/**
+ * Source entry for pulling block specs from external sources.
+ *
+ * Supported source types:
+ *   - "database": Pull from SQLite or PostgreSQL via connection URL
+ *   - "file": Merge another YAML file
+ *
+ * Examples:
+ *   - { type: "database", url: "sqlite:///path/to/blocks.db" }
+ *   - { type: "database", url: "postgres://user:pass@host/db", sync: "pull" }
+ *   - { type: "file", path: "./shared-blocks.yml" }
+ */
+export const SourceEntrySchema = z.union([
+  z.object({
+    type: z.literal("database"),
+    url: z.string(),
+    sync: z.enum(["pull", "push", "sync"]).optional(), // default: "pull"
+  }),
+  z.object({
+    type: z.literal("file"),
+    path: z.string(),
+  }),
+]);
+
+export const SourcesSchema = z.array(SourceEntrySchema).optional();
+
+// ——————————————————————————————————————————
 // Cache Configuration
 // ——————————————————————————————————————————
 
@@ -147,6 +177,7 @@ export const BlocksConfigSchema = z.object({
   $schema: z.string().optional(),
   name: z.string(),
   philosophy: z.array(z.string()).optional(),
+  sources: SourcesSchema.optional(),
   domain: DomainSchema.optional(),
   blocks: BlocksSchema,
   validators: ValidatorsSchema.optional(),
@@ -174,5 +205,7 @@ export type Validators = z.infer<typeof ValidatorsSchema>;
 
 export type AIConfig = z.infer<typeof AIConfigSchema>;
 export type CacheConfig = z.infer<typeof CacheConfigSchema>;
+export type SourceEntry = z.infer<typeof SourceEntrySchema>;
+export type Sources = z.infer<typeof SourcesSchema>;
 
 export type BlocksConfig = z.infer<typeof BlocksConfigSchema>;

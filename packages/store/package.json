@@ -1,22 +1,17 @@
 {
-  "name": "@blocksai/cli",
-  "version": "0.3.0",
-  "description": "Command-line interface for Blocks",
+  "name": "@blocksai/store",
+  "version": "0.1.0",
+  "description": "Database store for Blocks specifications - SQLite and PostgreSQL support via Drizzle ORM",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "blocks": "./dist/index.js"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -27,20 +22,24 @@
     "lint": "eslint src/"
   },
   "dependencies": {
-    "@blocksai/ai": "workspace:*",
-    "@blocksai/domain": "workspace:*",
     "@blocksai/schema": "workspace:*",
-    "@blocksai/store": "workspace:*",
-    "@blocksai/validators": "workspace:*",
-    "chalk": "^5.4.1",
-    "commander": "^12.1.0",
-    "dotenv": "^17.2.3",
-    "ora": "^8.1.1",
-    "p-limit": "^6.1.0"
+    "drizzle-orm": "^0.38.0",
+    "better-sqlite3": "^11.0.0",
+    "yaml": "^2.6.1"
+  },
+  "peerDependencies": {
+    "pg": "^8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "pg": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@blocks/tsconfig": "workspace:*",
-    "@types/node": "^22.10.2",
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/pg": "^8.0.0",
+    "drizzle-kit": "^0.30.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"

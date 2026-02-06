@@ -1,0 +1,513 @@
+---
+title: Migrate to Database Storage
+description: Step-by-step guide to moving from YAML-only to database-backed configuration
+---
+
+This tutorial walks you through migrating an existing Blocks project from YAML-only configuration to database-backed storage. You'll learn how to set up a database, migrate your existing config, and adopt a team collaboration workflow.
+
+## Prerequisites
+
+- Existing Blocks project with `blocks.yml`
+- Node.js 20+
+- PostgreSQL server (or use SQLite for simpler setup)
+- 20 minutes
+
+## What You'll Achieve
+
+By the end of this tutorial:
+
+- Your configuration will be stored in a database
+- Team members can access shared configuration
+- You can manage blocks programmatically via API
+- Local YAML file becomes a minimal override layer
+
+## Step 1: Install Dependencies
+
+Install the store package:
+
+```bash
+pnpm add @blocksai/store
+```
+
+For PostgreSQL support, also install:
+
+```bash
+pnpm add pg
+```
+
+For SQLite (simpler option), no additional dependencies needed.
+
+## Step 2: Choose Your Database
+
+### Option A: SQLite (Recommended for Getting Started)
+
+SQLite is file-based and requires zero configuration:
+
+```bash
+# Initialize a local database
+blocks store init sqlite:///blocks.db
+```
+
+This creates `blocks.db` in your project root.
+
+### Option B: PostgreSQL (Recommended for Teams)
+
+First, create a PostgreSQL database:
+
+```bash
+# Using PostgreSQL CLI
+createdb blocks-shared
+
+# Or via SQL client
+# CREATE DATABASE blocks_shared;
+```
+
+Then initialize the schema:
+
+```bash
+blocks store init postgres://username:password@localhost:5432/blocks-shared
+```
+
+<Callout type="info">
+Store the database URL in an environment variable for security:
+
+```bash
+export BLOCKS_DB_URL="postgres://username:password@localhost:5432/blocks-shared"
+blocks store init $BLOCKS_DB_URL
+```
+</Callout>
+
+## Step 3: Push Existing Configuration
+
+Upload your current `blocks.yml` to the database:
+
+### For SQLite
+
+```bash
+blocks store push sqlite:///blocks.db
+```
+
+### For PostgreSQL
+
+```bash
+blocks store push postgres://username:password@localhost:5432/blocks-shared
+
+# Or with environment variable
+blocks store push $BLOCKS_DB_URL
+```
+
+This uploads:
+- Project metadata
+- Philosophy statements
+- All domain definitions (entities, semantics, signals, measures)
+- All block definitions
+- Validator and pipeline configuration
+- AI and cache settings
+
+**Verify the upload:**
+
+```bash
+# Pull from database and display
+blocks store pull sqlite:///blocks.db
+
+# Or save to a file to review
+blocks store pull sqlite:///blocks.db --output db-config.yml
+```
+
+## Step 4: Update blocks.yml with Sources
+
+Now configure your `blocks.yml` to load from the database:
+
+```yaml title="blocks.yml"
+# Add sources at the top
+sources:
+  - type: database
+    url: sqlite:///blocks.db
+    mode: pull
+
+# Keep minimal local overrides
+project:
+  name: "my-project"
+  domain: "myproject.local"
+
+# You can remove blocks, entities, etc. since they're in the database
+# Or keep them here as local overrides
+```
+
+For teams using PostgreSQL:
+
+```yaml title="blocks.yml"
+sources:
+  - type: database
+    url: postgres://username:password@db.company.com:5432/blocks-shared
+    mode: pull
+
+project:
+  name: "my-project"
+  domain: "myproject.local"
+```
+
+<Callout type="warning">
+If you keep block definitions in both the database and local YAML, the local YAML values will override the database values. This is useful for local development but can be confusing. Consider moving all shared blocks to the database and keeping only local customizations in YAML.
+</Callout>
+
+## Step 5: Test the Migration
+
+Verify everything works:
+
+```bash
+blocks run --all
+```
+
+This should:
+1. Load configuration from the database
+2. Merge with your local `blocks.yml`
+3. Run validation on all blocks
+
+If you see errors, check:
+
+- Database connection (is the database running?)
+- URL format (correct username, password, host, port?)
+- Source configuration (correct type and mode?)
+
+**Verify specific blocks:**
+
+```bash
+# Check a specific block still works
+blocks run user_validator
+
+# Inspect loaded configuration (add --verbose flag if available)
+blocks config show
+```
+
+## Step 6: Clean Up Local YAML (Optional)
+
+Once you've verified the migration works, you can simplify your local `blocks.yml`:
+
+### Before (all config in YAML)
+
+```yaml title="blocks.yml"
+project:
+  name: "user-service"
+  domain: "users.api"
+
+philosophy:
+  - "All user data must be validated"
+  - "Privacy is paramount"
+
+domain:
+  entities:
+    user:
+      fields: [id, email, name]
+    # ... many more entities
+
+blocks:
+  user_validator:
+    description: "Validates user input"
+    # ... many more blocks
+
+validators:
+  - schema
+  - shape
+  - domain
+
+# ... more configuration
+```
+
+### After (minimal local YAML)
+
+```yaml title="blocks.yml"
+sources:
+  - type: database
+    url: sqlite:///blocks.db
+    mode: pull
+
+# Only local overrides
+project:
+  name: "user-service-dev"
+```
+
+Everything else is in the database!
+
+## Step 7: Team Collaboration Setup
+
+If you're working with a team, set up shared database access:
+
+### Share PostgreSQL Database
+
+1. **Database admin** creates and initializes:
+
+```bash
+createdb blocks-team
+blocks store init postgres://team:password@db.company.com/blocks-team
+blocks store push postgres://team:password@db.company.com/blocks-team
+```
+
+2. **Team members** update their `blocks.yml`:
+
+```yaml title="blocks.yml"
+sources:
+  - type: database
+    url: postgres://team:password@db.company.com/blocks-team
+    mode: pull
+
+# Each person can have local customizations
+project:
+  name: "my-local-name"
+```
+
+3. **Team members** run blocks normally:
+
+```bash
+blocks run --all
+```
+
+They automatically get the latest shared configuration from the database.
+
+### Making Changes to Shared Config
+
+**Option 1: Pull, Edit, Push (Recommended)**
+
+```bash
+# Pull current config
+blocks store pull $BLOCKS_DB_URL > shared.yml
+
+# Edit shared.yml
+# ... make changes ...
+
+# Push back
+blocks store push $BLOCKS_DB_URL --file shared.yml
+```
+
+**Option 2: Programmatic Updates**
+
+```typescript
+import { BlocksStore } from '@blocksai/store';
+
+const store = new BlocksStore(process.env.BLOCKS_DB_URL);
+await store.initialize();
+
+// Add new block
+await store.putBlock('new_validator', {
+  description: 'New validation block',
+  inputs: [{ name: 'data', type: 'string' }],
+  outputs: [{ name: 'valid', type: 'boolean' }],
+});
+
+// Update entity
+await store.putEntity('user', {
+  fields: ['id', 'email', 'name', 'verified'],
+});
+
+await store.close();
+```
+
+## Rollback Procedure
+
+If you need to rollback to YAML-only configuration:
+
+1. **Export current database config:**
+
+```bash
+blocks store pull sqlite:///blocks.db --output blocks-backup.yml
+```
+
+2. **Remove sources from blocks.yml:**
+
+```yaml title="blocks.yml"
+# Remove or comment out sources
+# sources:
+#   - type: database
+#     url: sqlite:///blocks.db
+
+# Keep or restore full configuration here
+project:
+  name: "my-project"
+
+blocks:
+  # ... all blocks
+```
+
+3. **Verify it works:**
+
+```bash
+blocks run --all
+```
+
+4. **Keep database backup** for potential future use.
+
+## PostgreSQL Production Setup
+
+For production deployments, follow these best practices:
+
+### Secure Connection String
+
+Store credentials securely:
+
+```bash
+# In .env file (DO NOT COMMIT)
+BLOCKS_DB_URL="postgres://user:password@db.company.com:5432/blocks"
+
+# In blocks.yml
+sources:
+  - type: database
+    url: ${BLOCKS_DB_URL}
+    mode: pull
+```
+
+### Read-Only Access for Most Users
+
+Create separate database users:
+
+```sql
+-- Read-write user (for admins)
+CREATE USER blocks_admin WITH PASSWORD 'secure-password';
+GRANT ALL PRIVILEGES ON DATABASE blocks TO blocks_admin;
+
+-- Read-only user (for developers)
+CREATE USER blocks_readonly WITH PASSWORD 'readonly-password';
+GRANT CONNECT ON DATABASE blocks TO blocks_readonly;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO blocks_readonly;
+```
+
+Team members use read-only connection:
+
+```yaml title="blocks.yml"
+sources:
+  - type: database
+    url: postgres://blocks_readonly:readonly-password@db.company.com/blocks
+    mode: pull  # Only pull, cannot push
+```
+
+### Backup Strategy
+
+```bash
+# Daily backup cron job
+0 2 * * * pg_dump blocks > /backups/blocks-$(date +\%Y\%m\%d).sql
+
+# Or export to YAML
+0 2 * * * blocks store pull $BLOCKS_DB_URL > /backups/blocks-$(date +\%Y\%m\%d).yml
+```
+
+## Advanced: Multi-Environment Setup
+
+Use different databases for different environments:
+
+```yaml title="blocks.yml"
+sources:
+  # Base configuration
+  - type: database
+    url: postgres://readonly@db.company.com/blocks-base
+    mode: pull
+
+  # Environment-specific overrides
+  - type: database
+    url: postgres://readonly@db.company.com/blocks-${DEPLOY_ENV}
+    mode: pull
+
+project:
+  name: "my-project-${DEPLOY_ENV}"
+```
+
+Set environment before running:
+
+```bash
+export DEPLOY_ENV="production"
+blocks run --all
+
+export DEPLOY_ENV="staging"
+blocks run --all
+```
+
+## Troubleshooting
+
+### "Connection refused" error
+
+```
+Error: Connection refused: postgres://localhost:5432/blocks
+```
+
+**Solution:** Ensure PostgreSQL is running:
+
+```bash
+# Check if running
+pg_isready
+
+# Start PostgreSQL (macOS with Homebrew)
+brew services start postgresql
+
+# Start PostgreSQL (Linux systemd)
+sudo systemctl start postgresql
+```
+
+### "Database does not exist" error
+
+```
+Error: database "blocks" does not exist
+```
+
+**Solution:** Create the database first:
+
+```bash
+createdb blocks
+```
+
+### "Permission denied" error
+
+```
+Error: permission denied for table blocks
+```
+
+**Solution:** Grant proper permissions:
+
+```sql
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO your_user;
+```
+
+### Blocks not loading from database
+
+**Check source configuration:**
+
+```yaml
+# Make sure mode is 'pull'
+sources:
+  - type: database
+    url: sqlite:///blocks.db
+    mode: pull  # Not 'push' or 'sync'
+```
+
+**Verify database has data:**
+
+```bash
+blocks store pull sqlite:///blocks.db
+# Should show configuration, not empty
+```
+
+## What You Learned
+
+1. **Database initialization** - Set up SQLite or PostgreSQL storage
+2. **Configuration migration** - Push existing YAML to database
+3. **Sources configuration** - Load from database with local overrides
+4. **Team collaboration** - Share configuration via shared database
+5. **Rollback procedure** - Return to YAML-only if needed
+6. **Production setup** - Secure connections and access control
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Sources Configuration"
+    description="Deep dive into multi-source merging"
+    href="/docs/specification/sources"
+  />
+  <Card
+    title="Store API"
+    description="Build tools with programmatic access"
+    href="/docs/specification/store-api"
+  />
+  <Card
+    title="Database Storage"
+    description="Complete database storage reference"
+    href="/docs/getting-started/database-storage"
+  />
+</Cards>

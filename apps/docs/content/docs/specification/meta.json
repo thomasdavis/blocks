@@ -1,4 +1,4 @@
 {
   "title": "Specification",
-  "pages": ["index", "blocks-yml", "domain-model", "validators", "migration"]
+  "pages": ["index", "blocks-yml", "domain-model", "validators", "sources", "store-api", "migration"]
 }

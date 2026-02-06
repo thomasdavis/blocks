@@ -1,0 +1,319 @@
+---
+title: Database Storage
+description: Store and share Blocks configurations in SQLite or PostgreSQL databases
+---
+
+Store your Blocks configuration in a database instead of (or in addition to) local YAML files. This enables team collaboration, programmatic access, and centralized configuration management.
+
+## Why Use Database Storage?
+
+Database storage is useful when you need to:
+
+- **Share configurations** across a team without committing to version control
+- **Manage configurations programmatically** via API instead of editing YAML
+- **Centralize configuration** in a single source of truth
+- **Enable dynamic updates** without file system access
+- **Audit changes** with database-level tracking
+
+You can use database storage exclusively, or combine it with local YAML files using the `sources` merge system.
+
+## Supported Databases
+
+Blocks supports two database backends:
+
+- **SQLite** - File-based, zero-config, perfect for local development and small teams
+- **PostgreSQL** - Client-server, production-ready, ideal for larger teams and cloud deployments
+
+## Quick Start with SQLite
+
+### Step 1: Install the Store Package
+
+```bash
+pnpm add @blocksai/store
+```
+
+### Step 2: Initialize Your Database
+
+```bash
+blocks store init sqlite:///blocks.db
+```
+
+This creates a SQLite database file at `blocks.db` with the necessary tables.
+
+### Step 3: Push Your Configuration
+
+If you have an existing `blocks.yml`, push it to the database:
+
+```bash
+blocks store push sqlite:///blocks.db
+```
+
+This uploads your entire configuration (blocks, entities, semantics, philosophy) to the database.
+
+### Step 4: Configure Sources
+
+Add the database as a source in your `blocks.yml`:
+
+```yaml title="blocks.yml"
+sources:
+  - type: database
+    url: sqlite:///blocks.db
+    mode: pull
+
+# Rest of your configuration...
+```
+
+Now when you run `blocks run --all`, it will load configuration from the database first, then merge with your local YAML.
+
+## PostgreSQL Setup
+
+PostgreSQL requires an additional dependency:
+
+```bash
+pnpm add @blocksai/store pg
+```
+
+### Initialize PostgreSQL Database
+
+```bash
+blocks store init postgres://user:password@localhost:5432/blocks
+```
+
+### Push Configuration
+
+```bash
+blocks store push postgres://user:password@localhost:5432/blocks
+```
+
+### Configure Source
+
+```yaml title="blocks.yml"
+sources:
+  - type: database
+    url: postgres://user:password@localhost:5432/blocks
+    mode: pull
+```
+
+<Callout type="info">
+Store your database URL in an environment variable for security:
+
+```bash
+export BLOCKS_DB_URL="postgres://user:password@localhost:5432/blocks"
+```
+
+Then reference it in blocks.yml or use it with CLI commands.
+</Callout>
+
+## Database URL Formats
+
+### SQLite
+
+```
+sqlite:///path/to/file.db
+sqlite:///absolute/path/database.db
+sqlite:///:memory:  # In-memory database (testing only)
+```
+
+Paths are relative to the current working directory unless they start with `/`.
+
+### PostgreSQL
+
+```
+postgres://username:password@host:port/database
+postgresql://username:password@host:port/database
+```
+
+Common examples:
+
+```
+postgres://localhost/blocks                           # Local, default user
+postgres://admin:secret@db.example.com:5432/blocks   # Remote with auth
+postgres://user@localhost:5433/blocks                # Custom port
+```
+
+## CLI Commands
+
+### Initialize Database
+
+Create the database schema:
+
+```bash
+blocks store init <url>
+```
+
+Options:
+- `--force` - Drop and recreate tables (destroys existing data)
+
+### Push Configuration to Database
+
+Upload local `blocks.yml` to database:
+
+```bash
+blocks store push <url>
+```
+
+Options:
+- `--file <path>` - Push from a specific YAML file (default: `blocks.yml`)
+- `--merge` - Merge with existing database content instead of replacing
+
+### Pull Configuration from Database
+
+Download database config and save to YAML:
+
+```bash
+blocks store pull <url>
+```
+
+Options:
+- `--output <path>` - Save to specific file (default: stdout)
+
+## Team Collaboration Workflow
+
+Here's how to use database storage with a team:
+
+### 1. Set Up Shared Database
+
+One team member creates and initializes a shared PostgreSQL database:
+
+```bash
+# Create database (using PostgreSQL client)
+createdb blocks-shared
+
+# Initialize schema
+blocks store init postgres://team:password@db.company.com/blocks-shared
+
+# Push initial configuration
+blocks store push postgres://team:password@db.company.com/blocks-shared
+```
+
+### 2. Team Members Configure Local Sources
+
+Each team member adds the shared database to their `blocks.yml`:
+
+```yaml title="blocks.yml"
+sources:
+  - type: database
+    url: postgres://team:password@db.company.com/blocks-shared
+    mode: pull
+
+# Local overrides can go here...
+project:
+  name: "My Local Override"
+```
+
+### 3. Make Changes
+
+Team members can either:
+
+**Option A: Update via CLI**
+
+```bash
+# Pull latest from database
+blocks store pull postgres://team:password@db.company.com/blocks-shared > remote.yml
+
+# Edit remote.yml
+# ... make changes ...
+
+# Push back to database
+blocks store push postgres://team:password@db.company.com/blocks-shared --file remote.yml
+```
+
+**Option B: Update via API**
+
+```typescript
+import { BlocksStore } from '@blocksai/store';
+
+const store = new BlocksStore('postgres://team:password@db.company.com/blocks-shared');
+await store.initialize();
+
+// Add a new block
+await store.putBlock('my_new_block', {
+  description: 'A new block for the team',
+  inputs: [{ name: 'data', type: 'string' }],
+  outputs: [{ name: 'result', type: 'string' }],
+});
+
+await store.close();
+```
+
+### 4. Stay in Sync
+
+Team members pull latest changes as needed:
+
+```bash
+# Run with latest database config
+blocks run --all
+```
+
+The `sources` system automatically merges database config with local YAML on every run.
+
+## Sync Modes
+
+When using a database source, you can control how it synchronizes:
+
+```yaml title="blocks.yml"
+sources:
+  - type: database
+    url: sqlite:///blocks.db
+    mode: pull  # Options: pull, push, sync
+```
+
+### Pull Mode (Default)
+
+Load configuration from database, merge with local YAML:
+
+```yaml
+mode: pull
+```
+
+- Database values are loaded first
+- Local YAML can override specific fields
+- Safe for most use cases
+
+### Push Mode
+
+Automatically push local changes to database:
+
+```yaml
+mode: push
+```
+
+- Local YAML is the source of truth
+- Changes are automatically pushed to database
+- Useful for single-writer scenarios
+
+### Sync Mode
+
+Bidirectional synchronization:
+
+```yaml
+mode: sync
+```
+
+- Pull from database before each run
+- Push local changes after validation
+- Use with caution in multi-user environments
+
+<Callout type="warning">
+Sync mode can cause conflicts if multiple users edit the same configuration. Use pull mode for team collaboration, and coordinate writes through a single process or manual CLI commands.
+</Callout>
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Sources Configuration"
+    description="Learn how sources are merged together"
+    href="/docs/specification/sources"
+  />
+  <Card
+    title="Store API Reference"
+    description="Programmatic access to database storage"
+    href="/docs/specification/store-api"
+  />
+  <Card
+    title="Migration Tutorial"
+    description="Step-by-step guide to migrating to database storage"
+    href="/docs/tutorials/database-migration"
+  />
+</Cards>

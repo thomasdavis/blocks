@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { runCommand } from "./commands/run.js";
 import { initCommand } from "./commands/init.js";
+import { storeCommand } from "./commands/store.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,5 +23,6 @@ program
 
 program.addCommand(runCommand);
 program.addCommand(initCommand);
+program.addCommand(storeCommand);
 
 program.parse(process.argv);

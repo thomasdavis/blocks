@@ -4,6 +4,7 @@
     "index",
     "first-block",
     "visual-testing",
-    "ci-cd-integration"
+    "ci-cd-integration",
+    "database-migration"
   ]
 }

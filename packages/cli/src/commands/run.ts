@@ -9,6 +9,7 @@ import pLimit from "p-limit";
 import { parseBlocksConfig } from "@blocksai/schema";
 import { AIProvider } from "@blocksai/ai";
 import { ValidatorRegistry, type Validator } from "@blocksai/validators";
+import { resolveConfig, type SourceEntry } from "@blocksai/store";
 import type {
   ValidationRunOutput,
   BlockRunResult,
@@ -212,6 +213,27 @@ export const runCommand = new Command("run")
         );
       }
       process.exit(1);
+    }
+
+    // Resolve sources if present
+    if (config.sources && config.sources.length > 0) {
+      if (!isJsonMode) {
+        spinner = ora("Resolving sources...").start();
+      }
+      try {
+        config = await resolveConfig(config, config.sources as SourceEntry[]);
+        if (!isJsonMode) spinner?.succeed(`Sources resolved (${config.sources?.length} source(s))`);
+      } catch (error) {
+        if (!isJsonMode) {
+          spinner?.fail("Failed to resolve sources");
+          console.error(chalk.red(error instanceof Error ? error.message : "Unknown error"));
+        } else {
+          console.error(
+            JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" })
+          );
+        }
+        process.exit(1);
+      }
     }
 
     // Initialize cache manager

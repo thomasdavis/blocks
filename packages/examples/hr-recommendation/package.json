@@ -1,6 +1,6 @@
 {
   "name": "@blocks-examples/hr-recommendation",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "HR recommendation scoring adapters using AI",
   "type": "module",
   "private": true,

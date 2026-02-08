@@ -1,5 +1,16 @@
 # @blocks/schema
 
+## 1.2.0
+
+### Minor Changes
+
+- 79c7902: **Add database storage and public registry**
+  - New `@blocksai/store` package for persistent database-backed storage of Blocks specifications
+  - Supports SQLite, PostgreSQL, and libSQL/Turso via Drizzle ORM
+  - New `blocks store` CLI commands: `init`, `push`, and `pull` for managing remote block storage
+  - Added `sources` configuration to schema for pulling block specs from databases or files
+  - Source resolution with deep merging (local config wins on conflicts)
+
 ## 1.1.0
 
 ### Minor Changes

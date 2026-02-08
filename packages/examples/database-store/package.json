@@ -1,6 +1,6 @@
 {
   "name": "@blocks-examples/database-store",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Example demonstrating database-backed shared domain specs with @blocksai/store",
   "type": "module",
   "private": true,

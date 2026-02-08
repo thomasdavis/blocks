@@ -1,5 +1,12 @@
 # @blocks-examples/hr-recommendation
 
+## 0.1.5
+
+### Patch Changes
+
+- @blocksai/ai@3.0.3
+- @blocksai/validators@1.2.1
+
 ## 0.1.4
 
 ### Patch Changes

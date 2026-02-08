@@ -1,6 +1,6 @@
 {
   "name": "@blocksai/validators",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Core validator implementations for Blocks",
   "type": "module",
   "main": "./dist/index.js",

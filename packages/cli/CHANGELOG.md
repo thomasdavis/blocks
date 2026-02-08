@@ -1,5 +1,27 @@
 # @blocks/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- 79c7902: **Add database storage and public registry**
+  - New `@blocksai/store` package for persistent database-backed storage of Blocks specifications
+  - Supports SQLite, PostgreSQL, and libSQL/Turso via Drizzle ORM
+  - New `blocks store` CLI commands: `init`, `push`, and `pull` for managing remote block storage
+  - Added `sources` configuration to schema for pulling block specs from databases or files
+  - Source resolution with deep merging (local config wins on conflicts)
+
+### Patch Changes
+
+- Updated dependencies [79c7902]
+- Updated dependencies [79c7902]
+- Updated dependencies [79c7902]
+  - @blocksai/store@0.2.0
+  - @blocksai/schema@1.2.0
+  - @blocksai/ai@3.0.3
+  - @blocksai/domain@0.3.1
+  - @blocksai/validators@1.2.1
+
 ## 0.3.0
 
 ### Minor Changes

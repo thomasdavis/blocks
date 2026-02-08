@@ -1,5 +1,13 @@
 # @blocks/ai
 
+## 3.0.3
+
+### Patch Changes
+
+- Updated dependencies [79c7902]
+  - @blocksai/schema@1.2.0
+  - @blocksai/domain@0.3.1
+
 ## 3.0.2
 
 ### Patch Changes

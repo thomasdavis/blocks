@@ -1,5 +1,14 @@
 # @blocks/validators
 
+## 1.2.1
+
+### Patch Changes
+
+- Updated dependencies [79c7902]
+  - @blocksai/schema@1.2.0
+  - @blocksai/ai@3.0.3
+  - @blocksai/domain@0.3.1
+
 ## 1.2.0
 
 ### Minor Changes

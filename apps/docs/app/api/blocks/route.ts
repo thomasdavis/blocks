@@ -1,4 +1,4 @@
-import { auth } from "../../../lib/auth";
+import { getAuth } from "../../../lib/auth";
 import { createClient } from "@libsql/client";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
@@ -43,7 +43,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await auth.api.getSession({
+  const session = await getAuth().api.getSession({
     headers: await headers(),
   });
 

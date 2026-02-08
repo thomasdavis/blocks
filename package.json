@@ -47,6 +47,7 @@
     "pnpm": ">=9.0.0"
   },
   "dependencies": {
-    "@libsql/client": "^0.17.0"
+    "@libsql/client": "^0.17.0",
+    "yaml": "^2.6.1"
   }
 }
